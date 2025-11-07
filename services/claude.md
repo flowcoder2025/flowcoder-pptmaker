@@ -37,14 +37,13 @@ services/
 │   └── base/               # 기본 템플릿
 │       └── toss-default/   # 토스 기본 템플릿
 │
-├── storage/             # 로컬 저장소 관리
-│   └── presentation.ts     # 프리젠테이션 저장/불러오기
+├── database/            # Supabase 데이터베이스 연동
+│   ├── presentation.ts     # 프리젠테이션 CRUD
+│   ├── subscription.ts     # 구독 관리
+│   └── credits.ts          # 크레딧 관리
 │
-├── bedrock/             # Bedrock SDK 연동 (향후)
-│   └── share.ts            # 공유 기능
-│
-└── ad/                  # 광고 연동
-    └── adService.ts        # 광고 서비스
+└── permissions/         # Zanzibar 권한 체크
+    └── check.ts            # 권한 검증 서비스
 ```
 
 ---
@@ -136,69 +135,153 @@ interface Template {
 
 ---
 
-### 4. storage/ - 로컬 저장소 관리
+### 4. database/ - Supabase 데이터베이스 연동
 
-**역할**: 프리젠테이션 로컬 저장 및 불러오기
+**역할**: Supabase PostgreSQL 데이터베이스 CRUD 작업
 
 **주요 파일**:
-- `presentation.ts`: localStorage 기반 저장소 관리
+- `presentation.ts`: 프리젠테이션 생성/조회/수정/삭제
+- `subscription.ts`: 구독 관리 (시작/취소/조회)
+- `credits.ts`: 크레딧 관리 (잔액 조회, 차감, 충전)
 
-**주요 기능**:
-- 프리젠테이션 저장 (자동 저장 포함)
-- 저장된 프리젠테이션 목록 조회
-- 프리젠테이션 불러오기
-- 저장소 용량 관리
-
-**저장 데이터 구조**:
+**구현 예시** (`presentation.ts`):
 ```typescript
-{
-  id: string
-  title: string
-  slides: SlideData[]
-  createdAt: string
-  updatedAt: string
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { check } from '@/services/permissions/check'
+
+export async function createPresentation(data: CreatePresentationData) {
+  const session = await auth()
+  if (!session) throw new Error('인증이 필요해요')
+
+  const presentation = await prisma.presentation.create({
+    data: {
+      userId: session.user.id,
+      title: data.title,
+      slides: data.slides,
+      slideData: data.slideData,
+      templateId: data.templateId,
+    },
+  })
+
+  // Zanzibar: owner 관계 생성
+  await prisma.relationTuple.create({
+    data: {
+      namespace: 'presentation',
+      objectId: presentation.id,
+      relation: 'owner',
+      userId: session.user.id,
+    },
+  })
+
+  return presentation
+}
+
+export async function getPresentation(id: string) {
+  const session = await auth()
+  if (!session) throw new Error('인증이 필요해요')
+
+  // 권한 체크
+  const canView = await check(session.user.id, 'presentation', id, 'viewer')
+  if (!canView) throw new Error('권한이 없어요')
+
+  return await prisma.presentation.findUnique({
+    where: { id },
+  })
 }
 ```
 
-**향후 계획**:
-- Bedrock SDK Storage API 연동 (클라우드 동기화)
+**데이터 구조** (Prisma 모델):
+```typescript
+model Presentation {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  slides      Json     // HTMLSlide[]
+  slideData   Json     // UnifiedPPTJSON
+  templateId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  thumbnailUrl String?
+  isPublic    Boolean  @default(false)
 
----
-
-### 5. bedrock/ - Bedrock SDK 연동 (향후)
-
-**역할**: Apps in Toss 플랫폼 네이티브 기능 연동
-
-**현재 구현**:
-- `share.ts`: 공유 기능 (네이티브 공유 시트)
-
-**향후 추가 예정**:
-- Storage API: 클라우드 저장소 연동
-- Haptic API: 촉각 피드백
-- Analytics: 사용자 행동 분석
-- InAppPurchase: 프리미엄 기능 (향후)
+  user        User     @relation(fields: [userId], references: [id])
+}
+```
 
 **참조**:
-- [Bedrock SDK 레퍼런스](../../docs/reference/bedrock/)
-- **apps-in-toss 스킬 필수 활용**
+- [Database_Architecture.md](../docs/Database_Architecture.md)
+- [Prisma 공식 문서](https://www.prisma.io)
 
 ---
 
-### 6. ad/ - 광고 연동
+### 5. permissions/ - Zanzibar 권한 체크
 
-**역할**: 광고 표시 및 관리
+**역할**: Relationship-Based Access Control (ReBAC) 권한 검증
 
 **주요 파일**:
-- `adService.ts`: 광고 서비스
+- `check.ts`: 권한 검증 서비스
 
-**주요 기능**:
-- 광고 표시 (배너, 전면)
-- 광고 로딩 및 에러 처리
-- 프리미엄 사용자 광고 제거
+**구현 예시**:
+```typescript
+import { prisma } from '@/lib/prisma'
+
+export async function check(
+  userId: string,
+  namespace: 'presentation' | 'system',
+  objectId: string,
+  relation: 'owner' | 'editor' | 'viewer' | 'admin'
+): Promise<boolean> {
+  // 직접 권한 체크
+  const directRelation = await prisma.relationTuple.findFirst({
+    where: {
+      namespace,
+      objectId,
+      userId,
+      relation,
+    },
+  })
+
+  if (directRelation) return true
+
+  // 권한 상속 체크 (owner > editor > viewer)
+  if (relation === 'viewer') {
+    const inherited = await prisma.relationTuple.findFirst({
+      where: {
+        namespace,
+        objectId,
+        userId,
+        relation: { in: ['owner', 'editor'] },
+      },
+    })
+    if (inherited) return true
+  }
+
+  if (relation === 'editor') {
+    const inherited = await prisma.relationTuple.findFirst({
+      where: {
+        namespace,
+        objectId,
+        userId,
+        relation: 'owner',
+      },
+    })
+    if (inherited) return true
+  }
+
+  return false
+}
+```
+
+**권한 레벨**:
+- `owner`: 소유자 (모든 권한)
+- `editor`: 편집자 (수정 가능, 삭제 불가)
+- `viewer`: 조회자 (읽기만 가능)
+- `admin`: 시스템 관리자
 
 **참조**:
-- [Apps in Toss 광고 정책](../../docs/07-marketing/)
-- [수익 모델.md](../수익 모델.md)
+- [Database_Architecture.md - Zanzibar 권한 시스템](../docs/Database_Architecture.md)
+- [Google Zanzibar 논문](https://research.google/pubs/pub48190/)
 
 ---
 
@@ -300,18 +383,23 @@ describe('ContentGenerator', () => {
 
 ### 프로젝트 문서
 - **[../CLAUDE.md](../CLAUDE.md)**: 프로젝트 루트 컨텍스트
-- **[../ARCHITECTURE.md](../ARCHITECTURE.md)**: 아키텍처 설계
-- **[../원가 분석.md](../원가 분석.md)**: AI 비용 분석
+- **[../docs/SPECIFICATION.md](../docs/SPECIFICATION.md)**: 기술 명세서
+- **[../docs/Database_Architecture.md](../docs/Database_Architecture.md)**: 데이터베이스 및 권한 시스템
+- **[../docs/COST_AND_REVENUE.md](../docs/COST_AND_REVENUE.md)**: AI 비용 분석
 
-### 상위 문서
-- **[Bedrock SDK 레퍼런스](../../docs/reference/bedrock/)**: Apps in Toss API
-- **[UX Writing 가이드](../../docs/03-design/03-ux-writing.md)**: 텍스트 작성 규칙
+### 데이터베이스 및 인증
+- **[Prisma 공식 문서](https://www.prisma.io)**: Prisma ORM
+- **[Supabase 공식 문서](https://supabase.com)**: Supabase PostgreSQL
+- **[NextAuth.js](https://next-auth.js.org)**: OAuth 인증
 
-### 외부 문서
+### AI API
 - **[Gemini API](https://ai.google.dev/gemini-api/docs)**: Gemini API 공식 문서
 - **[Perplexity API](https://docs.perplexity.ai/)**: Perplexity API 공식 문서
 
+### 권한 시스템
+- **[Google Zanzibar 논문](https://research.google/pubs/pub48190/)**: Zanzibar ReBAC 원문
+
 ---
 
-**마지막 업데이트**: 2025-11-06
-**변경 이력**: services 디렉토리 구조 문서화 및 서비스별 역할 정의
+**마지막 업데이트**: 2025-11-07
+**변경 이력**: 웹 서비스 전환 - Supabase 데이터베이스 및 Zanzibar 권한 시스템 추가

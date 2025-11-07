@@ -91,7 +91,7 @@ function InputPage() {
 ```
 
 **AI 생성 플로우**:
-1. 광고 시청 (무료 사용자만)
+1. 인증 체크 (NextAuth 세션)
 2. 자료 조사 (선택적 - Perplexity)
 3. 콘텐츠+JSON 생성 (Gemini Flash/Pro)
    - **Parser 통합**: 프롬프트에서 UnifiedPPTJSON 형식 직접 요청
@@ -100,11 +100,13 @@ function InputPage() {
    - `JSON.parse()`로 간단 파싱 (API 비용 0원)
    - 실패 시 에러 처리
 5. HTML 생성 (TemplateEngine - 0원)
+6. Supabase 데이터베이스에 저장
 
 **핵심 개선점**:
 - ✅ **3단계 파이프라인**: 기존 4단계에서 Parser 단계 제거
 - ✅ **비용 98% 절감**: 156원 → 2원 (Flash 기준)
 - ✅ **단일 API 호출**: 콘텐츠와 JSON을 한 번에 생성
+- ✅ **클라우드 저장**: Supabase Database + Zanzibar 권한 관리
 
 ---
 

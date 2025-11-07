@@ -106,15 +106,75 @@ const research: ResearchRequest = {
 
 ---
 
+### 💾 데이터베이스 (Database)
+
+#### `database.ts`
+Prisma 기반 데이터베이스 모델 타입
+
+**주요 타입** (Prisma 자동 생성):
+- `User`: 사용자 계정
+- `Presentation`: 프리젠테이션 데이터
+- `Subscription`: 구독 정보
+- `Credit`: 크레딧 정보
+- `RelationTuple`: Zanzibar 권한 관계
+- `Payment`: 결제 이력
+
+**사용 예시**:
+```typescript
+import type { User, Presentation } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
+
+// Prisma 모델 타입 사용
+const user: User = await prisma.user.findUnique({
+  where: { id: 'user-123' }
+})
+
+const presentation: Presentation = await prisma.presentation.create({
+  data: {
+    userId: user.id,
+    title: '나의 발표',
+    slides: slidesJson,
+    slideData: slideDataJson,
+    templateId: 'toss-default'
+  }
+})
+```
+
+**타입 확장 예시**:
+```typescript
+import type { Presentation, Slide } from '@prisma/client'
+
+// Prisma 타입 + 관계 포함
+type PresentationWithUser = Presentation & {
+  user: User
+}
+
+// 커스텀 타입
+interface PresentationListItem {
+  id: string
+  title: string
+  thumbnailUrl: string | null
+  createdAt: Date
+  slideCount: number
+}
+```
+
+**참조**:
+- Prisma 공식 문서 (https://www.prisma.io)
+- [Database Architecture](../docs/Database_Architecture.md)
+
+---
+
 ### 💰 수익화 (Monetization)
 
 #### `monetization.ts`
 수익화 전반의 공통 타입 및 설정
 
 **주요 타입**:
-- `SubscriptionPlan`: 구독 플랜 (Free, Premium 등)
+- `SubscriptionPlan`: 구독 플랜 (Free, Pro, Premium)
 - `PaymentStatus`: 결제 상태 (pending, completed, failed 등)
 - `FeatureGate`: 기능별 접근 제어 설정
+- `CreditBundle`: 크레딧 묶음 구매 상품
 
 **사용 예시**:
 ```typescript
@@ -134,12 +194,13 @@ const gate: FeatureGate = {
 ```
 
 #### `payment.ts`
-결제 처리 관련 타입
+웹 기반 결제 처리 관련 타입
 
 **주요 타입**:
-- `PaymentMethod`: 결제 수단 (토스페이, 카드, 간편결제 등)
+- `PaymentMethod`: 결제 수단 (신용카드, 간편결제 등)
 - `PaymentRequest`: 결제 요청 데이터
 - `PaymentResult`: 결제 완료 결과
+- `PaymentWebhook`: 결제 웹훅 데이터
 
 **사용 예시**:
 ```typescript
@@ -147,29 +208,10 @@ import type { PaymentRequest } from '@/types/payment'
 
 const paymentReq: PaymentRequest = {
   amount: 5900,
-  method: 'toss-pay',
+  method: 'card',
   planId: 'premium',
-  userId: 'user-123'
-}
-```
-
-#### `iap.ts`
-앱 내 구매(In-App Purchase) 타입
-
-**주요 타입**:
-- `IAPProduct`: 구매 가능한 상품 정보
-- `IAPReceipt`: 영수증 검증 데이터
-- `IAPStatus`: 구매 진행 상태
-
-**사용 예시**:
-```typescript
-import type { IAPProduct } from '@/types/iap'
-
-const product: IAPProduct = {
-  productId: 'premium-monthly',
-  price: 5900,
-  currency: 'KRW',
-  type: 'subscription'
+  userId: 'user-123',
+  returnUrl: '/payment/success'
 }
 ```
 
@@ -178,30 +220,50 @@ const product: IAPProduct = {
 ### 👤 사용자 및 인증
 
 #### `auth.ts`
-사용자 인증 및 세션 관련 타입
+NextAuth.js 기반 인증 타입
 
 **주요 타입**:
-- `User`: 사용자 프로필 (ID, 이름, 이메일 등)
-- `AuthSession`: 인증 세션 (토큰, 만료 시간 등)
-- `AuthProvider`: 인증 제공자 (토스, 카카오 등)
+- `User`: 사용자 프로필 (ID, 이름, 이메일 등) - NextAuth 확장
+- `Session`: NextAuth 세션 타입 확장
+- `JWT`: NextAuth JWT 토큰 타입 확장
+- `Account`: OAuth 계정 정보
+- `Profile`: OAuth 프로필 정보
 
 **사용 예시**:
 ```typescript
-import type { User, AuthSession } from '@/types/auth'
+import type { User, Session } from '@/types/auth'
+import type { Session as NextAuthSession } from 'next-auth'
 
-const user: User = {
-  id: 'user-123',
-  name: '홍길동',
-  email: 'hong@example.com',
-  plan: 'premium'
+// NextAuth User 확장
+interface ExtendedUser extends User {
+  plan: 'free' | 'pro' | 'premium'
+  credits: {
+    proModel: number
+    deepResearch: number
+  }
 }
 
-const session: AuthSession = {
-  token: 'jwt-token',
-  userId: 'user-123',
-  expiresAt: new Date('2025-12-31')
+// NextAuth Session 확장
+interface ExtendedSession extends NextAuthSession {
+  user: ExtendedUser
+}
+
+const session: ExtendedSession = {
+  user: {
+    id: 'user-123',
+    name: '홍길동',
+    email: 'hong@example.com',
+    plan: 'premium',
+    credits: {
+      proModel: 10,
+      deepResearch: 5
+    }
+  },
+  expires: '2025-12-31T00:00:00.000Z'
 }
 ```
+
+**참조**: NextAuth.js 공식 문서 (https://next-auth.js.org/)
 
 ---
 
@@ -430,5 +492,5 @@ export type NotificationType = 'info' | 'warning' | 'error' | 'success'
 
 ---
 
-**마지막 업데이트**: 2025-11-06
-**변경 이력**: types/ 디렉토리 가이드 문서 생성
+**마지막 업데이트**: 2025-11-07
+**변경 이력**: 웹 서비스 전환 - 데이터베이스 타입 추가, NextAuth 타입 업데이트, IAP 타입 제거

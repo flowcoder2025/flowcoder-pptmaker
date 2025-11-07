@@ -1,8 +1,8 @@
-# PPT Maker in Toss - 기술 명세서
+# FlowCoder PPT Maker - 기술 명세서
 
-> **버전**: 1.0.0
-> **최종 수정**: 2025-10-30
-> **상태**: 설계 완료, 구현 진행 중
+> **버전**: 2.0.0
+> **최종 수정**: 2025-11-07
+> **상태**: 웹 서비스 전환 완료, 구현 진행 중
 
 ---
 
@@ -11,15 +11,19 @@
 1. [프로젝트 개요](#1-프로젝트-개요)
 2. [기술 스택](#2-기술-스택)
 3. [시스템 아키텍처](#3-시스템-아키텍처)
-4. [템플릿 시스템 설계](#4-템플릿-시스템-설계)
-5. [데이터 구조](#5-데이터-구조)
-6. [API 설계](#6-api-설계)
-7. [AI 파이프라인](#7-ai-파이프라인)
-8. [디자인 시스템](#8-디자인-시스템)
-9. [성능 최적화](#9-성능-최적화)
-10. [보안 및 에러 처리](#10-보안-및-에러-처리)
-11. [향후 개선사항](#11-향후-개선사항)
-12. [부록](#12-부록)
+4. [인증 시스템](#4-인증-시스템)
+5. [데이터베이스 스키마](#5-데이터베이스-스키마)
+6. [권한 시스템](#6-권한-시스템)
+7. [구독 및 크레딧 시스템](#7-구독-및-크레딧-시스템)
+8. [템플릿 시스템 설계](#8-템플릿-시스템-설계)
+9. [데이터 구조](#9-데이터-구조)
+10. [API 설계](#10-api-설계)
+11. [AI 파이프라인](#11-ai-파이프라인)
+12. [디자인 시스템](#12-디자인-시스템)
+13. [성능 최적화](#13-성능-최적화)
+14. [보안 및 에러 처리](#14-보안-및-에러-처리)
+15. [향후 개선사항](#15-향후-개선사항)
+16. [부록](#16-부록)
 
 ---
 
@@ -27,7 +31,7 @@
 
 ### 1.1 개요
 
-PPT Maker in Toss는 텍스트 입력으로 AI 기반 프리젠테이션을 생성하는 앱인토스(Apps in Toss) 미니앱입니다.
+FlowCoder PPT Maker는 텍스트 입력으로 AI 기반 프리젠테이션을 생성하는 독립 웹 서비스입니다. 기존 Apps in Toss 플랫폼 전용에서 Vercel + Supabase 기반의 현대적인 풀스택 웹 애플리케이션으로 전환하였습니다.
 
 ### 1.2 핵심 기능
 
@@ -54,15 +58,29 @@ PPT Maker in Toss는 텍스트 입력으로 AI 기반 프리젠테이션을 생�
 
 | 카테고리 | 기술 | 버전 | 용도 |
 |---------|------|------|------|
-| Framework | Next.js | 16 | App Router 기반 |
+| Framework | Next.js | 16 | App Router 기반 SSR |
 | UI Library | React | 19 | 컴포넌트 시스템 |
-| Language | TypeScript | - | 타입 안정성 |
-| State | Zustand | - | 상태 관리 |
-| Styling | Tailwind CSS | 4 | 스타일링 |
-| Design System | TDS Mobile | 2.1.2 | 앱인토스 UI (향후) |
-| Build Tool | Turbopack | - | Next.js 내장 |
+| Language | TypeScript | 5 | 타입 안정성 |
+| State | Zustand | 5 | 클라이언트 상태 관리 |
+| Styling | Tailwind CSS | 4 | 유틸리티 CSS |
+| UI Components | shadcn/ui | - | Radix UI 기반 컴포넌트 |
+| Radix UI | @radix-ui/* | - | 접근성 우선 UI 프리미티브 |
+| Icons | lucide-react | - | 아이콘 라이브러리 |
+| Toast | react-hot-toast | - | 알림 메시지 |
+| Build Tool | Turbopack | - | Next.js 내장 빌드 도구 |
 
-### 2.2 Backend/API
+### 2.2 Backend
+
+| 카테고리 | 기술 | 용도 |
+|---------|------|------|
+| Database | Supabase PostgreSQL | 관리형 PostgreSQL |
+| ORM | Prisma | Type-safe DB 클라이언트 |
+| Auth | NextAuth.js v4 | OAuth 인증 (GitHub, Google) |
+| Auth Adapter | @next-auth/prisma-adapter | Prisma 연동 |
+| Permissions | Zanzibar (자체 구현) | Relationship-Based Access Control |
+| Deployment | Vercel | 서버리스 배포 |
+
+### 2.3 AI Services
 
 | 카테고리 | 기술 | 용도 | 비용 |
 |---------|------|------|------|
@@ -72,13 +90,13 @@ PPT Maker in Toss는 텍스트 입력으로 AI 기반 프리젠테이션을 생�
 | AI - 파싱 | ~~Gemini 2.5 Flash-Lite~~ | ~~JSON 파싱~~ | ~~8원~~ (통합) |
 | AI - HTML | ~~Gemini 2.5 Pro~~ | ~~HTML 생성~~ | ~~82원~~ (제거) |
 | 템플릿 | 클라이언트 엔진 | HTML 생성 | 0원 ⭐ |
-| Platform | Bedrock SDK | 앱인토스 연동 | - (향후) |
 
-### 2.3 개발 도구
+### 2.4 개발 도구
 
 - **패키지 관리**: npm
 - **코드 품질**: ESLint
 - **타입 체크**: TypeScript Compiler
+- **데이터베이스 마이그레이션**: Prisma Migrate
 - **테스트**: Jest, React Testing Library (향후)
 - **E2E 테스트**: Playwright (향후)
 
@@ -89,38 +107,68 @@ PPT Maker in Toss는 텍스트 입력으로 AI 기반 프리젠테이션을 생�
 ### 3.1 프로젝트 구조
 
 ```
-ppt-maker-in-toss/
-├── app/                      # Next.js App Router
-│   ├── page.tsx              # 홈 화면
-│   ├── input/page.tsx        # 텍스트 입력
-│   ├── viewer/page.tsx       # 슬라이드 뷰어
-│   ├── api/research/         # Perplexity API 프록시
-│   ├── layout.tsx            # 루트 레이아웃
-│   └── globals.css           # 전역 스타일
+ppt-maker-next/
+├── app/                       # Next.js App Router
+│   ├── page.tsx               # 홈 화면
+│   ├── input/page.tsx         # 텍스트 입력
+│   ├── viewer/page.tsx        # 슬라이드 뷰어
+│   ├── editor/page.tsx        # 슬라이드 편집
+│   ├── subscription/page.tsx  # 구독 관리
+│   ├── credits/page.tsx       # 크레딧 관리
+│   ├── layout.tsx             # 루트 레이아웃
+│   ├── globals.css            # 전역 스타일
+│   │
+│   └── api/                   # API Routes
+│       ├── auth/[...nextauth]/route.ts  # NextAuth API
+│       ├── presentations/     # 프리젠테이션 CRUD
+│       ├── subscriptions/     # 구독 관리
+│       ├── credits/           # 크레딧 관리
+│       ├── history/           # 생성 이력
+│       └── admin/             # 관리자 API
 │
-├── services/                 # 비즈니스 로직
-│   ├── gemini/               # Gemini API 연동
+├── components/                # React 컴포넌트
+│   ├── ui/                    # shadcn/ui 컴포넌트
+│   ├── auth/                  # 인증 컴포넌트
+│   ├── editor/                # 편집기 컴포넌트
+│   └── viewer/                # 뷰어 컴포넌트
+│
+├── lib/                       # 유틸리티 라이브러리
+│   ├── prisma.ts              # Prisma Client 인스턴스
+│   ├── permissions.ts         # Zanzibar 권한 시스템
+│   ├── supabase/              # Supabase 클라이언트
+│   │   └── client.ts
+│   └── utils.ts               # 유틸리티 함수
+│
+├── prisma/                    # Prisma ORM
+│   └── schema.prisma          # 데이터베이스 스키마
+│
+├── services/                  # 비즈니스 로직 (AI 파이프라인)
+│   ├── gemini/                # Gemini API 연동
 │   │   ├── config.ts
 │   │   ├── content-generator.ts
 │   │   └── parser.ts
-│   ├── perplexity/           # Perplexity AI 연동
+│   ├── perplexity/            # Perplexity AI 연동
 │   │   └── researcher.ts
-│   ├── template/             # 템플릿 시스템 ⭐
-│   │   ├── engine/           # 템플릿 엔진 코어
-│   │   ├── base/             # 기본 템플릿
-│   │   └── premium/          # 프리미엄 템플릿
-│   └── slide/                # 슬라이드 변환
+│   ├── template/              # 템플릿 시스템 ⭐
+│   │   ├── engine/            # 템플릿 엔진 코어
+│   │   ├── base/              # 기본 템플릿
+│   │   └── premium/           # 프리미엄 템플릿
+│   └── slide/                 # 슬라이드 변환
 │       └── converter.ts
 │
-├── store/                    # Zustand 상태
-│   └── presentationStore.ts
+├── store/                     # Zustand 상태 (클라이언트)
+│   ├── presentationStore.ts
+│   ├── subscriptionStore.ts
+│   └── creditStore.ts
 │
-├── types/                    # TypeScript 타입
+├── types/                     # TypeScript 타입
 │   ├── slide.ts
-│   └── research.ts
+│   ├── research.ts
+│   ├── auth.ts
+│   └── database.ts
 │
-└── constants/                # 상수
-    └── design.ts             # 디자인 시스템
+└── constants/                 # 상수
+    └── design.ts              # 디자인 시스템
 ```
 
 ### 3.2 컴포넌트 계층 구조
@@ -150,17 +198,62 @@ App
     └── PreviewPane
 ```
 
+### 3.2 기술 아키텍처 다이어그램
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Next.js 16 Frontend                  │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │   React 19  │  │  Zustand     │  │ shadcn/ui    │ │
+│  │  Components │  │  State Mgmt  │  │  (Radix UI)  │ │
+│  └─────────────┘  └──────────────┘  └──────────────┘ │
+└────────────────────────────────────────────────────────┘
+                          ↓
+┌────────────────────────────────────────────────────────┐
+│                  Next.js API Routes                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │
+│  │ NextAuth.js  │  │ Presentations│  │   Admin     │ │
+│  │     API      │  │  CRUD API    │  │    API      │ │
+│  └──────────────┘  └──────────────┘  └─────────────┘ │
+└────────────────────────────────────────────────────────┘
+         │                   │                   │
+         ↓                   ↓                   ↓
+┌────────────────────────────────────────────────────────┐
+│                    Prisma ORM Layer                    │
+│  ┌──────────────────────────────────────────────────┐ │
+│  │       Type-safe Database Access Layer            │ │
+│  └──────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+                          ↓
+┌────────────────────────────────────────────────────────┐
+│              Supabase PostgreSQL Database              │
+│  ┌─────────┐ ┌──────────────┐ ┌────────────────────┐ │
+│  │  Users  │ │Presentations │ │ Subscriptions      │ │
+│  │Accounts │ │    (JSON)    │ │ CreditTransactions │ │
+│  └─────────┘ └──────────────┘ └────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+
+            External Services (AI 파이프라인)
+┌──────────────────┐  ┌────────────────────────────┐
+│   Gemini API     │  │   Perplexity AI (선택)     │
+│  (콘텐츠+JSON)   │  │   (웹 자료 조사)           │
+└──────────────────┘  └────────────────────────────┘
+```
+
 ### 3.3 데이터 플로우
 
 #### 3.3.1 생성 플로우
 
 ```
-[사용자 입력]
+[사용자 입력] (로그인 필요)
     ↓
 [InputPage]
     ↓
+[크레딧/구독 확인] - API: /api/subscriptions/current
+    ↓
 ① Perplexity AI (선택)
     → 웹 자료 조사 (~160-200원)
+    → API: POST /api/research
     ↓
 ② Gemini Flash/Pro ⭐
     → 콘텐츠+JSON 생성 (~2원)
@@ -168,6 +261,11 @@ App
     ↓
 ③ 클라이언트 템플릿 엔진 ⭐
     → HTML 생성 (0원)
+    ↓
+[Supabase 저장]
+    → API: POST /api/presentations
+    → Prisma: presentations.create()
+    → GenerationHistory 기록
     ↓
 [ViewerPage]
 ━━━━━━━━━━━━━━━━━━━━
@@ -189,6 +287,11 @@ App
     → HTML 재생성 (0원, 즉시)
     ↓
 [실시간 미리보기]
+    ↓
+[저장]
+    → API: PATCH /api/presentations/{id}
+    → Prisma: presentations.update()
+    → Zanzibar 권한 체크 (owner/editor)
 ━━━━━━━━━━━━━━━━━━━━
 비용: 0원 (무제한 편집 가능)
 ```
@@ -198,23 +301,534 @@ App
 ```
 [저장]
 ViewerPage
-    → Bedrock Storage.setItem()
-    → key: ppt_{timestamp}
-    → value: { slides, slideData, templateId }
-    → 햅틱 피드백
+    → API: POST /api/presentations
+    → Prisma ORM
+        → presentations.create({
+            userId: session.user.id,
+            title: string,
+            slideData: UnifiedPPTJSON,
+            metadata: { ... }
+          })
+    → Zanzibar grant('presentation', id, 'owner', 'user', userId)
+    → Toast: "저장했어요"
 
 [불러오기]
 HistoryPage
-    → Bedrock Storage.getItem()
-    → Presentation 객체 로드
-    → ViewerPage로 이동
+    → API: GET /api/presentations
+    → Prisma: presentations.findMany({ where: { userId } })
+    → Zanzibar 권한 필터링
+    → Presentation 목록 표시
+    → 클릭 → ViewerPage로 이동
+```
+
+#### 3.3.4 인증 플로우
+
+```
+[로그인]
+HomePage
+    → 로그인 버튼 클릭
+    → NextAuth signIn('github' | 'google')
+    → OAuth Provider 인증
+    → Callback: /api/auth/callback
+    → Prisma Adapter
+        → users.upsert()
+        → accounts.create()
+        → sessions.create()
+    → 자동 Free 구독 생성
+        → subscriptions.create({ tier: 'FREE', status: 'ACTIVE' })
+    → 홈으로 리디렉션
+
+[로그아웃]
+    → NextAuth signOut()
+    → Session 삭제
+    → 홈으로 리디렉션
 ```
 
 ---
 
-## 4. 템플릿 시스템 설계
+## 4. 인증 시스템
 
-### 4.1 시스템 개요
+### 4.1 NextAuth.js 설정
+
+**인증 제공자**:
+- GitHub OAuth
+- Google OAuth
+
+**인증 전략**:
+```typescript
+{
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: 'database',  // 데이터베이스 세션 (JWT 아님)
+    maxAge: 30 * 24 * 60 * 60,  // 30일
+  },
+  providers: [
+    GithubProvider({ ... }),
+    GoogleProvider({ ... }),
+  ],
+}
+```
+
+### 4.2 인증 플로우
+
+```mermaid
+sequenceDiagram
+    User->>+HomePage: 로그인 버튼 클릭
+    HomePage->>+NextAuth: signIn('github')
+    NextAuth->>+GitHub: OAuth 요청
+    GitHub->>-User: 권한 승인 요청
+    User->>+GitHub: 승인
+    GitHub->>-NextAuth: authorization code
+    NextAuth->>+GitHub: access token 교환
+    GitHub->>-NextAuth: user info
+    NextAuth->>+Prisma: users.upsert()
+    Prisma->>-Database: User 생성/업데이트
+    NextAuth->>+Prisma: sessions.create()
+    Prisma->>-Database: Session 생성
+    NextAuth->>+Prisma: subscriptions.create(FREE)
+    Prisma->>-Database: Free 구독 생성
+    NextAuth->>-HomePage: 로그인 완료
+```
+
+### 4.3 세션 관리
+
+**세션 저장**: Database (Prisma)
+```typescript
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+```
+
+**세션 조회** (Server Component):
+```typescript
+import { auth } from '@/lib/auth'
+
+export default async function Page() {
+  const session = await auth()
+  if (!session) {
+    redirect('/')
+  }
+
+  return <div>Hello {session.user.email}</div>
+}
+```
+
+**세션 조회** (Client Component):
+```typescript
+'use client'
+import { useSession } from 'next-auth/react'
+
+export function UserInfo() {
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') return <div>불러오고 있어요...</div>
+  if (status === 'unauthenticated') return <div>로그인이 필요해요</div>
+
+  return <div>{session.user.name}</div>
+}
+```
+
+### 4.4 보호된 라우트
+
+**페이지 보호** (Server Component):
+```typescript
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+export default async function ProtectedPage() {
+  const session = await auth()
+  if (!session) {
+    redirect('/')
+  }
+
+  // 인증된 사용자만 접근 가능
+  return <div>...</div>
+}
+```
+
+**API 라우트 보호**:
+```typescript
+import { auth } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+
+export async function GET(request: Request) {
+  const session = await auth()
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // 인증된 사용자만 접근 가능
+  return NextResponse.json({ data: '...' })
+}
+```
+
+---
+
+## 5. 데이터베이스 스키마
+
+### 5.1 Prisma Schema 개요
+
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+```
+
+### 5.2 User & Auth Tables
+
+#### User (사용자)
+```prisma
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Relations
+  accounts         Account[]
+  presentations    Presentation[]
+  subscription     Subscription?
+  creditTransactions CreditTransaction[]
+  generationHistory  GenerationHistory[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+```
+
+#### Account (OAuth 계정)
+```prisma
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String  // 'github', 'google'
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+```
+
+### 5.3 Presentation Table
+
+```prisma
+model Presentation {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+
+  // SlideData JSON (UnifiedPPTJSON)
+  slideData   Json
+
+  // 메타데이터
+  metadata    Json?    // { totalSlides, createdWith, version, ... }
+  isPublic    Boolean  @default(false)
+
+  // 소프트 삭제
+  deletedAt   DateTime?
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history     GenerationHistory[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([deletedAt])
+  @@map("presentations")
+}
+```
+
+**UnifiedPPTJSON 구조**:
+```json
+{
+  "slides": [
+    {
+      "type": "title",
+      "data": {
+        "title": "프레젠테이션 제목",
+        "subtitle": "부제목"
+      }
+    },
+    {
+      "type": "bullet",
+      "data": {
+        "title": "슬라이드 제목",
+        "bullets": ["항목 1", "항목 2"]
+      }
+    }
+  ]
+}
+```
+
+### 5.4 Subscription & Credit Tables
+
+#### Subscription (구독)
+```prisma
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  tier      String   // 'FREE', 'PRO', 'PREMIUM'
+  status    String   // 'ACTIVE', 'CANCELED', 'EXPIRED'
+
+  startDate DateTime
+  endDate   DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tier])
+  @@index([status])
+  @@map("subscriptions")
+}
+```
+
+#### CreditTransaction (크레딧 거래)
+```prisma
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // 'PURCHASE', 'USAGE', 'REFUND', 'BONUS'
+  amount      Int      // 증가(+) 또는 감소(-) 크레딧
+  balance     Int      // 거래 후 잔액
+  description String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("credit_transactions")
+}
+```
+
+### 5.5 Generation History Table
+
+```prisma
+model GenerationHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  presentationId  String?
+
+  // 입력
+  prompt          String   @db.Text
+
+  // AI 설정
+  model           String   // 'gemini-flash', 'gemini-pro'
+  useResearch     Boolean  @default(false)
+
+  // 비용
+  creditsUsed     Int      @default(0)
+
+  // 결과
+  result          Json?    // 생성된 SlideData JSON + metadata
+
+  // Relations
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  presentation    Presentation? @relation(fields: [presentationId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([presentationId])
+  @@map("generation_history")
+}
+```
+
+---
+
+## 6. 권한 시스템
+
+### 6.1 Zanzibar 개요
+
+Google Zanzibar는 **Relationship-Based Access Control (ReBAC)** 패턴을 사용하는 분산 권한 시스템입니다.
+
+**핵심 개념**:
+- **Tuple**: `(namespace:objectId, relation, subjectType:subjectId)` 형태의 권한 관계
+- **Check API**: 권한 확인
+- **Write API**: 권한 부여
+- **Delete API**: 권한 제거
+
+### 6.2 Schema
+
+#### RelationTuple (권한 튜플)
+```prisma
+model RelationTuple {
+  id          String   @id @default(cuid())
+
+  namespace   String   // 'presentation', 'system'
+  objectId    String   // 리소스 ID
+  relation    String   // 'owner', 'editor', 'viewer', 'admin'
+  subjectType String   // 'user', 'user_set'
+  subjectId   String   // User ID 또는 '*' (와일드카드)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([namespace, objectId, relation, subjectType, subjectId])
+  @@index([namespace, objectId, relation])
+  @@index([subjectType, subjectId])
+  @@map("relation_tuples")
+}
+```
+
+### 6.3 권한 체계
+
+**Namespace**: `presentation`, `system`
+**Relation**: `owner`, `editor`, `viewer`, `admin`
+
+**상속 구조**:
+- `owner` → `editor` → `viewer`
+- `admin` (시스템 레벨, 모든 권한)
+
+### 6.4 권한 API (`lib/permissions.ts`)
+
+**권한 확인**:
+```typescript
+export async function check(
+  userId: string,
+  namespace: 'presentation' | 'system',
+  objectId: string,
+  relation: 'owner' | 'editor' | 'viewer' | 'admin'
+): Promise<boolean>
+
+// 예시
+const canEdit = await check('alice', 'presentation', '123', 'editor')
+```
+
+**권한 부여**:
+```typescript
+export async function grant(
+  namespace: string,
+  objectId: string,
+  relation: string,
+  subjectType: 'user',
+  subjectId: string
+): Promise<RelationTuple | null>
+
+// 예시
+await grant('presentation', '123', 'owner', 'user', 'alice')
+```
+
+**권한 제거**:
+```typescript
+export async function revoke(
+  namespace: string,
+  objectId: string,
+  relation: string,
+  subjectType: 'user',
+  subjectId: string
+): Promise<void>
+```
+
+### 6.5 권한 체크 흐름
+
+```
+1. 직접 권한 확인: (namespace, objectId, relation, user, userId) 튜플 조회
+2. 상속 권한 확인: owner → editor → viewer 계층
+3. 시스템 권한 확인: (system, global, admin, user, userId) 조회
+4. 와일드카드 확인: (namespace, objectId, relation, user, *) 조회
+```
+
+**예시**:
+```
+(presentation:123, owner, user:alice)   → alice는 owner
+(presentation:123, editor, user:bob)    → bob은 editor
+(presentation:456, viewer, user:*)      → 모든 사용자가 조회 가능
+(system:global, admin, user:admin_user) → admin_user는 시스템 관리자
+```
+
+---
+
+## 7. 구독 및 크레딧 시스템
+
+### 7.1 구독 티어 비교
+
+| 기능 | Free | Pro (월 9,900원) | Premium (미정) |
+|------|------|------------------|----------------|
+| **AI 모델** | Gemini Flash | Gemini Flash | Gemini Pro |
+| **Deep Research** | ❌ | 크레딧 사용 | 크레딧 사용 |
+| **슬라이드 제한** | 5개 | 무제한 | 무제한 |
+| **워터마크** | ✅ 있음 | ❌ 없음 | ❌ 없음 |
+| **광고** | ✅ 있음 | ❌ 없음 | ❌ 없음 |
+| **저장 개수** | 무제한 | 무제한 | 무제한 |
+| **다운로드** | HTML, PDF | HTML, PDF, PPTX | HTML, PDF, PPTX |
+| **협업 (향후)** | ❌ | ✅ | ✅ |
+
+### 7.2 크레딧 시스템
+
+**크레딧 사용**:
+- **Pro 모델 사용**: 1 크레딧
+- **Deep Research 기능**: 2 크레딧
+
+**크레딧 구매** (예시):
+- 100 크레딧: 10,000원
+- 500 크레딧: 45,000원 (10% 할인)
+- 1,000 크레딧: 80,000원 (20% 할인)
+
+**크레딧 잔액 조회**:
+```typescript
+// API: GET /api/credits
+const latestTransaction = await prisma.creditTransaction.findFirst({
+  where: { userId },
+  orderBy: { createdAt: 'desc' },
+  select: { balance: true },
+})
+
+const currentBalance = latestTransaction?.balance ?? 0
+```
+
+### 7.3 구독 API
+
+| Endpoint | Method | 설명 |
+|----------|--------|------|
+| `/api/subscriptions/current` | GET | 내 구독 정보 조회 |
+| `/api/subscriptions` | POST | 구독 생성/업그레이드 |
+| `/api/subscriptions/cancel` | POST | 구독 취소 |
+
+### 7.4 크레딧 API
+
+| Endpoint | Method | 설명 |
+|----------|--------|------|
+| `/api/credits` | GET | 크레딧 잔액 조회 |
+| `/api/credits/purchase` | POST | 크레딧 구매 |
+| `/api/credits/history` | GET | 크레딧 거래 이력 조회 |
+| `/api/credits/consume` | POST | 크레딧 차감 (내부 API) |
+
+---
+
+## 8. 템플릿 시스템 설계
+
+### 8.1 시스템 개요
 
 클라이언트 HTML 템플릿 시스템은 기존 Gemini API 호출을 클라이언트 엔진으로 대체하여 **비용 87% 절감** 및 **실시간 편집 기능**을 구현합니다.
 
@@ -224,7 +838,7 @@ HistoryPage
 2. **구조화된 데이터 저장**: UnifiedPPTJSON 기반 편집 가능 데이터
 3. **플러그인 아키텍처**: 템플릿 추가/제거 용이
 
-### 4.2 아키텍처 다이어그램
+### 8.2 아키텍처 다이어그램
 
 ```
 ┌─────────────────────────────────────────┐
@@ -252,7 +866,7 @@ HistoryPage
                         └──────────────────┘
 ```
 
-### 4.3 템플릿 디렉토리 구조
+### 8.3 템플릿 디렉토리 구조
 
 ```
 services/template/
@@ -276,7 +890,7 @@ services/template/
     └── modern-tech/
 ```
 
-### 4.4 기본 템플릿 (toss-default)
+### 8.4 기본 템플릿 (toss-default)
 
 #### MVP 범위 (4개 슬라이드 타입)
 
@@ -310,7 +924,7 @@ Phase 1에서 구현하는 핵심 타입:
 </div>
 ```
 
-### 4.5 프리미엄 템플릿 시스템
+### 8.5 프리미엄 템플릿 시스템
 
 #### 동적 로딩 메커니즘
 
@@ -326,9 +940,9 @@ Phase 1에서 구현하는 핵심 타입:
 
 ---
 
-## 5. 데이터 구조
+## 9. 데이터 구조
 
-### 5.1 Presentation 타입
+### 9.1 Presentation 타입
 
 #### 기존 구조 (Phase 0)
 
@@ -365,7 +979,7 @@ interface Presentation {
 - 템플릿 재적용 가능
 - 하위 호환성 유지 (slides 필드)
 
-### 5.2 UnifiedPPTJSON 규격
+### 9.2 UnifiedPPTJSON 규격
 
 ```typescript
 interface UnifiedPPTJSON {
@@ -419,7 +1033,7 @@ interface BaseSlide {
 }
 ```
 
-### 5.3 HTMLSlide 타입
+### 9.3 HTMLSlide 타입
 
 ```typescript
 interface HTMLSlide {
@@ -430,9 +1044,9 @@ interface HTMLSlide {
 
 ---
 
-## 6. API 설계
+## 10. API 설계
 
-### 6.1 Gemini API 연동
+### 10.1 Gemini API 연동
 
 #### content-generator.ts
 
@@ -474,7 +1088,7 @@ UnifiedPPTJSON
 
 **비용**: ~8원 (Flash-Lite)
 
-### 6.2 Perplexity API 연동
+### 10.2 Perplexity API 연동
 
 #### researcher.ts
 
@@ -499,7 +1113,7 @@ UnifiedPPTJSON
 
 **비용**: ~160원 (Sonar) / ~200원 (Reasoning)
 
-### 6.3 템플릿 엔진 API
+### 10.3 템플릿 엔진 API
 
 #### TemplateEngine
 
@@ -523,45 +1137,193 @@ generateAll(
 
 **비용**: 0원 (클라이언트 처리)
 
-### 6.4 Bedrock SDK 연동 (향후)
+### 10.4 웹 서비스 API
 
-#### Storage API
+#### Presentations API
 
+**엔드포인트**: `/api/presentations`
+
+**CREATE** - `POST /api/presentations`
 ```typescript
-// 저장
-await setItem(key, value);
+// Request
+{
+  title: string
+  slideData: UnifiedPPTJSON
+  metadata?: {
+    totalSlides: number
+    createdWith: 'gemini-flash' | 'gemini-pro'
+    version: string
+  }
+}
 
-// 불러오기
-const data = await getItem(key);
-
-// 삭제
-await removeItem(key);
+// Response
+{
+  id: string
+  userId: string
+  title: string
+  slideData: UnifiedPPTJSON
+  metadata: object
+  createdAt: string
+}
 ```
 
-#### Share API
-
+**READ** - `GET /api/presentations?userId={userId}`
 ```typescript
-await share({
-  message: string;
-  url?: string;
-  title?: string;
-});
+// Response
+{
+  presentations: Presentation[]
+}
 ```
 
-#### Haptic Feedback
-
+**UPDATE** - `PATCH /api/presentations/{id}`
 ```typescript
-await generateHapticFeedback({
-  type: 'impact';
-  intensity: 'light' | 'medium' | 'heavy';
-});
+// Request
+{
+  title?: string
+  slideData?: UnifiedPPTJSON
+  metadata?: object
+}
+
+// Response
+{
+  updated: Presentation
+}
+```
+
+**DELETE** - `DELETE /api/presentations/{id}`
+```typescript
+// Response (Soft Delete)
+{
+  success: boolean
+  deletedAt: string
+}
+```
+
+#### Subscriptions API
+
+**엔드포인트**: `/api/subscriptions`
+
+**현재 구독 조회** - `GET /api/subscriptions/current`
+```typescript
+// Response
+{
+  tier: 'FREE' | 'PRO' | 'PREMIUM'
+  status: 'ACTIVE' | 'CANCELED' | 'EXPIRED'
+  startDate: string
+  endDate?: string
+}
+```
+
+**구독 생성/업그레이드** - `POST /api/subscriptions`
+```typescript
+// Request
+{
+  tier: 'PRO' | 'PREMIUM'
+  paymentMethod: string
+}
+
+// Response
+{
+  subscription: Subscription
+  paymentUrl?: string  // 결제 페이지 URL
+}
+```
+
+**구독 취소** - `POST /api/subscriptions/cancel`
+```typescript
+// Response
+{
+  subscription: Subscription  // status: 'CANCELED'
+  effectiveDate: string       // 구독 종료 예정일
+}
+```
+
+#### Credits API
+
+**엔드포인트**: `/api/credits`
+
+**잔액 조회** - `GET /api/credits`
+```typescript
+// Response
+{
+  balance: number
+  transactions: CreditTransaction[]  // 최근 10개
+}
+```
+
+**크레딧 구매** - `POST /api/credits/purchase`
+```typescript
+// Request
+{
+  packageId: '100' | '500' | '1000'
+  paymentMethod: string
+}
+
+// Response
+{
+  transaction: CreditTransaction
+  newBalance: number
+  paymentUrl?: string
+}
+```
+
+**크레딧 거래 이력** - `GET /api/credits/history?limit={n}&offset={n}`
+```typescript
+// Response
+{
+  transactions: CreditTransaction[]
+  total: number
+  hasMore: boolean
+}
+```
+
+**크레딧 차감 (내부 API)** - `POST /api/credits/consume`
+```typescript
+// Request
+{
+  amount: number
+  description: string
+}
+
+// Response
+{
+  transaction: CreditTransaction
+  newBalance: number
+}
+```
+
+#### History API
+
+**엔드포인트**: `/api/history`
+
+**생성 이력 조회** - `GET /api/history?userId={userId}&limit={n}`
+```typescript
+// Response
+{
+  history: GenerationHistory[]
+  total: number
+}
+```
+
+**생성 이력 상세** - `GET /api/history/{id}`
+```typescript
+// Response
+{
+  id: string
+  prompt: string
+  model: string
+  useResearch: boolean
+  creditsUsed: number
+  result: UnifiedPPTJSON
+  createdAt: string
+}
 ```
 
 ---
 
-## 7. AI 파이프라인
+## 11. AI 파이프라인
 
-### 7.1 현재 아키텍처 (Phase 0)
+### 11.1 현재 아키텍처 (Phase 0)
 
 ```
 텍스트 입력
@@ -578,7 +1340,7 @@ await generateHapticFeedback({
 - 편집 시마다 API 재호출 → 비용 중복
 - 규모 확장 시 원가 급증 위험
 
-### 7.2 개선 아키텍처 (Phase 1+)
+### 11.2 개선 아키텍처 (Phase 1+)
 
 ```
 텍스트 입력
@@ -597,7 +1359,7 @@ await generateHapticFeedback({
 - 편집 무제한 (0원)
 - 즉시 미리보기 가능
 
-### 7.3 비용 분석
+### 11.3 비용 분석
 
 #### 기본 생성 비용
 
@@ -637,9 +1399,9 @@ await generateHapticFeedback({
 
 ---
 
-## 8. 디자인 시스템
+## 12. 디자인 시스템
 
-### 8.1 색상 팔레트 (TDS Colors)
+### 12.1 색상 팔레트 (TDS Colors)
 
 ```typescript
 export const TOSS_COLORS = {
@@ -669,7 +1431,7 @@ export const TOSS_COLORS = {
 };
 ```
 
-### 8.2 타이포그래피
+### 12.2 타이포그래피
 
 ```typescript
 export const TYPOGRAPHY = {
@@ -699,7 +1461,7 @@ export const TYPOGRAPHY = {
 };
 ```
 
-### 8.3 레이아웃 스펙
+### 12.3 레이아웃 스펙
 
 ```typescript
 export const LAYOUT = {
@@ -729,7 +1491,7 @@ export const LAYOUT = {
 };
 ```
 
-### 8.4 슬라이드 타입별 스타일
+### 12.4 슬라이드 타입별 스타일
 
 #### TitleSlide
 - 배경: `geminiPrimary` (#3182f6)
@@ -756,9 +1518,9 @@ export const LAYOUT = {
 
 ---
 
-## 9. 성능 최적화
+## 13. 성능 최적화
 
-### 9.1 API 호출 최적화
+### 13.1 API 호출 최적화
 
 #### 비용 절감 전략
 - **Gemini Flash 우선**: Pro 대비 5배 저렴
@@ -776,7 +1538,7 @@ function getCachedResult(text: string) {
 }
 ```
 
-### 9.2 렌더링 최적화
+### 13.2 렌더링 최적화
 
 #### Lazy Loading
 ```typescript
@@ -804,7 +1566,7 @@ useEffect(() => {
 }, []);
 ```
 
-### 9.3 저장소 최적화
+### 13.3 저장소 최적화
 
 #### 썸네일 압축
 ```typescript
@@ -821,7 +1583,7 @@ function cleanupOldPresentations() {
 }
 ```
 
-### 9.4 번들 최적화
+### 13.4 번들 최적화
 
 #### Dynamic Import
 ```typescript
@@ -837,23 +1599,39 @@ const template = await import(
 
 ---
 
-## 10. 보안 및 에러 처리
+## 14. 보안 및 에러 처리
 
-### 10.1 환경 변수 관리
+### 14.1 환경 변수 관리
 
 ```env
-# 클라이언트 노출 가능
-NEXT_PUBLIC_GEMINI_API_KEY=your_key
+# Database (서버 전용)
+DATABASE_URL=postgresql://user:password@host:5432/database
 
-# 서버 전용 (노출 금지)
-PERPLEXITY_API_KEY=your_key
+# Supabase (서버 전용)
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...  # 서버 전용
+
+# NextAuth (서버 전용)
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_random_secret_here
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# AI Services
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key  # 클라이언트 노출 가능
+PERPLEXITY_API_KEY=your_perplexity_key      # 서버 전용
 ```
 
 **주의사항**:
-- Perplexity API Key는 서버 사이드만 사용
-- Gemini API Key는 클라이언트 노출 허용 (Apps in Toss 샌드박스)
+- `NEXT_PUBLIC_` 접두사: 브라우저에 노출되는 환경 변수
+- `SUPABASE_SERVICE_ROLE_KEY`: 서버 전용, 절대 클라이언트 노출 금지
+- `NEXTAUTH_SECRET`: 프로덕션 환경에서는 강력한 랜덤 문자열 사용
+- `DATABASE_URL`: Supabase PostgreSQL 연결 문자열 (Prisma 사용)
 
-### 10.2 API 에러 처리
+### 14.2 API 에러 처리
 
 #### Gemini API 에러
 
@@ -885,7 +1663,7 @@ try {
 }
 ```
 
-### 10.3 입력 검증
+### 14.3 입력 검증
 
 #### 텍스트 입력 검증
 
@@ -915,7 +1693,7 @@ function escapeHtml(text: string): string {
 }
 ```
 
-### 10.4 UX Writing 규칙
+### 14.4 UX Writing 규칙
 
 **모든 사용자 대면 텍스트는 Apps in Toss UX Writing 가이드 준수**
 
@@ -933,9 +1711,9 @@ function escapeHtml(text: string): string {
 
 ---
 
-## 11. 향후 개선사항
+## 15. 향후 개선사항
 
-### 11.1 Phase 1: 기본 템플릿 시스템 (완료)
+### 15.1 Phase 1: 기본 템플릿 시스템 (완료)
 
 - ✅ 템플릿 엔진 코어 구현
 - ✅ Gemini HTML 패턴 분석 완료
@@ -943,14 +1721,14 @@ function escapeHtml(text: string): string {
 - ✅ Presentation 타입 확장
 - ✅ 생성 플로우 통합
 
-### 11.2 Phase 2: 편집 기능 (1주)
+### 15.2 Phase 2: 편집 기능 (1주)
 
 - 📝 Editor 페이지 구축
 - 📝 슬라이드 타입별 편집 폼
 - 📝 실시간 미리보기
 - 📝 저장 및 업데이트 로직
 
-### 11.3 Phase 3: 나머지 템플릿 (1주)
+### 15.3 Phase 3: 나머지 템플릿 (1주)
 
 - 📝 8개 추가 슬라이드 타입
   - TableSlide
@@ -962,20 +1740,20 @@ function escapeHtml(text: string): string {
   - ThankYouSlide
   - TwoColumnSlide
 
-### 11.4 Phase 4: 프리미엄 템플릿 (2주)
+### 15.4 Phase 4: 프리미엄 템플릿 (2주)
 
 - 📝 동적 템플릿 로더
 - 📝 템플릿 레지스트리
 - 📝 템플릿 선택 UI
 - 📝 10개 프리미엄 템플릿 제작
 
-### 11.5 Phase 5: 수익화 (1주)
+### 15.5 Phase 5: 수익화 (1주)
 
 - 📝 인앱 결제 연동 (Apps in Toss IAP)
 - 📝 템플릿 스토어 UI
 - 📝 구독 모델 구현
 
-### 11.6 Long-term (Phase 6+)
+### 15.6 Long-term (Phase 6+)
 
 - 📝 협업 기능 (공동 편집)
 - 📝 클라우드 동기화
@@ -987,9 +1765,9 @@ function escapeHtml(text: string): string {
 
 ---
 
-## 12. 부록
+## 16. 부록
 
-### 12.1 용어 정리
+### 16.1 용어 정리
 
 | 용어 | 설명 |
 |------|------|
@@ -1001,7 +1779,7 @@ function escapeHtml(text: string): string {
 | Bedrock SDK | Apps in Toss 플랫폼 API |
 | TDS Mobile | 토스 디자인 시스템 (WebView 전용) |
 
-### 12.2 참조 문서
+### 16.2 참조 문서
 
 #### 내부 문서
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - 상세 아키텍처
@@ -1015,7 +1793,7 @@ function escapeHtml(text: string): string {
 - [Bedrock SDK 레퍼런스](../../docs/reference/bedrock/)
 - [공식 예제](../../example/)
 
-### 12.3 수익 시뮬레이션
+### 16.3 수익 시뮬레이션
 
 #### 시나리오 A: 템플릿 판매 중심
 

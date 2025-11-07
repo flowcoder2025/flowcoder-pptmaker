@@ -2,14 +2,14 @@
 
 > **상위 문서**: [../CLAUDE.md](../CLAUDE.md)
 > **프레임워크**: Next.js 16 + React 19
-> **UI 라이브러리**: TDS Mobile (v2.1.2)
+> **UI 라이브러리**: shadcn/ui + Radix UI + Tailwind CSS 4
 
 ---
 
 ## 개요
 
 이 디렉토리는 PPT Maker 프로젝트의 모든 React 컴포넌트를 포함합니다.
-Next.js 16 App Router 아키텍처에 맞춰 재사용 가능한 컴포넌트를 체계적으로 관리합니다.
+Next.js 16 App Router 아키텍처에 맞춰 재사용 가능한 컴포넌트를 체계적으로 관리하며, shadcn/ui와 Radix UI를 기반으로 한 접근성 우선 UI를 제공합니다.
 
 ---
 
@@ -18,8 +18,13 @@ Next.js 16 App Router 아키텍처에 맞춰 재사용 가능한 컴포넌트를
 ```
 components/
 ├── claude.md              # 현재 파일 - 컴포넌트 가이드
-├── ui/                    # 공통 UI 컴포넌트
-│   └── Button.tsx         # 기본 버튼 컴포넌트
+├── ui/                    # shadcn/ui 기반 공통 UI 컴포넌트
+│   ├── button.tsx         # 버튼 (Radix UI 기반)
+│   ├── input.tsx          # 입력 필드
+│   ├── dialog.tsx         # 다이얼로그/모달
+│   ├── card.tsx           # 카드 레이아웃
+│   ├── select.tsx         # 선택 드롭다운
+│   └── ...                # 기타 shadcn/ui 컴포넌트
 ├── editor/                # 슬라이드 편집 컴포넌트
 │   ├── ConfirmDialog.tsx  # 확인 다이얼로그
 │   ├── ImageUploader.tsx  # 이미지 업로드
@@ -40,9 +45,11 @@ components/
 │       ├── TeamProfileSlideForm.tsx  # 팀 소개
 │       └── ThankYouSlideForm.tsx     # 감사 슬라이드
 ├── auth/                  # 인증 관련 컴포넌트
-│   └── LoginButton.tsx    # 로그인 버튼
+│   ├── SignInButton.tsx   # OAuth 로그인 버튼
+│   ├── UserMenu.tsx       # 사용자 메뉴
+│   └── ProtectedRoute.tsx # 인증 보호 래퍼
 └── providers/             # Context 프로바이더
-    └── TDSProvider.tsx    # TDS Mobile 테마 프로바이더
+    └── SessionProvider.tsx # NextAuth 세션 프로바이더
 ```
 
 ---
@@ -51,16 +58,21 @@ components/
 
 ### 1. ui/ - 공통 UI 컴포넌트
 
-**목적**: 프로젝트 전반에서 재사용되는 기본 UI 요소
+**목적**: 프로젝트 전반에서 재사용되는 기본 UI 요소 (shadcn/ui 기반)
 
-**현재 컴포넌트**:
-- `Button.tsx`: 기본 버튼 컴포넌트 (TDS Mobile 버튼 래핑)
+**주요 컴포넌트**:
+- `button.tsx`: 기본 버튼 (Radix UI `Button` 기반)
+- `input.tsx`: 입력 필드
+- `dialog.tsx`: 모달/다이얼로그 (Radix UI `Dialog` 기반)
+- `card.tsx`: 카드 레이아웃
+- `select.tsx`: 드롭다운 선택 (Radix UI `Select` 기반)
+- `toast.tsx`: 토스트 알림
 
 **작성 규칙**:
-- TDS Mobile 컴포넌트를 우선 사용
-- 커스텀 스타일은 Tailwind CSS 사용
+- shadcn/ui CLI로 컴포넌트 추가: `npx shadcn-ui@latest add [component]`
+- Tailwind CSS로 스타일 커스터마이징
 - Props 인터페이스는 명시적으로 정의
-- 접근성(Accessibility) 고려 필수
+- 접근성(Accessibility) 기본 제공 (Radix UI 기반)
 
 ### 2. editor/ - 슬라이드 편집 컴포넌트
 
@@ -96,37 +108,76 @@ components/
 
 ### 3. auth/ - 인증 컴포넌트
 
-**목적**: 사용자 인증 및 로그인 관련 UI
+**목적**: NextAuth.js 기반 사용자 인증 UI
 
-**현재 컴포넌트**:
-- `LoginButton.tsx`: 토스 로그인 버튼 (Bedrock SDK 연동)
+**주요 컴포넌트**:
+- `SignInButton.tsx`: OAuth 로그인 버튼 (GitHub, Google)
+- `UserMenu.tsx`: 사용자 정보 및 메뉴 (드롭다운)
+- `ProtectedRoute.tsx`: 인증 필요 페이지 래퍼
 
-**향후 추가 예정**:
-- 프로필 카드
-- 로그아웃 버튼
-- 사용자 정보 표시
+**구현 예시**:
+```typescript
+'use client'
+
+import { signIn, signOut, useSession } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+
+export function SignInButton() {
+  const { data: session } = useSession()
+
+  if (session) {
+    return (
+      <Button onClick={() => signOut()}>
+        로그아웃해요
+      </Button>
+    )
+  }
+
+  return (
+    <Button onClick={() => signIn('github')}>
+      GitHub으로 로그인해요
+    </Button>
+  )
+}
+```
 
 ### 4. providers/ - Context 프로바이더
 
-**목적**: 전역 상태 및 테마 관리
+**목적**: 전역 상태 및 세션 관리
 
-**현재 컴포넌트**:
-- `TDSProvider.tsx`: TDS Mobile 테마 설정 프로바이더
+**주요 컴포넌트**:
+- `SessionProvider.tsx`: NextAuth 세션 프로바이더 래퍼
 
 **사용 패턴**:
 ```typescript
 // app/layout.tsx에서 사용
-import { TDSProvider } from '@/components/providers/TDSProvider'
+import { SessionProvider } from '@/components/providers/SessionProvider'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
-        <TDSProvider>
+        <SessionProvider>
           {children}
-        </TDSProvider>
+        </SessionProvider>
       </body>
     </html>
+  )
+}
+```
+
+**SessionProvider 구현**:
+```typescript
+'use client'
+
+import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react'
+import { ReactNode } from 'react'
+
+export function SessionProvider({ children }: { children: ReactNode }) {
+  return (
+    <NextAuthSessionProvider>
+      {children}
+    </NextAuthSessionProvider>
   )
 }
 ```
@@ -198,26 +249,38 @@ export default function Button({ label, onClick, disabled = false }: ButtonProps
 
 ### 🟡 권장 사항
 
-#### 1. TDS Mobile 컴포넌트 우선 사용
+#### 1. shadcn/ui 컴포넌트 우선 사용
 ```typescript
-// ✅ 권장: TDS Mobile 컴포넌트 사용
-import { Button } from '@toss/tds-mobile'
+// ✅ 권장: shadcn/ui 컴포넌트 사용
+import { Button } from '@/components/ui/button'
 
 export default function MyComponent() {
-  return <Button variant="primary">클릭해요</Button>
+  return <Button variant="default">클릭해요</Button>
 }
 ```
 
+**shadcn/ui 컴포넌트 추가**:
+```bash
+# CLI로 필요한 컴포넌트 추가
+npx shadcn-ui@latest add button
+npx shadcn-ui@latest add dialog
+npx shadcn-ui@latest add input
+
+# 여러 컴포넌트 한 번에 추가
+npx shadcn-ui@latest add button dialog input card
+```
+
+**커스텀 스타일링**:
 ```typescript
-// ⚠️ 최소화: 커스텀 스타일
-// 불가피한 경우에만 사용
-import { Button } from '@toss/tds-mobile'
+// ✅ Tailwind CSS로 스타일 확장
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export default function MyComponent() {
   return (
     <Button
-      variant="primary"
-      className="custom-override" // 최소한만 오버라이드
+      variant="default"
+      className={cn("custom-class", "hover:bg-primary/90")}
     >
       클릭해요
     </Button>
@@ -303,14 +366,18 @@ export default memo(function HeavyComponent({ data }: Props) {
 - **[../CLAUDE.md](../CLAUDE.md)**: 프로젝트 전체 가이드
 - **[../types/slide.ts](../types/slide.ts)**: 슬라이드 타입 정의
 
-### Apps in Toss 문서
-- **[TDS Mobile 컴포넌트](../../docs/reference/tds-mobile/)**: UI 컴포넌트 레퍼런스
-- **[UX Writing 가이드](../../docs/03-design/03-ux-writing.md)**: 텍스트 작성 규칙
-- **[디자인 가이드](../../docs/03-design/claude.md)**: 디자인 시스템
+### UI 라이브러리
+- **[shadcn/ui](https://ui.shadcn.com)**: shadcn/ui 공식 문서
+- **[Radix UI](https://www.radix-ui.com)**: Radix UI 프리미티브 문서
+- **[Tailwind CSS](https://tailwindcss.com)**: Tailwind CSS 공식 문서
+
+### 인증
+- **[NextAuth.js](https://next-auth.js.org)**: NextAuth.js 공식 문서
+- **[NextAuth React Hooks](https://next-auth.js.org/getting-started/client)**: useSession, signIn, signOut
 
 ### 외부 문서
-- **[TDS Mobile 공식 문서](https://tossmini-docs.toss.im/tds-mobile/)**: 최신 컴포넌트 API
 - **[React 19 문서](https://react.dev/)**: React 공식 문서
+- **[Next.js App Router](https://nextjs.org/docs/app)**: Next.js 16 App Router
 
 ---
 
@@ -362,22 +429,48 @@ export default function MyComponent({ children }: MyComponentProps) {
 - [ ] JSDoc 주석 작성
 - [ ] UX Writing 규칙 준수 (사용자 대면 텍스트)
 - [ ] TypeScript strict mode 통과
-- [ ] TDS Mobile 컴포넌트 우선 검토
+- [ ] shadcn/ui 컴포넌트 우선 검토
 
 ---
 
 ## 문제 해결
 
-### TDS Mobile 컴포넌트가 작동하지 않음
+### shadcn/ui 컴포넌트 추가 오류
 ```bash
-# 1. TDS Mobile 설치 확인
-npm list @toss/tds-mobile
+# 1. shadcn/ui 설정 확인
+cat components.json
 
-# 2. 미설치 시 설치
-npm install @toss/tds-mobile
+# 2. 미설정 시 초기화
+npx shadcn-ui@latest init
 
-# 3. TDSProvider 확인
-# app/layout.tsx에서 TDSProvider로 감싸져 있는지 확인
+# 3. 컴포넌트 추가
+npx shadcn-ui@latest add button
+```
+
+### NextAuth 세션이 undefined
+```typescript
+// ❌ 잘못된 사용: SessionProvider 없음
+export default function Page() {
+  const { data: session } = useSession()  // undefined
+  // ...
+}
+```
+
+**해결**: `app/layout.tsx`에 SessionProvider 추가 확인
+```typescript
+import { SessionProvider } from '@/components/providers/SessionProvider'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <SessionProvider>
+          {children}
+        </SessionProvider>
+      </body>
+    </html>
+  )
+}
 ```
 
 ### 'use client' 없이 상태 사용 시 오류
@@ -386,6 +479,22 @@ Error: useState can only be used in Client Components
 ```
 
 **해결**: 파일 상단에 `'use client'` 추가
+
+### Radix UI 스타일이 적용되지 않음
+```bash
+# Tailwind CSS 설정 확인
+# tailwind.config.js에 components/ui 경로 추가
+```
+
+```javascript
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  // ...
+}
+```
 
 ### 임포트 경로 오류
 ```
@@ -405,5 +514,5 @@ Module not found: Can't resolve '@/components/...'
 
 ---
 
-**마지막 업데이트**: 2025-11-06
-**변경 이력**: 초기 작성 - components 디렉토리 가이드 및 작성 규칙
+**마지막 업데이트**: 2025-11-07
+**변경 이력**: 웹 서비스 전환 - shadcn/ui, NextAuth.js 기반으로 업데이트
