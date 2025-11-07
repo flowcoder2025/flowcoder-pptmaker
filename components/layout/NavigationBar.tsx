@@ -174,7 +174,15 @@ export default function NavigationBar() {
                     <ChevronDown size={16} style={{ color: TOSS_COLORS.textSecondary }} />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 bg-white border shadow-lg"
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderColor: TOSS_COLORS.muted,
+                    zIndex: 100,
+                  }}
+                >
                   <div className="px-2 py-2">
                     <p className="text-sm font-medium" style={{ color: TOSS_COLORS.text }}>
                       {session.user?.name || '사용자'}
