@@ -10,7 +10,6 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
@@ -19,7 +18,7 @@ import bcrypt from 'bcryptjs'
 // ============================================
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Credentials Provider 사용 시 Adapter 제거 (JWT 전략 필요)
   providers: [
     // GitHub OAuth
     GithubProvider({
@@ -78,10 +77,96 @@ export const authOptions: NextAuthOptions = {
     error: '/login', // 에러 페이지
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      // OAuth 로그인 시 사용자 생성 또는 업데이트
+      if (account?.provider === 'github' || account?.provider === 'google') {
+        try {
+          // 이메일로 기존 사용자 조회
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+          })
+
+          if (existingUser) {
+            // 기존 사용자: Account 연결 확인
+            const existingAccount = await prisma.account.findUnique({
+              where: {
+                provider_providerAccountId: {
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                },
+              },
+            })
+
+            if (!existingAccount) {
+              // Account가 없으면 생성
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state,
+                },
+              })
+            }
+
+            // user.id를 기존 사용자 ID로 설정
+            user.id = existingUser.id
+          } else {
+            // 새 사용자 생성
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name,
+                image: user.image,
+                emailVerified: new Date(),
+              },
+            })
+
+            // Account 생성
+            await prisma.account.create({
+              data: {
+                userId: newUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                refresh_token: account.refresh_token,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                session_state: account.session_state,
+              },
+            })
+
+            // user.id를 새 사용자 ID로 설정
+            user.id = newUser.id
+          }
+
+          return true
+        } catch (error) {
+          console.error('OAuth signIn error:', error)
+          return false
+        }
+      }
+
+      // Credentials 로그인은 그대로 통과
+      return true
+    },
+    async jwt({ token, user, account }) {
       // 로그인 시 user 정보를 token에 추가
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.name = user.name
+        token.picture = user.image
       }
       return token
     },
@@ -89,6 +174,9 @@ export const authOptions: NextAuthOptions = {
       // 세션에 userId 추가
       if (session.user) {
         session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.picture as string
       }
       return session
     },
