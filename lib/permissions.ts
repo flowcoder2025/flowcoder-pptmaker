@@ -322,7 +322,7 @@ export async function listAccessible(
     return []
   }
 
-  return tuples.map((t) => t.objectId)
+  return tuples.map((t: { objectId: string }) => t.objectId)
 }
 
 // ============================================
