@@ -80,8 +80,13 @@ export default function NavigationBar() {
       >
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <img
+            src="/PPT Maker_logo_600600.png"
+            alt="PPT Maker Logo"
+            className="h-8 w-8"
+          />
           <div
-            className="text-xl font-bold"
+            className="text-lg font-bold"
             style={{
               background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
               WebkitBackgroundClip: 'text',
@@ -89,7 +94,7 @@ export default function NavigationBar() {
               backgroundClip: 'text',
             }}
           >
-            FlowCoder PPT
+            PPT Maker by FlowCoder
           </div>
         </Link>
 

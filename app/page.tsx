@@ -67,7 +67,7 @@ export default function HomePage() {
           className="text-3xl sm:text-4xl font-bold text-center mb-12"
           style={{ color: TOSS_COLORS.text }}
         >
-          왜 FlowCoder PPT Maker인가요?
+          왜 'FlowCoder가 만든 PPT Maker'인가요?
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
