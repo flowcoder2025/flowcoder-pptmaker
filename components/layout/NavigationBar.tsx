@@ -81,7 +81,7 @@ export default function NavigationBar() {
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img
-            src="/PPT Maker_logo_600600.png"
+            src="/PPT_Maker_logo_600600__1_-removebg-preview.png"
             alt="PPT Maker Logo"
             className="h-8 w-8"
           />
