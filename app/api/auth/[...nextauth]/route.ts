@@ -81,10 +81,17 @@ export const authOptions: NextAuthOptions = {
       // OAuth 로그인 시 사용자 생성 또는 업데이트
       if (account?.provider === 'github' || account?.provider === 'google') {
         try {
+          console.log('🔐 OAuth signIn attempt:', {
+            provider: account.provider,
+            email: user.email,
+            providerAccountId: account.providerAccountId
+          })
+
           // 이메일로 기존 사용자 조회
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
           })
+          console.log('👤 Existing user:', existingUser ? `Found (${existingUser.id})` : 'Not found')
 
           if (existingUser) {
             // 기존 사용자: Account 연결 확인
@@ -96,9 +103,11 @@ export const authOptions: NextAuthOptions = {
                 },
               },
             })
+            console.log('🔗 Existing account:', existingAccount ? 'Found' : 'Not found')
 
             if (!existingAccount) {
               // Account가 없으면 생성
+              console.log('📝 Creating new account link...')
               await prisma.account.create({
                 data: {
                   userId: existingUser.id,
@@ -114,12 +123,14 @@ export const authOptions: NextAuthOptions = {
                   session_state: account.session_state,
                 },
               })
+              console.log('✅ Account link created')
             }
 
             // user.id를 기존 사용자 ID로 설정
             user.id = existingUser.id
           } else {
             // 새 사용자 생성
+            console.log('📝 Creating new user...')
             const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
@@ -128,8 +139,10 @@ export const authOptions: NextAuthOptions = {
                 emailVerified: new Date(),
               },
             })
+            console.log('✅ User created:', newUser.id)
 
             // Account 생성
+            console.log('📝 Creating account link...')
             await prisma.account.create({
               data: {
                 userId: newUser.id,
@@ -145,14 +158,21 @@ export const authOptions: NextAuthOptions = {
                 session_state: account.session_state,
               },
             })
+            console.log('✅ Account link created')
 
             // user.id를 새 사용자 ID로 설정
             user.id = newUser.id
           }
 
+          console.log('✅ OAuth signIn success')
           return true
         } catch (error) {
-          console.error('OAuth signIn error:', error)
+          console.error('❌ OAuth signIn error:', error)
+          console.error('Error details:', {
+            name: (error as Error).name,
+            message: (error as Error).message,
+            stack: (error as Error).stack,
+          })
           return false
         }
       }
