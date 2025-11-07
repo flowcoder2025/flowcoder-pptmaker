@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 워크플로우 자동화 플랫폼</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 32px;
+      color: #333;
+    }
+
+    .slide {
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      margin: 0 auto 40px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      page-break-inside: avoid;
+    }
+
+    /* 인쇄 최적화 */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .container {
+        padding: 0;
+      }
+
+      h1 {
+        page-break-after: avoid;
+      }
+
+      .slide {
+        page-break-after: always;
+        page-break-inside: avoid;
+        margin: 0;
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+
+      .slide:last-child {
+        page-break-after: auto;
+      }
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      .slide {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI 워크플로우 자동화 플랫폼</h1>
+    
+    <!-- 슬라이드 1 -->
+    <div class="slide" id="slide-1">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center; background-color: #3182f6; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; padding: 60px;"><h1 style="color: #FFFFFF; font-size: 48px; font-family: Arial; font-weight: bold; margin: 0 0 20px 0;">AI 워크플로우 자동화 플랫폼</h1><p style="color: #d1d6db; font-size: 24px; font-family: Arial; margin: 0;">업무 생산성을 10배 향상시키는 혁신</p></div>
+    </div>
+  
+
+    <!-- 슬라이드 2 -->
+    <div class="slide" id="slide-2">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">목차 (Agenda)</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">1. 시장의 기회: 왜 지금, 자동화 혁신이 필요한가?</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">2. 우리의 솔루션: 무엇이 우리를 특별하게 만드는가?</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">3. 출시 계획: 어떻게 시장을 선도할 것인가?</span></li><li style="display: flex; align-items: flex-start; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">4. Q&A</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 3 -->
+    <div class="slide" id="slide-3">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">시장 현황: 반복적인 업무에 갇힌 기업들</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>주요 Pain Points:</strong></span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">시간 및 비용 낭비: 수작업 프로세스로 인한 비효율 발생</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">휴먼 에러: 반복 작업에서 발생하는 치명적인 실수 가능성</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">높은 진입장벽: 중소기업에게 기존 자동화 솔루션은 너무 복잡하고 비쌈</span></li><li style="display: flex; align-items: flex-start; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">파편화된 시스템: 통합되지 않은 도구들로 인한 협업의 어려움</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 4 -->
+    <div class="slide" id="slide-4">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">시장이 요구하는 핵심 해결 과제</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>핵심 요구사항:</strong></span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">완전 자동화: 단순 반복 업무를 넘어선 지능형 자동화</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">실시간 인사이트: 데이터 기반의 신속하고 정확한 의사결정 지원</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">원활한 협업: 팀과 부서의 경계를 허무는 통합 워크플로우</span></li><li style="display: flex; align-items: flex-start; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">비용 효율성: 합리적인 비용으로 최고의 ROI(투자수익률)를 제공하는 솔루션</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 5 -->
+    <div class="slide" id="slide-5">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">우리의 목표: 시장을 재정의하는 핵심 지표</h3></div><div style="flex: 1; display: flex; align-items: center;"><div style="width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;"><div style="background: #f8f9fa; padding: 40px; border-radius: 16px; text-align: center; border-left: 5px solid #3182f6;"><div style="color: #3182f6; font-size: 72px; font-weight: bold; margin-bottom: 15px; font-family: Arial;">95%</div><div style="color: #191f28; font-size: 18px; font-family: Arial;">AI 기반 최대 업무 자동화율 달성</div></div><div style="background: #f8f9fa; padding: 40px; border-radius: 16px; text-align: center; border-left: 5px solid #3182f6;"><div style="color: #3182f6; font-size: 72px; font-weight: bold; margin-bottom: 15px; font-family: Arial;">3.5배</div><div style="color: #191f28; font-size: 18px; font-family: Arial;">평균 업무 처리 속도 및 생산성 향상</div></div><div style="background: #f8f9fa; padding: 40px; border-radius: 16px; text-align: center; border-left: 5px solid #3182f6;"><div style="color: #3182f6; font-size: 72px; font-weight: bold; margin-bottom: 15px; font-family: Arial;">60%</div><div style="color: #191f28; font-size: 18px; font-family: Arial;">수작업 비용 및 운영 리소스 절감</div></div><div style="background: #f8f9fa; padding: 40px; border-radius: 16px; text-align: center; border-left: 5px solid #3182f6;"><div style="color: #3182f6; font-size: 72px; font-weight: bold; margin-bottom: 15px; font-family: Arial;">4.8/5</div><div style="color: #191f28; font-size: 18px; font-family: Arial;">초기 베타 테스트 그룹의 고객 만족도 점수</div></div></div></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 6 -->
+    <div class="slide" id="slide-6">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">우리의 솔루션: AI 워크플로우 자동화 플랫폼</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>차별화된 가치:</strong></span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">학습이 필요 없는 직관성: 드래그 앤 드롭 인터페이스로 누구나 전문가 수준의 자동화 구현</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">즉시 사용 가능한 템플릿: 다양한 직무와 산업에 맞는 100개 이상의 자동화 템플릿 제공</span></li><li style="display: flex; align-items: flex-start; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;">무한한 확장성: 200개 이상의 외부 도구(SaaS)와 완벽하게 연동</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 7 -->
+    <div class="slide" id="slide-7">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">기술 비교: 게임의 판도를 바꾸는 혁신</h3></div><div style="flex: 1; display: flex; align-items: center; overflow: auto;"><table style="width: 100%; border-collapse: collapse; font-family: Arial; font-size: 16px;"><thead style="text-align: left; color: #191f28;"><tr><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">구분</th><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">기존 도구의 한계</th><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6; color: #3182f6;">우리 솔루션의 강점</th></tr></thead><tbody style="color: #191f28;"><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold;">자동화 범위</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">부분적, 규칙 기반 자동화</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">엔드투엔드(End-to-end) 지능형 자동화</td></tr><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">설정 및 학습</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">복잡한 초기 설정, 높은 학습 곡선</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">즉시 사용 가능한 템플릿, 제로 코드(No-Code) UI</td></tr><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold;">통합 기능</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">제한적인 연동, 추가 개발 필요</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">200+ 주요 SaaS 도구 원클릭 연동</td></tr><tr><td style="padding: 15px; font-weight: bold; background-color: #f8f9fa;">비용 구조</td><td style="padding: 15px; background-color: #f8f9fa;">높은 초기 도입 비용, 유지보수비 발생</td><td style="padding: 15px; background-color: #f8f9fa;">합리적인 구독 모델, 투명한 가격 정책</td></tr></tbody></table></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 8 -->
+    <div class="slide" id="slide-8">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">경쟁사 대비 압도적인 성능</h3></div><div style="flex: 1; display: flex; flex-direction: column; justify-content: center;"><div style="width: 100%; display: flex; flex-direction: column; gap: 20px;"><div style="display: flex; align-items: center; gap: 15px;"><span style="width: 120px; font-size: 18px; color: #191f28; font-family: Arial; text-align: right;">우리 플랫폼</span><div style="flex: 1; background: #e9ecef; border-radius: 8px; height: 40px; position: relative; overflow: hidden;"><div style="width: 25%; height: 100%; background: #3182f6; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; box-sizing: border-box;"><span style="color: white; font-weight: bold; font-size: 16px; font-family: Arial;">0.3s</span></div></div></div><div style="display: flex; align-items: center; gap: 15px;"><span style="width: 120px; font-size: 18px; color: #191f28; font-family: Arial; text-align: right;">경쟁사 A</span><div style="flex: 1; background: #e9ecef; border-radius: 8px; height: 40px; position: relative; overflow: hidden;"><div style="width: 100%; height: 100%; background: #adb5bd; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; box-sizing: border-box;"><span style="color: white; font-weight: bold; font-size: 16px; font-family: Arial;">1.2s</span></div></div></div><div style="display: flex; align-items: center; gap: 15px;"><span style="width: 120px; font-size: 18px; color: #191f28; font-family: Arial; text-align: right;">경쟁사 B</span><div style="flex: 1; background: #e9ecef; border-radius: 8px; height: 40px; position: relative; overflow: hidden;"><div style="width: 66.67%; height: 100%; background: #adb5bd; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; box-sizing: border-box;"><span style="color: white; font-weight: bold; font-size: 16px; font-family: Arial;">0.8s</span></div></div></div></div><p style="text-align: center; color: #333d4b; font-size: 16px; font-family: Arial; margin-top: 40px;">(그래프 설명: 자동 문서 분류 작업 기준, 우리 플랫폼이 경쟁사 대비 최대 4배 빠른 처리 속도를 보입니다.)</p></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 9 -->
+    <div class="slide" id="slide-9">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">기능별 핵심 성능 지표</h3></div><div style="flex: 1; display: flex; align-items: center; overflow: auto;"><table style="width: 100%; border-collapse: collapse; font-family: Arial; font-size: 16px;"><thead style="text-align: center; color: #191f28;"><tr><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">핵심 기능</th><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">평균 처리 속도</th><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">정확도</th><th style="padding: 15px; background-color: #f2f4f6; border-bottom: 2px solid #dee2e6;">사용자 만족도</th></tr></thead><tbody style="color: #191f28; text-align: center;"><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold;">자동 문서 분류</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">0.3초</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; color: #3182f6; font-weight: bold;">98%</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">4.8 / 5.0</td></tr><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold; background-color: #f8f9fa;">데이터 추출 및 요약</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">0.5초</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; background-color: #f8f9fa; color: #3182f6; font-weight: bold;">95%</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; background-color: #f8f9fa;">4.7 / 5.0</td></tr><tr><td style="padding: 15px; border-bottom: 1px solid #dee2e6; font-weight: bold;">보고서 자동 생성</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">2.0초</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6; color: #3182f6; font-weight: bold;">99%</td><td style="padding: 15px; border-bottom: 1px solid #dee2e6;">4.9 / 5.0</td></tr><tr><td style="padding: 15px; font-weight: bold; background-color: #f8f9fa;">팀 일정 최적화</td><td style="padding: 15px; background-color: #f8f9fa;">1.0초</td><td style="padding: 15px; background-color: #f8f9fa; color: #3182f6; font-weight: bold;">97%</td><td style="padding: 15px; background-color: #f8f9fa;">4.8 / 5.0</td></tr></tbody></table></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 10 -->
+    <div class="slide" id="slide-10">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">안정성과 확장성을 모두 잡은 기술 아키텍처</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>프론트엔드 (Frontend Layer):</strong> React 기반의 빠르고 역동적인 SPA(Single Page Application), 실시간 데이터 시각화 대시보드, 직관적인 드래그 앤 드롭 워크플로우 빌더, 모든 디바이스를 지원하는 모바일 반응형 UI</span></li><li style="display: flex; align-items: flex-start; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>백엔드 시스템 (Backend System):</strong> Node.js 기반 마이크로서비스 아키텍처(MSA), 핵심: GPT-4 기반 AI 자동화 엔진, PostgreSQL & Redis를 통한 안정적인 데이터 처리, AWS 인프라 기반의 99.9% 서비스 가용성(Uptime) 보장</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 11 -->
+    <div class="slide" id="slide-11">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 15px 0;">출시 계획: 성공을 위한 로드맵</h3><p style="color: #333d4b; font-size: 18px; font-family: Arial; margin: 0 0 30px 0;">체계적인 4단계 로드맵으로 시장에 성공적으로 안착하겠습니다.</p></div><div style="flex: 1; display: flex; align-items: center;"><div style="width: 100%; display: flex; justify-content: space-between; gap: 20px;"><div style="flex: 1; text-align: center; padding: 20px; border-top: 4px solid #3182f6; background-color: #f8f9fa; border-radius: 8px;"><h4 style="color: #3182f6; font-size: 20px; font-family: Arial; margin: 0 0 10px 0;">2024년 1월 (Alpha)</h4><p style="color: #333d4b; font-size: 16px; font-family: Arial; margin: 0; line-height: 1.5;">핵심 AI 자동화 엔진 및 MVP 기능 개발 완료</p></div><div style="flex: 1; text-align: center; padding: 20px; border-top: 4px solid #3182f6; background-color: #f8f9fa; border-radius: 8px;"><h4 style="color: #3182f6; font-size: 20px; font-family: Arial; margin: 0 0 10px 0;">2024년 4월 (Beta)</h4><p style="color: #333d4b; font-size: 16px; font-family: Arial; margin: 0; line-height: 1.5;">100명의 얼리 어답터를 대상으로 클로즈 베타 테스트 진행, 핵심 기능 개선을 위한 사용자 피드백 집중 수집</p></div><div style="flex: 1; text-align: center; padding: 20px; border-top: 4px solid #3182f6; background-color: #f8f9fa; border-radius: 8px;"><h4 style="color: #3182f6; font-size: 20px; font-family: Arial; margin: 0 0 10px 0;">2024년 7월 (Official Launch)</h4><p style="color: #333d4b; font-size: 16px; font-family: Arial; margin: 0; line-height: 1.5;">정식 서비스 출시 및 대규모 디지털 마케팅 캠페인 시작, 개인 및 팀을 위한 프리미엄 요금제 오픈</p></div><div style="flex: 1; text-align: center; padding: 20px; border-top: 4px solid #3182f6; background-color: #f8f9fa; border-radius: 8px;"><h4 style="color: #3182f6; font-size: 20px; font-family: Arial; margin: 0 0 10px 0;">2024년 10월 (Enterprise)</h4><p style="color: #333d4b; font-size: 16px; font-family: Arial; margin: 0; line-height: 1.5;">보안 및 관리 기능이 강화된 기업용 버전 출시, 주요 산업별 리더 기업과의 파트너십 확대</p></div></div></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 12 -->
+    <div class="slide" id="slide-12">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">고객의 목소리: 이미 검증된 가치</h3></div><div style="flex: 1; display: flex; align-items: center; justify-content: center;"><div style="width: 80%; text-align: center; font-family: Arial;"><div style="font-size: 72px; color: #3182f6; line-height: 1; margin-bottom: 20px;">“</div><blockquote style="font-size: 24px; color: #191f28; line-height: 1.6; margin: 0; font-style: italic;">이 도구 덕분에 우리 팀의 생산성이 3배 향상되었습니다. 반복 작업에 쓰던 시간을 전략적 업무에 집중할 수 있게 되었어요. 특히 자동 보고서 생성 기능이 정말 유용합니다!</blockquote><p style="font-size: 18px; color: #333d4b; margin-top: 30px; font-weight: bold;">- 김민준, ABC 스타트업 CEO</p></div></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 13 -->
+    <div class="slide" id="slide-13">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="background-color: #ffffff; width: 100%; height: 100%; box-sizing: border-box; padding: 60px; display: flex; flex-direction: column; overflow: hidden;"><div><div style="width: 60px; height: 4px; background-color: #3182f6; margin-bottom: 30px;"></div><h3 style="color: #191f28; font-size: 32px; font-family: Arial; font-weight: bold; margin: 0 0 30px 0;">마무리</h3></div><div style="flex: 1; display: flex; align-items: center;"><ul style="list-style: none; padding: 0; margin: 0; width: 100%; font-family: Arial;"><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>Why:</strong> 시장은 지능형 자동화를 통한 생산성 혁신을 요구합니다.</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>What:</strong> 우리는 GPT-4 기반의 가장 강력하고 직관적인 자동화 플랫폼을 제공합니다.</span></li><li style="display: flex; align-items: flex-start; margin-bottom: 20px; font-size: 18px; line-height: 1.5;"><span style="color: #3182f6; font-size: 24px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #333d4b;"><strong>How:</strong> 검증된 기술력과 체계적인 출시 계획으로 시장을 선도하겠습니다.</span></li><li style="display: flex; align-items: flex-start; margin-top: 40px; font-size: 22px; line-height: 1.5; font-weight: bold;"><span style="color: #3182f6; font-size: 28px; margin-right: 15px; line-height: 1.2;">→</span><span style="color: #3182f6;">혁신의 여정에 함께하세요.</span></li></ul></div></div>
+    </div>
+  
+
+    <!-- 슬라이드 14 -->
+    <div class="slide" id="slide-14">
+      <style>.slide { width: 1200px; height: 675px; }</style>
+      <div class="slide" style="display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: center; background-color: #f2f4f6; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; padding: 60px;"><h2 style="color: #3182f6; font-size: 44px; font-family: Arial; font-weight: bold; margin: 0 0 20px 0;">함께 해주셔서 감사합니다.</h2><p style="color: #333d4b; font-size: 20px; font-family: Arial; margin: 0;">contact@aiworkflow.com</p></div>
+    </div>
+  
+  </div>
+
+  <script>
+    // 키보드 단축키 지원
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        if (currentSlide > 0) {
+          currentSlide--;
+          slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    });
+
+    console.log('✅ AI 워크플로우 자동화 플랫폼 - 14개 슬라이드 로드 완료');
+  </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+// PPT Maker - Prisma Schema
+// Database: Supabase PostgreSQL
+// ORM: Prisma
+// Auth: NextAuth.js
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// NextAuth.js Models
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Relations
+  accounts         Account[]
+  presentations    Presentation[]
+  subscription     Subscription?
+  creditTransactions CreditTransaction[]
+  generationHistory  GenerationHistory[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String  // 'github', 'google'
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// Presentation Models
+// ============================================
+
+model Presentation {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+
+  // SlideData JSON (21개 타입 지원 - UnifiedPPTJSON)
+  slideData   Json
+
+  // 메타데이터
+  metadata    Json?    // { totalSlides, createdWith, version, researchUsed, generationTime }
+  isPublic    Boolean  @default(false)
+
+  // 소프트 삭제
+  deletedAt   DateTime?
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history     GenerationHistory[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([deletedAt])
+  @@map("presentations")
+}
+
+// ============================================
+// Subscription & Credit Models
+// ============================================
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  tier      String   // 'FREE', 'PRO', 'PREMIUM'
+  status    String   // 'ACTIVE', 'CANCELED', 'EXPIRED'
+
+  startDate DateTime
+  endDate   DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tier])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // 'PURCHASE', 'USAGE', 'REFUND', 'BONUS'
+  amount      Int      // 증가(+) 또는 감소(-) 크레딧
+  balance     Int      // 거래 후 잔액
+  description String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("credit_transactions")
+}
+
+// ============================================
+// Generation History Model
+// ============================================
+
+model GenerationHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  presentationId  String?
+
+  // 입력
+  prompt          String   @db.Text
+
+  // AI 설정
+  model           String   // 'gemini-flash', 'gemini-pro'
+  useResearch     Boolean  @default(false)
+
+  // 비용
+  creditsUsed     Int      @default(0)
+
+  // 결과
+  result          Json?    // 생성된 SlideData JSON + metadata
+
+  // Relations
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  presentation    Presentation? @relation(fields: [presentationId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([presentationId])
+  @@map("generation_history")
+}
+
+// ============================================
+// Zanzibar Permission Models
+// ============================================
+
+model RelationTuple {
+  id          String   @id @default(cuid())
+
+  namespace   String   // 'presentation', 'system'
+  objectId    String   // 리소스 ID
+  relation    String   // 'owner', 'editor', 'viewer', 'admin'
+  subjectType String   // 'user', 'user_set'
+  subjectId   String   // User ID 또는 '*' (와일드카드)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([namespace, objectId, relation, subjectType, subjectId])
+  @@index([namespace, objectId, relation])
+  @@index([subjectType, subjectId])
+  @@index([namespace, relation, subjectId])
+  @@map("relation_tuples")
+}
+
+model RelationDefinition {
+  id           String  @id @default(cuid())
+  namespace    String  // 'presentation', 'system'
+  relation     String  // 'owner', 'editor', 'viewer', 'admin'
+  inheritsFrom String? // 상속 관계 (예: 'editor' → 'viewer')
+  description  String?
+
+  @@unique([namespace, relation])
+  @@map("relation_definitions")
+}
