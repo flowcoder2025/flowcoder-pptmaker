@@ -41,6 +41,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **아키텍처 이해 시** → [docs/SPECIFICATION.md](docs/SPECIFICATION.md)
 **데이터베이스 스키마** → [docs/Database_Architecture.md](docs/Database_Architecture.md)
 **웹 서비스 전환 가이드** → [docs/DESIGN_DOC.md](docs/DESIGN_DOC.md)
+**릴리즈 노트 확인 시** → [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
 ---
 
@@ -190,6 +191,104 @@ if (!canEdit) return 403
 - shadcn/ui + Radix UI 사용
 - Tailwind CSS 4로 스타일링
 - `components/ui/` 디렉토리
+
+### 5. 릴리즈 노트 업데이트 규칙 (필수)
+
+**모든 커밋 시 RELEASE_NOTES.md를 업데이트해야 합니다.**
+
+**업데이트 절차**:
+
+1. **커밋 타입 분류**:
+   - `feat:` → ✨ Features
+   - `fix:` → 🐛 Fixes
+   - `style:`, `ui:` → 🎨 UI/UX
+   - `docs:` → 📝 Documentation
+   - `refactor:`, `chore:`, `build:` → 🔧 Technical
+
+2. **형식**:
+```markdown
+### [카테고리 아이콘] [카테고리명]
+
+#### YYYY-MM-DD
+- **[변경사항 요약]** (커밋해시)
+  - 세부 내용 1
+  - 세부 내용 2
+```
+
+3. **추가 위치**: `[Unreleased]` 섹션의 해당 카테고리
+4. **날짜 헤더**: 당일 첫 커밋인 경우 `#### YYYY-MM-DD` 추가
+5. **커밋 해시**: 7자리 단축 해시만 기록 (URL 제외)
+
+**예시**:
+```markdown
+## [Unreleased]
+
+### ✨ Features
+
+#### 2025-11-08
+- **결제 시스템 통합** (a1b2c3d)
+  - Stripe 결제 연동
+  - 구독 자동 갱신
+```
+
+**참조**: [RELEASE_NOTES.md](RELEASE_NOTES.md)
+
+### 6. 공통 코드 마이그레이션 규칙 (필수)
+
+**공통 코드 영역(`services/`, `types/`, `constants/`) 변경 시 MIGRATION_QUEUE.md를 업데이트해야 합니다.**
+
+**대상 영역**:
+- `services/gemini/`, `services/perplexity/` - AI 파이프라인
+- `services/template/` - 템플릿 시스템
+- `services/slide/` - 슬라이드 변환
+- `types/` - TypeScript 타입 정의
+- `constants/design.ts` - 디자인 시스템
+
+**업데이트 절차**:
+
+1. **개발 및 커밋 완료 후**:
+```markdown
+# ../MIGRATION_QUEUE.md의 [📋 대기 중 (Pending)] 섹션에 추가
+
+### [카테고리] 기능명
+
+- **소스**: ppt-maker-next
+- **타겟**: ppt-maker-in-toss
+- **영역**: services/gemini/
+- **소스 커밋**: (7자리 해시)
+- **날짜**: YYYY-MM-DD
+- **설명**: 변경 내용 요약
+
+**변경 상세**:
+- 구체적인 변경 내용
+
+**마이그레이션 체크리스트**:
+- [ ] 코드 파일 복사
+- [ ] 의존성 확인
+- [ ] 타입 호환성 검증
+- [ ] 테스트 작성 및 실행
+- [ ] 문서 업데이트
+- [ ] 타겟 프로젝트 커밋
+```
+
+2. **마이그레이션 완료 시**:
+   - 체크리스트 모두 완료
+   - 항목을 `[✅ 완료 (Completed)]` 섹션으로 이동
+   - 완료 날짜 및 타겟 커밋 해시 기록
+
+**예시**:
+```bash
+# 1. 공통 코드 개발 및 커밋
+git commit -m "feat: 새로운 SlideType 추가"
+
+# 2. MIGRATION_QUEUE.md에 항목 추가
+vim ../MIGRATION_QUEUE.md
+
+# 3. RELEASE_NOTES.md에도 기록
+vim RELEASE_NOTES.md
+```
+
+**참조**: [../MIGRATION_QUEUE.md](../MIGRATION_QUEUE.md)
 
 ---
 
