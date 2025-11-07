@@ -1,24 +1,29 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import TabBar from './TabBar';
+import NavigationBar from './layout/NavigationBar';
+import { SessionProvider } from './auth/SessionProvider';
+import { Toaster } from 'sonner';
 
 /**
  * LayoutWrapper 컴포넌트
  *
  * @description
- * 조건부 TabBar 렌더링을 위한 Client Component Wrapper입니다.
+ * NavigationBar와 SessionProvider를 포함한 레이아웃 래퍼입니다.
+ * NavigationBar는 자체적으로 viewer, editor, dev-tools 페이지에서 숨김 처리됩니다.
  *
- * **TabBar를 숨기는 페이지**:
- * - /viewer: 슬라이드 전체 화면
- * - /editor: 편집 전체 화면
- * - /dev-tools: 개발자 도구
- *
- * **TabBar를 표시하는 페이지**:
+ * **NavigationBar가 표시되는 페이지**:
  * - /: 홈
  * - /input: 입력
  * - /subscription: 구독
  * - /credits: 크레딧
+ * - /profile: 프로필
+ * - /history: 히스토리
+ * - /login, /signup: 인증 페이지
+ *
+ * **NavigationBar가 숨겨지는 페이지**:
+ * - /viewer: 슬라이드 전체 화면
+ * - /editor: 편집 전체 화면
+ * - /dev-tools: 개발자 도구
  */
 
 interface LayoutWrapperProps {
@@ -26,23 +31,13 @@ interface LayoutWrapperProps {
 }
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
-  const pathname = usePathname();
-
-  // TabBar를 숨길 페이지 목록
-  const hideTabBar =
-    pathname === '/viewer' ||
-    pathname === '/editor' ||
-    pathname === '/dev-tools';
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        paddingBottom: hideTabBar ? '0' : '100px', // TabBar 공간 확보
-      }}
-    >
-      {children}
-      {!hideTabBar && <TabBar />}
-    </div>
+    <SessionProvider>
+      <div className="min-h-screen">
+        <NavigationBar />
+        {children}
+        <Toaster position="top-center" />
+      </div>
+    </SessionProvider>
   );
 }

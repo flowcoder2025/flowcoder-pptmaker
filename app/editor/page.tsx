@@ -160,8 +160,27 @@ export default function EditorPage() {
       {/* 상단 네비게이션 */}
       <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
         <div className="flex justify-between items-center px-4 py-3 gap-2">
-          {/* 좌측: 빈 공간 */}
-          <div className="w-12 shrink-0"></div>
+          {/* 좌측: 뒤로가기 버튼 */}
+          <button
+            onClick={() => router.push('/viewer')}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+            title="뷰어로 돌아가기"
+            aria-label="뒤로가기"
+          >
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
 
           {/* 중앙: 제목 */}
           <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">
@@ -262,7 +281,7 @@ export default function EditorPage() {
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 좌측: 슬라이드 리스트 + 편집 폼 */}
-        <div className="w-full md:w-1/2 border-r border-gray-200 flex flex-col bg-white">
+        <div className="w-full md:w-2/5 lg:w-[35%] border-r border-gray-200 flex flex-col bg-white">
           {/* 슬라이드 리스트 영역 */}
           <SlideList
             slides={currentPresentation.slideData.slides}
@@ -280,7 +299,7 @@ export default function EditorPage() {
         </div>
 
         {/* 우측: 실시간 미리보기 */}
-        <div className="hidden md:block w-1/2 bg-gray-100 overflow-hidden">
+        <div className="hidden md:block flex-1 bg-white overflow-hidden">
           <SlidePreview
             slide={currentSlide}
             templateId={currentPresentation.templateId}

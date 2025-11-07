@@ -11,7 +11,6 @@ import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 export default function ViewerPage() {
   const router = useRouter();
   const { currentPresentation, savePresentation } = usePresentationStore();
-  const { plan, isActive } = useSubscriptionStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -241,12 +240,43 @@ export default function ViewerPage() {
         padding: isMobile ? '8px 12px' : '16px 20px',
         background: '#FFFFFF',
         borderBottom: '1px solid #E5E7EB',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
         alignItems: 'center',
-        justifyContent: 'space-between',
         gap: '8px',
       }}>
-        <div style={{ width: isMobile ? '24px' : '60px' }}></div>
+        {/* 뒤로가기 버튼 */}
+        <button
+          onClick={() => router.push('/input')}
+          style={{
+            padding: '8px',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          title="입력 페이지로 돌아가기"
+          aria-label="뒤로가기"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#374151"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
         {!isMobile ? (
           <div style={{
@@ -270,7 +300,7 @@ export default function ViewerPage() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: isMobile ? '4px' : '8px', position: 'relative', justifyContent: 'flex-end' }}>
           <Button
             onClick={handleSave}
             size="default"

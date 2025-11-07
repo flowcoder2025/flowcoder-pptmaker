@@ -23,6 +23,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  password      String?   // Nullable - OAuth 사용자는 null, 이메일 로그인은 해시된 패스워드
 
   // Relations
   accounts         Account[]
