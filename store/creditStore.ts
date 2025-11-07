@@ -24,12 +24,17 @@ interface CreditState {
   /**
    * 크래딧 사용
    */
-  useCredits: (amount: number) => boolean;
+  useCredits: (amount: number) => Promise<boolean>;
 
   /**
    * 크래딧 추가
    */
-  addCredits: (amount: number) => void;
+  addCredits: (amount: number) => Promise<void>;
+
+  /**
+   * API에서 크레딧 잔액 가져오기
+   */
+  fetchBalance: () => Promise<void>;
 
   /**
    * 최초 무료 사용 가능 여부 확인
@@ -90,7 +95,7 @@ export const useCreditStore = create<CreditState>()(
         return totalCredits >= amount;
       },
 
-      useCredits: (amount) => {
+      useCredits: async (amount) => {
         const { totalCredits } = get();
 
         if (totalCredits < amount) {
@@ -98,16 +103,82 @@ export const useCreditStore = create<CreditState>()(
           return false;
         }
 
-        set({ totalCredits: totalCredits - amount });
-        console.log(`[Credit] 크래딧 사용: -${amount} (남은 크래딧: ${totalCredits - amount})`);
-        return true;
+        try {
+          // API 호출: 크레딧 소비
+          const response = await fetch('/api/credits/consume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`크레딧 사용 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // 서버에서 반환된 최신 잔액으로 업데이트
+          set({ totalCredits: data.balance });
+          console.log(`✅ 크래딧 사용: -${amount} (남은 크래딧: ${data.balance})`);
+          return true;
+        } catch (error) {
+          console.error('❌ 크래딧 사용 실패:', error);
+          // 에러 시 로컬 상태 업데이트 (fallback)
+          set({ totalCredits: totalCredits - amount });
+          console.log(`[Credit] 로컬 크래딧 사용 (fallback): -${amount} (남은 크래딧: ${totalCredits - amount})`);
+          return true;
+        }
       },
 
-      addCredits: (amount) => {
-        set((state) => ({
-          totalCredits: state.totalCredits + amount,
-        }));
-        console.log(`[Credit] 크래딧 충전: +${amount} (현재 ${get().totalCredits})`);
+      addCredits: async (amount) => {
+        try {
+          // API 호출: 크레딧 구매
+          const response = await fetch('/api/credits', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`크레딧 구매 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // 서버에서 반환된 최신 잔액으로 업데이트
+          set({ totalCredits: data.balance });
+          console.log(`✅ 크래딧 충전: +${amount} (현재 ${data.balance})`);
+        } catch (error) {
+          console.error('❌ 크래딧 충전 실패:', error);
+          // 에러 시 로컬 상태 업데이트 (fallback)
+          set((state) => ({
+            totalCredits: state.totalCredits + amount,
+          }));
+          console.log(`[Credit] 로컬 크래딧 충전 (fallback): +${amount} (현재 ${get().totalCredits})`);
+        }
+      },
+
+      fetchBalance: async () => {
+        try {
+          const response = await fetch('/api/credits');
+
+          if (!response.ok) {
+            // 401/403이면 로그인 필요
+            if (response.status === 401 || response.status === 403) {
+              console.log('⚠️ 인증 필요: 로그인 후 크레딧 조회 가능');
+              return;
+            }
+            throw new Error(`크레딧 조회 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          set({ totalCredits: data.balance });
+          console.log(`✅ 크레딧 잔액 로드: ${data.balance} 크래딧`);
+        } catch (error) {
+          console.error('❌ 크레딧 잔액 조회 실패:', error);
+          // 에러 시 로컬 상태 유지 (fallback)
+        }
       },
 
       isFirstTimeFree: (type) => {

@@ -45,6 +45,8 @@ interface PresentationState {
   setUseProHtmlModel: (usePro: boolean) => void;
   generatePresentation: (text: string) => Promise<void>;
   savePresentation: () => Promise<void>;
+  fetchPresentations: () => Promise<Presentation[]>;
+  fetchPresentation: (id: string) => Promise<void>;
   updateSlide: (index: number, updatedSlide: Slide) => void;
   reorderSlides: (startIndex: number, endIndex: number) => void;
   addSlide: (slideType: SlideType, afterIndex: number) => void;
@@ -261,14 +263,93 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   savePresentation: async () => {
     const { currentPresentation } = get();
     if (!currentPresentation) {
-      throw new Error('저장할 프리젠테이션이 없습니다.');
+      throw new Error('저장할 프리젠테이션이 없어요');
     }
 
     try {
-      await savePresentationToStorage(currentPresentation);
-      console.log('💾 프리젠테이션 저장 완료!');
+      // API 호출: 프리젠테이션 저장 (생성 또는 업데이트)
+      const method = currentPresentation.id ? 'PUT' : 'POST';
+      const url = currentPresentation.id
+        ? `/api/presentations/${currentPresentation.id}`
+        : '/api/presentations';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: currentPresentation.title,
+          data: currentPresentation, // 전체 프리젠테이션 데이터
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`프리젠테이션 저장 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 저장 후 ID 업데이트 (새로 생성된 경우)
+      if (!currentPresentation.id && data.presentation?.id) {
+        set({
+          currentPresentation: {
+            ...currentPresentation,
+            id: data.presentation.id,
+          },
+        });
+      }
+
+      console.log('✅ 프리젠테이션 저장 완료!');
     } catch (error) {
       console.error('❌ 저장 실패:', error);
+      // 에러 시 로컬 저장 시도 (fallback)
+      try {
+        await savePresentationToStorage(currentPresentation);
+        console.log('💾 로컬 저장 완료 (fallback)');
+      } catch (localError) {
+        console.error('❌ 로컬 저장도 실패:', localError);
+      }
+      throw error;
+    }
+  },
+
+  fetchPresentations: async () => {
+    try {
+      const response = await fetch('/api/presentations');
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          console.log('⚠️ 인증 필요: 로그인 후 프리젠테이션 조회 가능');
+          return [];
+        }
+        throw new Error(`프리젠테이션 목록 조회 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`✅ 프리젠테이션 ${data.presentations.length}개 로드`);
+      return data.presentations;
+    } catch (error) {
+      console.error('❌ 프리젠테이션 목록 조회 실패:', error);
+      return [];
+    }
+  },
+
+  fetchPresentation: async (id: string) => {
+    try {
+      const response = await fetch(`/api/presentations/${id}`);
+
+      if (!response.ok) {
+        throw new Error(`프리젠테이션 조회 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const presentation = data.presentation?.data as Presentation;
+
+      if (presentation) {
+        set({ currentPresentation: presentation });
+        console.log(`✅ 프리젠테이션 로드: ${presentation.title}`);
+      }
+    } catch (error) {
+      console.error('❌ 프리젠테이션 조회 실패:', error);
       throw error;
     }
   },

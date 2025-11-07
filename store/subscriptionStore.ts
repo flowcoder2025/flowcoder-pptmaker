@@ -44,7 +44,12 @@ interface SubscriptionState {
     plan: SubscriptionPlan,
     expiresAt: number | null,
     subscriptionId?: string
-  ) => void;
+  ) => Promise<void>;
+
+  /**
+   * API에서 구독 정보 가져오기
+   */
+  fetchSubscription: () => Promise<void>;
 
   /**
    * 구독 상태 업데이트
@@ -149,25 +154,57 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       lastCreditProvidedDate: Date.now(),
       subscriptionStartDate: null,
 
-      setPlan: (plan, expiresAt, subscriptionId) => {
+      setPlan: async (plan, expiresAt, subscriptionId) => {
         const now = Date.now();
         const currentState = get();
 
-        set({
-          plan,
-          expiresAt,
-          status: 'active',
-          subscriptionId: subscriptionId || null,
-          // 구독 시작일 설정 (처음 구독 시에만)
-          subscriptionStartDate: currentState.subscriptionStartDate || now,
-          // 구독 변경 시 월간 크래딧 제공 상태 초기화
-          monthlyCreditsProvided: false,
-          lastCreditProvidedDate: now,
-        });
+        try {
+          // API 호출: 구독 생성
+          const response = await fetch('/api/subscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tier: plan.toUpperCase(), // 'free' → 'FREE'
+              ...(expiresAt && { endDate: new Date(expiresAt).toISOString() }),
+            }),
+          });
 
-        // Pro 이상 플랜이면 즉시 크래딧 제공
-        if ((plan === 'pro' || plan === 'premium') && !currentState.monthlyCreditsProvided) {
-          get().provideMonthlyCredits();
+          if (!response.ok) {
+            throw new Error(`구독 설정 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          set({
+            plan,
+            expiresAt,
+            status: 'active',
+            subscriptionId: data.subscription?.id || subscriptionId || null,
+            // 구독 시작일 설정 (처음 구독 시에만)
+            subscriptionStartDate: currentState.subscriptionStartDate || now,
+            // 구독 변경 시 월간 크래딧 제공 상태 초기화
+            monthlyCreditsProvided: false,
+            lastCreditProvidedDate: now,
+          });
+
+          console.log(`✅ 구독 플랜 설정 완료: ${plan}`);
+
+          // Pro 이상 플랜이면 즉시 크래딧 제공
+          if ((plan === 'pro' || plan === 'premium') && !currentState.monthlyCreditsProvided) {
+            get().provideMonthlyCredits();
+          }
+        } catch (error) {
+          console.error('❌ 구독 설정 실패:', error);
+          // 에러 시 로컬 상태만 업데이트 (fallback)
+          set({
+            plan,
+            expiresAt,
+            status: 'active',
+            subscriptionId: subscriptionId || null,
+            subscriptionStartDate: currentState.subscriptionStartDate || now,
+            monthlyCreditsProvided: false,
+            lastCreditProvidedDate: now,
+          });
         }
       },
 
@@ -341,6 +378,52 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           });
           console.log(`[Subscription] 월간 크래딧 제공 플래그 초기화 (매월 ${dayOfMonth}일 기준)`);
           get().provideMonthlyCredits();
+        }
+      },
+
+      fetchSubscription: async () => {
+        try {
+          const response = await fetch('/api/subscriptions');
+
+          if (!response.ok) {
+            // 401/403이면 로그인 필요, 404면 구독 없음 (free)
+            if (response.status === 401 || response.status === 403) {
+              console.log('⚠️ 인증 필요: 로그인 후 구독 정보 조회 가능');
+              return;
+            }
+            if (response.status === 404) {
+              console.log('📭 구독 정보 없음: Free 플랜 유지');
+              return;
+            }
+            throw new Error(`구독 조회 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const subscription = data.subscription;
+
+          if (subscription) {
+            const tierMap: Record<string, SubscriptionPlan> = {
+              FREE: 'free',
+              PRO: 'pro',
+              PREMIUM: 'premium',
+            };
+
+            const plan = tierMap[subscription.tier] || 'free';
+            const expiresAt = subscription.endDate ? new Date(subscription.endDate).getTime() : null;
+
+            set({
+              plan,
+              expiresAt,
+              status: subscription.status === 'ACTIVE' ? 'active' : 'expired',
+              subscriptionId: subscription.id,
+              subscriptionStartDate: new Date(subscription.startDate).getTime(),
+            });
+
+            console.log(`✅ 구독 정보 로드 완료: ${plan} (만료: ${subscription.endDate || '없음'})`);
+          }
+        } catch (error) {
+          console.error('❌ 구독 정보 조회 실패:', error);
+          // 에러 시 로컬 상태 유지 (fallback)
         }
       },
 
