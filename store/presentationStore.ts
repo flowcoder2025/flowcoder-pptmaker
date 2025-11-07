@@ -240,6 +240,22 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       console.log('🎉 프리젠테이션 생성 완료! (총 비용: 2원 - Parser 8원 절감)');
 
+      // 생성 즉시 자동 저장
+      try {
+        console.log('💾 데이터베이스에 저장 중...');
+        await get().savePresentation();
+        console.log('✅ 데이터베이스 저장 완료!');
+      } catch (saveError) {
+        console.error('⚠️ 자동 저장 실패 (로컬 저장으로 폴백):', saveError);
+        // 저장 실패 시 로컬 저장 시도
+        try {
+          await savePresentationToStorage(presentation);
+          console.log('💾 로컬 저장 완료 (fallback)');
+        } catch (localError) {
+          console.error('❌ 로컬 저장도 실패:', localError);
+        }
+      }
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
       console.error('❌ 프리젠테이션 생성 실패:', error);
@@ -267,9 +283,12 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     }
 
     try {
+      // 프리젠테이션이 데이터베이스에 이미 있는지 확인
+      const isUpdate = currentPresentation.id && !isNaN(Number(currentPresentation.id)) && Number(currentPresentation.id) < Date.now() - 1000;
+
       // API 호출: 프리젠테이션 저장 (생성 또는 업데이트)
-      const method = currentPresentation.id ? 'PUT' : 'POST';
-      const url = currentPresentation.id
+      const method = isUpdate ? 'PATCH' : 'POST';
+      const url = isUpdate
         ? `/api/presentations/${currentPresentation.id}`
         : '/api/presentations';
 
@@ -278,18 +297,27 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: currentPresentation.title,
-          data: currentPresentation, // 전체 프리젠테이션 데이터
+          description: currentPresentation.description || '',
+          slideData: currentPresentation.slideData,
+          metadata: {
+            templateId: currentPresentation.templateId,
+            slideCount: currentPresentation.slides.length,
+            ...currentPresentation.metadata,
+          },
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`프리젠테이션 저장 실패: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `프리젠테이션 저장 실패: ${response.status} - ${errorData.error || response.statusText}`
+        );
       }
 
       const data = await response.json();
 
       // 저장 후 ID 업데이트 (새로 생성된 경우)
-      if (!currentPresentation.id && data.presentation?.id) {
+      if (!isUpdate && data.presentation?.id) {
         set({
           currentPresentation: {
             ...currentPresentation,
