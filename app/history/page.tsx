@@ -63,7 +63,7 @@ export default function HistoryPage() {
 
   const fetchPresentations = async () => {
     try {
-      const res = await fetch('/api/history');
+      const res = await fetch('/api/presentations');
 
       if (!res.ok) {
         throw new Error('Failed to fetch presentations');
@@ -73,6 +73,7 @@ export default function HistoryPage() {
       setPresentations(data.presentations || []);
       setFilteredPresentations(data.presentations || []);
     } catch (error) {
+      console.error('프리젠테이션 조회 실패:', error);
       toast.error('프리젠테이션을 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
@@ -85,7 +86,7 @@ export default function HistoryPage() {
     }
 
     try {
-      const res = await fetch(`/api/history/${id}`, {
+      const res = await fetch(`/api/presentations/${id}`, {
         method: 'DELETE',
       });
 
@@ -255,7 +256,7 @@ function PresentationCard({
   onDelete,
   onDownload,
 }: PresentationCardProps) {
-  const slideCount = presentation.metadata?.totalSlides || 0;
+  const slideCount = presentation.metadata?.slideCount || 0;
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg">
