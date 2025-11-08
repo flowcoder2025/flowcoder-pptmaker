@@ -43,17 +43,20 @@ export default function ProfilePage() {
 
   const fetchUserStats = async () => {
     try {
-      // API 호출 (향후 구현)
-      // const res = await fetch('/api/user/stats')
-      // const data = await res.json()
+      const res = await fetch('/api/user/stats');
 
-      // 임시 데이터
+      if (!res.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+
+      const data = await res.json();
       setStats({
-        presentationsCount: 0,
-        creditsBalance: 0,
-        subscriptionTier: 'FREE',
+        presentationsCount: data.presentationsCount || 0,
+        creditsBalance: data.creditsBalance || 0,
+        subscriptionTier: data.subscriptionTier || 'FREE',
       });
     } catch (error) {
+      console.error('사용자 통계 조회 실패:', error);
       toast.error('정보를 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
