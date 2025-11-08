@@ -130,7 +130,7 @@ export async function PATCH(
     await requirePresentationEditor(userId, id)
 
     const body = await request.json()
-    const { title, description, slideData, metadata, isPublic } = body
+    const { title, description, slideData, slides, metadata, isPublic } = body
 
     // 프레젠테이션 수정
     const presentation = await prisma.presentation.update({
@@ -139,6 +139,7 @@ export async function PATCH(
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(slideData !== undefined && { slideData }),
+        ...(slides !== undefined && { slides }),  // HTML 캐시 업데이트
         ...(metadata !== undefined && { metadata }),
         ...(isPublic !== undefined && { isPublic }),
       },

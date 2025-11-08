@@ -299,6 +299,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           title: currentPresentation.title,
           description: currentPresentation.description || '',
           slideData: currentPresentation.slideData,
+          slides: currentPresentation.slides,  // HTML 캐시 저장
           metadata: {
             templateId: currentPresentation.templateId,
             slideCount: currentPresentation.slides.length,
@@ -370,7 +371,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       }
 
       const data = await response.json();
-      const presentation = data.presentation?.data as Presentation;
+      const presentation = data.presentation as Presentation;
 
       if (presentation) {
         set({ currentPresentation: presentation });

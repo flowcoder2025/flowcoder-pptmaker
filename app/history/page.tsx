@@ -37,6 +37,9 @@ export default function HistoryPage() {
   const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
+  const [selectedPresentationId, setSelectedPresentationId] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -109,8 +112,50 @@ export default function HistoryPage() {
     router.push(`/editor?id=${id}`);
   };
 
-  const handleDownload = (id: string) => {
-    toast.info('다운로드 기능 준비 중이에요');
+  const handleDownloadClick = (id: string) => {
+    setSelectedPresentationId(id);
+    setShowDownloadDialog(true);
+  };
+
+  const handleDownload = async (format: 'pdf' | 'pptx') => {
+    if (!selectedPresentationId || isDownloading) return;
+
+    setIsDownloading(true);
+    setShowDownloadDialog(false);
+
+    try {
+      // 1. 프리젠테이션 데이터 로드
+      const res = await fetch(`/api/presentations/${selectedPresentationId}`);
+      if (!res.ok) {
+        throw new Error('프리젠테이션을 불러오지 못했어요');
+      }
+
+      const data = await res.json();
+      const presentation = data.presentation;
+
+      if (!presentation || !presentation.slides || presentation.slides.length === 0) {
+        throw new Error('다운로드할 슬라이드가 없어요');
+      }
+
+      // 2. 다운로드 실행 (동적 import)
+      toast.info('다운로드를 준비하고 있어요');
+
+      if (format === 'pdf') {
+        const { downloadPDF } = await import('@/utils/download');
+        await downloadPDF(presentation);
+      } else {
+        const { downloadPPTX } = await import('@/utils/download');
+        await downloadPPTX(presentation);
+      }
+
+      toast.success(`${format === 'pdf' ? 'PDF' : 'PowerPoint'} 파일을 다운로드했어요!`);
+    } catch (error) {
+      console.error('다운로드 실패:', error);
+      toast.error('다운로드하지 못했어요');
+    } finally {
+      setIsDownloading(false);
+      setSelectedPresentationId(null);
+    }
   };
 
   if (status === 'loading' || isLoading) {
@@ -228,12 +273,116 @@ export default function HistoryPage() {
                 onView={handleView}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onDownload={handleDownload}
+                onDownload={handleDownloadClick}
               />
             ))}
           </div>
         )}
       </MaxWidthContainer>
+
+      {/* 다운로드 형식 선택 다이얼로그 */}
+      {showDownloadDialog && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowDownloadDialog(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                marginBottom: '16px',
+                color: TOSS_COLORS.text,
+              }}
+            >
+              다운로드 형식 선택
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => handleDownload('pdf')}
+                disabled={isDownloading}
+                style={{
+                  padding: '16px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: TOSS_COLORS.text,
+                  backgroundColor: '#FFFFFF',
+                  border: `2px solid ${TOSS_COLORS.primary}`,
+                  borderRadius: '8px',
+                  cursor: isDownloading ? 'not-allowed' : 'pointer',
+                  opacity: isDownloading ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDownloading) e.currentTarget.style.backgroundColor = `${TOSS_COLORS.primary}10`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FFFFFF';
+                }}
+              >
+                📕 PDF 파일
+              </button>
+              <button
+                onClick={() => handleDownload('pptx')}
+                disabled={isDownloading}
+                style={{
+                  padding: '16px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: TOSS_COLORS.text,
+                  backgroundColor: '#FFFFFF',
+                  border: `2px solid ${TOSS_COLORS.primary}`,
+                  borderRadius: '8px',
+                  cursor: isDownloading ? 'not-allowed' : 'pointer',
+                  opacity: isDownloading ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDownloading) e.currentTarget.style.backgroundColor = `${TOSS_COLORS.primary}10`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FFFFFF';
+                }}
+              >
+                📊 PowerPoint 파일
+              </button>
+            </div>
+            <button
+              onClick={() => setShowDownloadDialog(false)}
+              style={{
+                marginTop: '16px',
+                width: '100%',
+                padding: '12px',
+                fontSize: '14px',
+                color: TOSS_COLORS.textSecondary,
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

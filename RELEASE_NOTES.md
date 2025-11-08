@@ -21,6 +21,25 @@
 
 ## [Unreleased]
 
+### ✨ Features
+
+#### 2025-11-08
+- **프로필 페이지 통계 연결 및 히스토리 다운로드 개선**
+  - 프로필 페이지 통계 실제 데이터 연결 (총 슬라이드 수, 사용한 크레딧)
+  - `/api/user/stats`: 모든 프리젠테이션 메타데이터 집계 로직 추가
+  - 히스토리 페이지 다운로드 포맷 선택 다이얼로그 구현 (PDF/PPTX)
+  - 뷰어 페이지와 동일한 UX 적용
+
+### 🔧 Technical
+
+#### 2025-11-08
+- **Supabase Transaction pooler 설정 및 Prisma 최적화**
+  - Transaction pooler (port 6543) + pgbouncer 모드 설정
+  - Prisma schema에 directUrl 추가 (마이그레이션용)
+  - DATABASE_URL: Transaction pooler (pgbouncer=true)
+  - DIRECT_URL: Session pooler (마이그레이션용)
+  - prisma.config.ts 제거 (환경 변수 로딩 간섭 해결)
+
 ### 📝 Documentation
 
 #### 2025-11-08

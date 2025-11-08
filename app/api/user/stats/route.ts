@@ -31,10 +31,10 @@ export async function GET() {
     const userId = session.user.id;
 
     // 2. 병렬로 데이터 조회
-    const [presentationsCount, latestCreditTransaction, subscription] = await Promise.all([
+    const [presentationsCount, latestCreditTransaction, subscription, recentPresentations, allPresentations, creditTransactions] = await Promise.all([
       // 프리젠테이션 개수
       prisma.presentation.count({
-        where: { userId },
+        where: { userId, deletedAt: null },
       }),
 
       // 크레딧 잔액 (최신 거래의 balance)
@@ -54,9 +54,62 @@ export async function GET() {
           startDate: 'desc',
         },
       }),
+
+      // 최근 프리젠테이션 3개
+      prisma.presentation.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          metadata: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        take: 3,
+      }),
+
+      // 모든 프리젠테이션 (총 슬라이드 수 계산용)
+      prisma.presentation.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+        },
+        select: {
+          metadata: true,
+        },
+      }),
+
+      // 사용한 크레딧 계산용
+      prisma.creditTransaction.findMany({
+        where: {
+          userId,
+          type: 'CONSUMED',
+        },
+        select: {
+          amount: true,
+        },
+      }),
     ]);
 
-    // 3. 구독 플랜 결정
+    // 3. 총 슬라이드 수 계산
+    const totalSlides = allPresentations.reduce((sum, p) => {
+      const slideCount = (p.metadata as any)?.slideCount || 0;
+      return sum + slideCount;
+    }, 0);
+
+    // 4. 사용한 크레딧 계산
+    const creditsUsed = creditTransactions.reduce((sum, tx) => {
+      return sum + Math.abs(tx.amount); // CONSUMED는 음수이므로 절댓값
+    }, 0);
+
+    // 5. 구독 플랜 결정
     let subscriptionTier: 'FREE' | 'PRO' | 'PREMIUM' = 'FREE';
     if (subscription) {
       if (subscription.tier === 'PREMIUM') {
@@ -66,11 +119,14 @@ export async function GET() {
       }
     }
 
-    // 4. 응답 반환
+    // 6. 응답 반환
     return NextResponse.json({
       presentationsCount,
+      totalSlides,
       creditsBalance: latestCreditTransaction?.balance || 0,
+      creditsUsed,
       subscriptionTier,
+      recentPresentations,
     });
   } catch (error) {
     console.error('사용자 통계 조회 실패:', error);

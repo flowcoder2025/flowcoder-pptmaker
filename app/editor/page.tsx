@@ -5,9 +5,10 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { usePresentationStore } from '@/store/presentationStore';
+import { TOSS_COLORS } from '@/constants/design';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
 import SlidePreview from '@/components/editor/SlidePreview';
@@ -19,11 +20,32 @@ import type { SlideType } from '@/types/slide';
 
 export default function EditorPage() {
   const router = useRouter();
-  const { currentPresentation, updateSlide, reorderSlides, addSlide, deleteSlide, duplicateSlide, changeTemplate, undo, redo, canUndo, canRedo, savePresentation } = usePresentationStore();
+  const searchParams = useSearchParams();
+  const { currentPresentation, updateSlide, reorderSlides, addSlide, deleteSlide, duplicateSlide, changeTemplate, undo, redo, canUndo, canRedo, savePresentation, fetchPresentation } = usePresentationStore();
   const [selectedSlideIndex, setSelectedSlideIndex] = useState(0);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // URL 파라미터로부터 프리젠테이션 로드
+  useEffect(() => {
+    const id = searchParams.get('id');
+
+    if (id) {
+      // 히스토리 페이지에서 온 경우 - DB에서 로드
+      setIsLoading(true);
+      fetchPresentation(id)
+        .then(() => {
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error('프리젠테이션 로드 실패:', error);
+          setIsLoading(false);
+          router.push('/history');
+        });
+    }
+  }, [searchParams, fetchPresentation, router]);
 
   // 키보드 단축키: Ctrl+Z (Undo), Ctrl+Shift+Z (Redo)
   React.useEffect(() => {
@@ -49,6 +71,15 @@ export default function EditorPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPresentation?.slideData, undo, redo, canUndo, canRedo]);
+
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
+        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      </div>
+    );
+  }
 
   // slideData가 없으면 편집 불가 (구 버전 프리젠테이션)
   if (!currentPresentation?.slideData) {

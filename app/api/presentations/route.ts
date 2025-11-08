@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, slideData, metadata } = body
+    const { title, description, slideData, slides, metadata } = body
 
     // 입력 검증
     if (!title || !slideData) {
@@ -103,14 +103,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('[POST /api/presentations] Creating presentation:', {
+      userId,
+      title,
+      hasDescription: !!description,
+      hasSlideData: !!slideData,
+      hasSlides: !!slides,
+      slidesLength: slides?.length,
+      hasMetadata: !!metadata,
+    })
+
     // 프레젠테이션 생성
     const presentation = await prisma.presentation.create({
       data: {
         userId,
         title,
-        description,
+        description: description || null,
         slideData,
-        metadata,
+        slides: slides || null,  // HTML 캐시 (optional)
+        metadata: metadata || null,
         isPublic: false,
       },
       select: {
@@ -123,8 +134,12 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('[POST /api/presentations] Presentation created:', presentation.id)
+
     // Zanzibar 권한 부여: 생성자를 owner로 설정
     await grantPresentationOwnership(presentation.id, userId)
+
+    console.log('[POST /api/presentations] Ownership granted')
 
     return NextResponse.json(
       {
@@ -134,9 +149,22 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('프레젠테이션 생성 실패:', error)
+    console.error('❌ [POST /api/presentations] 프레젠테이션 생성 실패:', error)
+
+    // 상세 에러 메시지
+    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
+    const errorStack = error instanceof Error ? error.stack : ''
+
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+    })
+
     return NextResponse.json(
-      { error: '프레젠테이션을 생성하지 못했어요.' },
+      {
+        error: '프레젠테이션을 생성하지 못했어요.',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      },
       { status: 500 }
     )
   }

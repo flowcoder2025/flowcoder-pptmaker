@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -10,12 +10,14 @@ import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 
 export default function ViewerPage() {
   const router = useRouter();
-  const { currentPresentation, savePresentation } = usePresentationStore();
+  const searchParams = useSearchParams();
+  const { currentPresentation, savePresentation, fetchPresentation } = usePresentationStore();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 워터마크 표시 여부
   const { hasWatermark } = useSubscriptionStore();
@@ -31,11 +33,28 @@ export default function ViewerPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // URL 파라미터로부터 프리젠테이션 로드
   useEffect(() => {
-    if (!currentPresentation) {
+    const id = searchParams.get('id');
+
+    if (id) {
+      // 히스토리 페이지에서 온 경우 - DB에서 로드
+      setIsLoading(true);
+      fetchPresentation(id)
+        .then(() => {
+          setIsLoading(false);
+          setIsSaved(true); // DB에서 로드한 것이므로 이미 저장됨
+        })
+        .catch((error) => {
+          console.error('프리젠테이션 로드 실패:', error);
+          setIsLoading(false);
+          router.push('/history');
+        });
+    } else if (!currentPresentation) {
+      // id도 없고 currentPresentation도 없으면 input으로 이동
       router.push('/input');
     }
-  }, [currentPresentation, router]);
+  }, [searchParams, fetchPresentation, router, currentPresentation]);
 
   // 다운로드 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -67,6 +86,14 @@ export default function ViewerPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, currentPresentation, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
+        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      </div>
+    );
+  }
 
   if (!currentPresentation) {
     return null;

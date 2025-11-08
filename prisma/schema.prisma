@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -90,6 +91,9 @@ model Presentation {
 
   // SlideData JSON (21개 타입 지원 - UnifiedPPTJSON)
   slideData   Json
+
+  // Rendered Slides HTML Cache (HTMLSlide[])
+  slides      Json?    // 렌더링용 HTML 캐시 (성능 최적화)
 
   // 메타데이터
   metadata    Json?    // { totalSlides, createdWith, version, researchUsed, generationTime }

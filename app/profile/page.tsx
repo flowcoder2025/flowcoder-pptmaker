@@ -25,8 +25,11 @@ export default function ProfilePage() {
 
   const [stats, setStats] = useState({
     presentationsCount: 0,
+    totalSlides: 0,
     creditsBalance: 0,
+    creditsUsed: 0,
     subscriptionTier: 'FREE',
+    recentPresentations: [] as any[],
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -52,8 +55,11 @@ export default function ProfilePage() {
       const data = await res.json();
       setStats({
         presentationsCount: data.presentationsCount || 0,
+        totalSlides: data.totalSlides || 0,
         creditsBalance: data.creditsBalance || 0,
+        creditsUsed: data.creditsUsed || 0,
         subscriptionTier: data.subscriptionTier || 'FREE',
+        recentPresentations: data.recentPresentations || [],
       });
     } catch (error) {
       console.error('사용자 통계 조회 실패:', error);
@@ -180,7 +186,7 @@ export default function ProfilePage() {
                 </Button>
               </div>
 
-              {stats.presentationsCount === 0 ? (
+              {stats.recentPresentations.length === 0 ? (
                 <div
                   className="text-center py-8"
                   style={{ color: TOSS_COLORS.textSecondary }}
@@ -197,9 +203,45 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               ) : (
-                <p style={{ color: TOSS_COLORS.textSecondary }}>
-                  프리젠테이션 목록이 여기에 표시돼요
-                </p>
+                <div className="space-y-3">
+                  {stats.recentPresentations.map((presentation: any) => (
+                    <div
+                      key={presentation.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => router.push(`/viewer?id=${presentation.id}`)}
+                      style={{ borderColor: TOSS_COLORS.muted }}
+                    >
+                      <div className="flex-1">
+                        <h4
+                          className="font-semibold mb-1"
+                          style={{ color: TOSS_COLORS.text }}
+                        >
+                          {presentation.title}
+                        </h4>
+                        {presentation.description && (
+                          <p
+                            className="text-sm line-clamp-1"
+                            style={{ color: TOSS_COLORS.textSecondary }}
+                          >
+                            {presentation.description}
+                          </p>
+                        )}
+                        <p
+                          className="text-xs mt-1"
+                          style={{ color: TOSS_COLORS.textSecondary }}
+                        >
+                          {new Date(presentation.updatedAt).toLocaleDateString('ko-KR')}
+                        </p>
+                      </div>
+                      <div
+                        className="text-sm font-medium"
+                        style={{ color: TOSS_COLORS.primary }}
+                      >
+                        {presentation.metadata?.slideCount || 0}슬라이드
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </Card>
           </div>
@@ -304,7 +346,7 @@ export default function ProfilePage() {
                     className="font-bold"
                     style={{ color: TOSS_COLORS.text }}
                   >
-                    0개
+                    {stats.totalSlides}개
                   </span>
                 </div>
 
@@ -316,7 +358,7 @@ export default function ProfilePage() {
                     className="font-bold"
                     style={{ color: TOSS_COLORS.text }}
                   >
-                    0
+                    {stats.creditsUsed.toLocaleString()}
                   </span>
                 </div>
               </div>
