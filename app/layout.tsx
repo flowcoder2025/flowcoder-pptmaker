@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { logEnvironmentDiagnostics } from "@/utils/env-validator";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -35,6 +36,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LayoutWrapper>{children}</LayoutWrapper>
+
+        {/* 카카오 애드핏 스크립트 - 전역에서 한 번만 로드 */}
+        <Script
+          id="kakao-adfit-sdk"
+          async
+          type="text/javascript"
+          src="https://t1.daumcdn.net/kas/static/ba.min.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
