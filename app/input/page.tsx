@@ -164,6 +164,31 @@ export default function InputPage() {
                     {plan === 'pro' && 'Pro 플랜은 한번 생성에 최대 20장까지 만들 수 있어요'}
                     {plan === 'premium' && 'Premium 플랜은 한번 생성에 최대 50장까지 만들 수 있어요'}
                   </p>
+
+                  {/* 크래딧 사용 시 혜택 안내 */}
+                  {plan === 'free' && (
+                    <div className="mt-3 p-3 bg-white rounded-lg border border-yellow-300">
+                      <div className="flex items-start gap-2">
+                        <span className="text-base">💡</span>
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-yellow-800 mb-1">
+                            크래딧으로 더 많이 생성해요
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            고품질 생성(50 크래딧)을 선택하면 슬라이드 제한 없이 원하는 만큼 생성할 수 있어요
+                          </p>
+                          <Button
+                            onClick={() => router.push('/credits')}
+                            size="sm"
+                            variant="outline"
+                            className="mt-2 h-7 text-xs"
+                          >
+                            크레딧 구매 →
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {plan === 'free' && (
                   <Button
