@@ -94,7 +94,7 @@ export default function NavigationBar() {
               backgroundClip: 'text',
             }}
           >
-            PPT Maker by FlowCoder
+            PPT Maker<span className="hidden sm:inline"> by FlowCoder</span>
           </div>
         </Link>
 

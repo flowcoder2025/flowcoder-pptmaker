@@ -142,7 +142,7 @@ export default function HomePage() {
             사용 방법
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { step: '1', icon: '📝', title: '텍스트 입력', desc: '프리젠테이션 내용을 입력해요' },
               { step: '2', icon: '🔍', title: '자료 조사', desc: 'AI가 자동으로 조사해요 (선택)' },
