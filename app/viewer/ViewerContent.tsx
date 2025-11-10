@@ -558,7 +558,6 @@ export default function ViewerContent() {
           borderTop: '1px solid #E5E7EB',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
           gap: '16px',
         }}>
           <Button
@@ -566,14 +565,22 @@ export default function ViewerContent() {
             disabled={currentIndex === 0}
             size="lg"
             variant="outline"
+            style={{
+              minWidth: '100px',
+              flexShrink: 0,
+            }}
           >
             ← 이전
           </Button>
 
           <div style={{
+            flex: 1,
             fontSize: '14px',
             color: TOSS_COLORS.textSecondary,
             textAlign: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
           }}>
             {currentPresentation.title}
           </div>
@@ -583,6 +590,10 @@ export default function ViewerContent() {
             disabled={currentIndex === slides.length - 1}
             size="lg"
             variant="outline"
+            style={{
+              minWidth: '100px',
+              flexShrink: 0,
+            }}
           >
             다음 →
           </Button>
