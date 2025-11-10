@@ -24,7 +24,12 @@
 ### 🐛 Fixes
 
 #### 2025-11-10
-- **Vercel 배포 Prisma WASM 에러 수정** (d86975d)
+- **Vercel용 Prisma 바이너리 타겟 추가** (add1dbb)
+  - binaryTargets에 rhel-openssl-3.0.x 추가
+  - Vercel serverless 환경에서 Query Engine 바이너리 찾기 실패 해결
+  - 이메일, GitHub, Google 로그인 정상 작동 보장
+
+- **Vercel 배포 Prisma WASM 에러 수정** (31f6fb1)
   - engineType=client 제거 (WASM 파일 의존성 제거)
   - PrismaPg adapter 제거 (기본 PostgreSQL 드라이버 사용)
   - 이메일, GitHub, Google 로그인 정상화
