@@ -13,6 +13,8 @@ import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 export default function InputPage() {
   const router = useRouter();
@@ -210,6 +212,11 @@ export default function InputPage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
+            <div className="md:hidden">
+              <KakaoAdMobileThick />
             </div>
 
             {/* 자료 조사 */}
@@ -494,9 +501,14 @@ export default function InputPage() {
         </div>
       )}
 
-      {/* 하단 고정 가로 배너 광고 */}
+      {/* 하단 고정 가로 배너 광고 - 데스크톱 */}
       <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
         <KakaoAdBanner />
+      </div>
+
+      {/* 하단 고정 얇은 광고 - 모바일 */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+        <KakaoAdMobileThin />
       </div>
     </div>
   );
