@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { logEnvironmentDiagnostics } from "@/utils/env-validator";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -17,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PPT Maker by FlowCoder",
   description: "AI 워크플로우 자동화 플랫폼 - 업무 생산성을 10배 향상시키는 혁신",
+  verification: {
+    google: process.env.NEXT_PUBLIC_SEARCH_CONSOLE_VERIFICATION,
+  },
 };
 
 // 환경 변수 진단 (프로덕션 디버깅용)
@@ -29,6 +33,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="ko">
       <body
@@ -41,6 +47,26 @@ export default function RootLayout({
           Next.js 페이지 전환 시 광고가 제대로 표시되도록 useEffect를 사용합니다.
           자세한 내용은 components/ads/*.tsx를 참고하세요.
         */}
+
+        {/* Google Analytics 4 (GA4) */}
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

@@ -22,7 +22,7 @@ export default function HomePage() {
             className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
             style={{ color: TOSS_COLORS.text }}
           >
-            AI가 만들어주는{' '}
+            한줄로 만드는{' '}
             <span
               className="bg-clip-text text-transparent"
               style={{
@@ -71,7 +71,7 @@ export default function HomePage() {
           className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12"
           style={{ color: TOSS_COLORS.text }}
         >
-          왜 'FlowCoder가 만든 PPT Maker'인가요?
+          FlowCoder가 만든 PPT Maker
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
