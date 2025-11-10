@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -80,10 +81,13 @@ export default function NavigationBar() {
       >
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img
+          <Image
             src="/PPT_Maker_logo_600600__1_-removebg-preview.png"
             alt="PPT Maker Logo"
-            className="h-8 w-8"
+            width={40}
+            height={40}
+            className="h-10 w-10"
+            priority
           />
           <div
             className="text-lg font-bold hidden sm:block"
