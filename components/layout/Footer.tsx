@@ -24,6 +24,11 @@ export default function Footer() {
             주식회사 테크트리아이엔씨 (636-81-00865)
           </div>
 
+          {/* 대표자 및 주소 */}
+          <div className="text-xs text-gray-500">
+            대표자: 박현일 | 대구광역시 중구 동덕로 115, 9층 902호 내 512(삼덕동2가)
+          </div>
+
           {/* 문의 메일 */}
           <div className="text-xs text-gray-500">
             문의 사항이 있으신가요?{' '}
