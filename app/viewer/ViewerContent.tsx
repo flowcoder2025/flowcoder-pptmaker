@@ -61,7 +61,8 @@ export default function ViewerContent() {
       // id도 없고 currentPresentation도 없으면 input으로 이동
       router.push('/input');
     }
-  }, [searchParams, fetchPresentation, router, currentPresentation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // 다운로드 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -264,7 +265,7 @@ export default function ViewerContent() {
 
   return (
     <div style={{
-      height: '100vh',
+      minHeight: '100vh',
       background: '#F9FAFB',
       display: 'flex',
       flexDirection: 'column',
@@ -455,7 +456,6 @@ export default function ViewerContent() {
       {/* 광고 - 상단 */}
       <div style={{
         padding: isMobile ? '8px 12px' : '16px 20px',
-        paddingBottom: isMobile ? '20px' : '32px',
         background: '#FFFFFF',
         borderBottom: '1px solid #E5E7EB',
         display: 'flex',
@@ -464,111 +464,64 @@ export default function ViewerContent() {
         <KakaoAdMobileThick />
       </div>
 
+      {/* 광고와 슬라이드 사이 간격 */}
+      <div style={{
+        height: isMobile ? '20px' : '32px',
+        background: '#F9FAFB',
+      }} />
+
       {/* 슬라이드 뷰어 */}
-      {isMobile ? (
-        // 모바일: 세로 스크롤 레이아웃 (1200×675 비율 유지, 화면에 맞게 스케일 조정)
+      <div style={{
+        flex: 1,
+        minHeight: isMobile ? '300px' : '400px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: isMobile ? '12px' : '40px',
+        overflow: 'hidden',
+      }}>
         <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '12px',
-          background: '#F9FAFB',
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          }}>
-            {slides.map((slide, index) => {
-              // 모바일 화면 너비 계산 (padding 제외)
-              const mobileWidth = typeof window !== 'undefined' ? window.innerWidth - 24 : 400;
-              // 1200px 기준으로 스케일 계산
-              const scale = mobileWidth / 1200;
-              // 스케일된 높이 계산
-              const scaledHeight = 675 * scale;
-
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: '100%',
-                    height: `${scaledHeight}px`,
-                    background: '#FFFFFF',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    overflow: 'hidden',
-                    position: 'relative',
-                  }}
-                >
-                  <iframe
-                    srcDoc={createSlideDocument(slide.html, slide.css)}
-                    style={{
-                      width: '1200px',
-                      height: '675px',
-                      border: 'none',
-                      display: 'block',
-                      transform: `scale(${scale})`,
-                      transformOrigin: 'top left',
-                    }}
-                    title={`슬라이드 ${index + 1}`}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        // 데스크톱: 페이지네이션 레이아웃
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px',
-          overflow: 'auto',
-        }}>
-          <div style={{
-            width: '90vw',
-            maxWidth: '1200px',
-            aspectRatio: '16/9',
-            background: '#FFFFFF',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-          }}>
-            <iframe
-              srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                display: 'block',
-              }}
-              title={`슬라이드 ${currentIndex + 1}`}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* 네비게이션 - 데스크톱 전용 */}
-      {!isMobile && (
-        <div style={{
-          padding: '20px',
+          width: isMobile ? '100%' : '90vw',
+          maxWidth: isMobile ? '100%' : '1200px',
+          aspectRatio: '16/9',
           background: '#FFFFFF',
-          borderTop: '1px solid #E5E7EB',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
         }}>
-          <Button
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            size="lg"
-            variant="outline"
-          >
-            ← 이전
-          </Button>
+          <iframe
+            srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block',
+            }}
+            title={`슬라이드 ${currentIndex + 1}`}
+          />
+        </div>
+      </div>
 
+      {/* 네비게이션 */}
+      <div style={{
+        padding: isMobile ? '12px' : '20px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #E5E7EB',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: isMobile ? '8px' : '16px',
+      }}>
+        <Button
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          size={isMobile ? 'default' : 'lg'}
+          variant="outline"
+        >
+          {isMobile ? '←' : '← 이전'}
+        </Button>
+
+        {!isMobile && (
           <div style={{
             fontSize: '14px',
             color: TOSS_COLORS.textSecondary,
@@ -576,17 +529,17 @@ export default function ViewerContent() {
           }}>
             {currentPresentation.title}
           </div>
+        )}
 
-          <Button
-            onClick={handleNext}
-            disabled={currentIndex === slides.length - 1}
-            size="lg"
-            variant="outline"
-          >
-            다음 →
-          </Button>
-        </div>
-      )}
+        <Button
+          onClick={handleNext}
+          disabled={currentIndex === slides.length - 1}
+          size={isMobile ? 'default' : 'lg'}
+          variant="outline"
+        >
+          {isMobile ? '→' : '다음 →'}
+        </Button>
+      </div>
 
       {/* 광고 - 하단 */}
       <div style={{
