@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     unoptimized: true, // Apps in Toss 최적화 대응
   },
 
+  // Vercel 배포 시 Prisma Client 네이티브 바이너리 포함
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client', '@prisma/engines'],
+  },
+
   env: {
     // 환경 변수 명시적 주입
     NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
