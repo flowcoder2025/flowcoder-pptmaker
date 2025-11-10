@@ -75,7 +75,7 @@ export default function NavigationBar() {
       }}
     >
       <div
-        className="mx-auto px-5 sm:px-8 lg:px-10 h-full flex items-center justify-between"
+        className="mx-auto px-3 sm:px-8 lg:px-10 h-full flex items-center justify-between"
         style={{ maxWidth: '1200px' }}
       >
         {/* 로고 */}
@@ -90,8 +90,8 @@ export default function NavigationBar() {
               backgroundClip: 'text',
             }}
           >
-            <div className="text-lg font-bold">PPT</div>
-            <div className="text-lg font-bold">Maker</div>
+            <div className="text-sm font-bold">PPT</div>
+            <div className="text-sm font-bold">Maker</div>
           </div>
 
           {/* 데스크톱: 이미지 + 텍스트 로고 */}

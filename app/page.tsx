@@ -16,10 +16,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
       {/* Hero Section */}
-      <MaxWidthContainer className="pt-16 sm:pt-24 lg:pt-32">
-        <div className="text-center space-y-6">
+      <MaxWidthContainer className="pt-12 sm:pt-24 lg:pt-32">
+        <div className="text-center space-y-4 px-4">
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight"
+            className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
             style={{ color: TOSS_COLORS.text }}
           >
             AI가 만들어주는{' '}
@@ -34,7 +34,7 @@ export default function HomePage() {
           </h1>
 
           <p
-            className="text-lg sm:text-xl max-w-2xl mx-auto"
+            className="text-base sm:text-xl max-w-2xl mx-auto"
             style={{ color: TOSS_COLORS.textSecondary }}
           >
             텍스트만 입력하면 AI가 자동으로 슬라이드를 생성해요.<br />
@@ -66,9 +66,9 @@ export default function HomePage() {
       </MaxWidthContainer>
 
       {/* Features Section */}
-      <MaxWidthContainer className="py-16 sm:py-20 lg:py-24">
+      <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 px-4">
         <h2
-          className="text-3xl sm:text-4xl font-bold text-center mb-12"
+          className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12"
           style={{ color: TOSS_COLORS.text }}
         >
           왜 'FlowCoder가 만든 PPT Maker'인가요?
@@ -141,9 +141,9 @@ export default function HomePage() {
 
       {/* How It Works Section */}
       <div style={{ backgroundColor: TOSS_COLORS.surface }}>
-        <MaxWidthContainer className="py-16 sm:py-20 lg:py-24">
+        <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 px-4">
           <h2
-            className="text-3xl sm:text-4xl font-bold text-center mb-12"
+            className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12"
             style={{ color: TOSS_COLORS.text }}
           >
             사용 방법
@@ -180,15 +180,15 @@ export default function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <MaxWidthContainer className="py-16 sm:py-20 lg:py-24 text-center relative">
+      <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 text-center relative px-4">
         <h2
-          className="text-3xl sm:text-4xl font-bold mb-6"
+          className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6"
           style={{ color: TOSS_COLORS.text }}
         >
           지금 바로 시작해보세요
         </h2>
         <p
-          className="text-lg mb-8"
+          className="text-base sm:text-lg mb-6 sm:mb-8"
           style={{ color: TOSS_COLORS.textSecondary }}
         >
           무료 플랜으로 시작해서 원하는 프리젠테이션을 만들어요
