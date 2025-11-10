@@ -520,16 +520,17 @@ export default function ViewerContent() {
         // 데스크톱: 페이지네이션 레이아웃
         <div style={{
           flex: 1,
+          minHeight: '715px', // 슬라이드 높이(675px) + padding(40px) 보장
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '40px',
-          overflow: 'auto',
+          padding: '20px',
         }}>
           <div style={{
-            width: '90vw',
-            maxWidth: '1200px',
-            aspectRatio: '16/9',
+            width: '1200px', // 고정 너비
+            height: '675px', // 고정 높이 (16:9 비율)
+            maxWidth: '90vw', // 화면보다 크면 축소
+            maxHeight: '90vh', // 화면보다 크면 축소
             background: '#FFFFFF',
             borderRadius: '12px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
