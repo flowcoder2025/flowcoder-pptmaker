@@ -26,7 +26,7 @@ export default function Footer() {
 
           {/* 대표자 및 주소 */}
           <div className="text-xs text-gray-500">
-            대표자: 박현일 | 대구광역시 중구 동덕로 115, 9층 902호 내 512(삼덕동2가)
+            박현일 | 대구광역시 중구 동덕로 115, 9층 902호 내 512(삼덕동2가)
           </div>
 
           {/* 문의 메일 */}
