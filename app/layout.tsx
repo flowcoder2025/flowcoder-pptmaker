@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { logEnvironmentDiagnostics } from "@/utils/env-validator";
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -37,14 +36,11 @@ export default function RootLayout({
       >
         <LayoutWrapper>{children}</LayoutWrapper>
 
-        {/* 카카오 애드핏 스크립트 - 전역에서 한 번만 로드 */}
-        <Script
-          id="kakao-adfit-sdk"
-          async
-          type="text/javascript"
-          src="https://t1.daumcdn.net/kas/static/ba.min.js"
-          strategy="afterInteractive"
-        />
+        {/*
+          카카오 애드핏 스크립트는 각 광고 컴포넌트에서 개별적으로 로드됩니다.
+          Next.js 페이지 전환 시 광고가 제대로 표시되도록 useEffect를 사용합니다.
+          자세한 내용은 components/ads/*.tsx를 참고하세요.
+        */}
       </body>
     </html>
   );
