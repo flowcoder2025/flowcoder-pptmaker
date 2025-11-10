@@ -65,6 +65,12 @@ export async function isAuthenticated(): Promise<boolean> {
   return !!session
 }
 
+/**
+ * auth 함수 (getSession의 alias)
+ * Admin 페이지 및 API Routes에서 사용
+ */
+export const auth = getSession
+
 // ============================================
 // 타입 확장
 // ============================================
