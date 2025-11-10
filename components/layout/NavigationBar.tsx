@@ -80,13 +80,28 @@ export default function NavigationBar() {
       >
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          {/* 모바일: 텍스트 2줄 로고 */}
+          <div
+            className="flex flex-col leading-none md:hidden"
+            style={{
+              background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            <div className="text-lg font-bold">PPT</div>
+            <div className="text-lg font-bold">Maker</div>
+          </div>
+
+          {/* 데스크톱: 이미지 + 텍스트 로고 */}
           <img
             src="/PPT_Maker_logo_600600__1_-removebg-preview.png"
             alt="PPT Maker Logo"
-            className="h-12 w-12 object-contain"
+            className="h-12 w-12 object-contain hidden md:block"
           />
           <div
-            className="text-lg font-bold hidden sm:block"
+            className="text-lg font-bold hidden md:block"
             style={{
               background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
               WebkitBackgroundClip: 'text',
