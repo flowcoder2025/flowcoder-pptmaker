@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
     unoptimized: true, // Apps in Toss 최적화 대응
   },
 
-  // Prisma Client with Neon adapter (JavaScript engine)
-  // WASM 파일을 번들에 포함하기 위해 external packages 설정 제거
+  // Vercel 배포 시 Prisma 바이너리 파일 포함
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./node_modules/.prisma/client/**/*'],
+  },
 
   env: {
     // 환경 변수 명시적 주입

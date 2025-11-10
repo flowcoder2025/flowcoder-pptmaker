@@ -33,6 +33,12 @@
 ### 🐛 Fixes
 
 #### 2025-11-10
+- **Next.js outputFileTracingIncludes로 Prisma 바이너리 포함**
+  - next.config.ts에 outputFileTracingIncludes 설정 추가
+  - API Routes에서 Prisma Client 바이너리 파일 명시적 포함
+  - Vercel serverless function에 libquery_engine-rhel-openssl-3.0.x.so.node 포함 보장
+  - 이메일, GitHub, Google 로그인 정상 작동
+
 - **Vercel 빌드 명령어 최적화로 Prisma 바이너리 배포 수정**
   - vercel.json의 buildCommand에서 `rm -rf node_modules/.prisma` 제거
   - 불필요한 Prisma Client 삭제가 바이너리 파일 트레이싱 방해하는 문제 해결
