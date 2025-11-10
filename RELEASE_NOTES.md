@@ -55,10 +55,15 @@
 ### 🐛 Fixes
 
 #### 2025-11-08
+- **Vercel 빌드 에러 수정 (useSearchParams Suspense 경계 추가)**
+  - /editor 페이지를 page.tsx + EditorContent.tsx로 분리
+  - Suspense 경계로 EditorContent 감싸기
+  - Next.js 16 클라이언트 컴포넌트 useSearchParams() 요구사항 해결
+  - 프리렌더링 에러 완전 해결
+
 - **Vercel 빌드 에러 수정 (useSearchParams Suspense 요구사항)** (432c1e2)
-  - /editor 페이지에 `export const dynamic = 'force-dynamic'` 추가
-  - Next.js 16 useSearchParams() Suspense boundary 요구사항 해결
-  - 프리렌더링 에러 해결
+  - /editor 페이지에 `export const dynamic = 'force-dynamic'` 추가 (작동하지 않음)
+  - 클라이언트 컴포넌트에서는 Suspense 필요
 
 - **Vercel 빌드 에러 수정 (Prisma Client 생성)** (eef7b34)
   - package.json에 postinstall 스크립트 추가
