@@ -86,7 +86,7 @@ export default function NavigationBar() {
             className="h-8 w-8"
           />
           <div
-            className="text-lg font-bold"
+            className="text-lg font-bold hidden sm:block"
             style={{
               background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
               WebkitBackgroundClip: 'text',
@@ -94,7 +94,7 @@ export default function NavigationBar() {
               backgroundClip: 'text',
             }}
           >
-            PPT Maker<span className="hidden sm:inline"> by FlowCoder</span>
+            PPT Maker by FlowCoder
           </div>
         </Link>
 
