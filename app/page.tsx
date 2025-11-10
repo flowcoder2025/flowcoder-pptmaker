@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { TOSS_COLORS } from '@/constants/design';
+import KakaoAd from '@/components/ads/KakaoAd';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 
 export default function HomePage() {
   const router = useRouter();
@@ -171,7 +173,7 @@ export default function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <MaxWidthContainer className="py-16 sm:py-20 lg:py-24 text-center">
+      <MaxWidthContainer className="py-16 sm:py-20 lg:py-24 text-center relative">
         <h2
           className="text-3xl sm:text-4xl font-bold mb-6"
           style={{ color: TOSS_COLORS.text }}
@@ -195,7 +197,17 @@ export default function HomePage() {
         >
           무료로 시작하기 →
         </Button>
+
+        {/* 오른쪽 여백에 세로 광고 (절대 위치) */}
+        <div className="hidden xl:block fixed right-4 top-24 z-30">
+          <KakaoAd />
+        </div>
       </MaxWidthContainer>
+
+      {/* 하단 고정 가로 배너 광고 */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
+        <KakaoAdBanner />
+      </div>
     </div>
   );
 }
