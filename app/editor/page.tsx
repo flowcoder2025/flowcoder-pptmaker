@@ -18,6 +18,9 @@ import TemplateSelector from '@/components/editor/TemplateSelector';
 import MoreMenu from '@/components/editor/MoreMenu';
 import type { SlideType } from '@/types/slide';
 
+// Next.js 16: 동적 렌더링 강제 (useSearchParams 사용)
+export const dynamic = 'force-dynamic';
+
 export default function EditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
