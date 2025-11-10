@@ -141,40 +141,24 @@ export const authOptions: NextAuthOptions = {
             console.log('🔗 Existing account:', existingAccount ? 'Found' : 'Not found')
 
             if (!existingAccount) {
-              // 다른 provider로 이미 가입한 경우 안내 메시지 생성
-              const providers = existingUser.accounts.map((acc) => acc.provider)
-              const hasPassword = !!existingUser.password
-
-              let errorMessage = '이미 사용 중인 이메일이에요. '
-
-              if (providers.length === 0 && hasPassword) {
-                // 이메일로만 가입한 경우
-                errorMessage += '이메일과 비밀번호로 로그인해주세요'
-              } else if (providers.length === 1) {
-                // 단일 OAuth provider로 가입한 경우
-                const existingProvider = providers[0]
-                const providerName = existingProvider === 'github' ? 'GitHub' : existingProvider === 'google' ? 'Google' : existingProvider
-                errorMessage += `${providerName} 계정으로 이미 가입하셨어요. ${providerName}으로 로그인해주세요`
-              } else if (providers.length > 1) {
-                // 여러 OAuth provider로 가입한 경우
-                const providerNames = providers.map((p) => (p === 'github' ? 'GitHub' : p === 'google' ? 'Google' : p))
-                const lastProvider = providerNames.pop()!
-                const otherProviders = providerNames.join(', ')
-                errorMessage += `${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 가입하셨어요. ${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 로그인해주세요`
-              } else {
-                // 예외 상황
-                const providerNames = providers.map((p) => (p === 'github' ? 'GitHub' : p === 'google' ? 'Google' : p))
-                if (providerNames.length > 0) {
-                  errorMessage += `${providerNames.join('과 ')} 또는 이메일로 로그인해주세요`
-                } else {
-                  errorMessage += '로그인해주세요'
-                }
-              }
-
-              // 에러 메시지를 URL에 인코딩하여 로그인 페이지로 리다이렉트
-              console.log('⚠️ Provider mismatch detected:', errorMessage)
-              const encodedMessage = encodeURIComponent(errorMessage)
-              return `/login?error=ProviderMismatch&message=${encodedMessage}`
+              // 같은 이메일에 다른 provider 연결 (새 Account 생성)
+              console.log('📝 Linking new account to existing user...')
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state,
+                },
+              })
+              console.log('✅ New account linked to existing user')
             }
 
             // user.id를 기존 사용자 ID로 설정

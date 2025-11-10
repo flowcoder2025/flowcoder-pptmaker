@@ -48,6 +48,14 @@
   - 사용자에게 올바른 로그인 방법 제시로 UX 개선
   - 예시: "Google 계정으로 가입하셨어요. Google로 로그인해주세요"
 
+- **같은 이메일로 여러 제공자 계정 통합 지원**
+  - OAuth → OAuth (다른 provider) 연결 허용
+  - OAuth → Email 회원가입 허용
+  - Email → OAuth 연결 허용
+  - 이메일 로그인 시 password 없으면 OAuth 안내
+  - 하나의 User 계정으로 모든 로그인 방식 사용 가능
+  - 예시: 구글 로그인 → 깃헙 로그인 → 이메일 회원가입 모두 같은 계정으로 통합
+
 - **전역 푸터 컴포넌트 추가**
   - MIT 라이센스, 회사명(FlowCoder), 문의메일 정보 포함
   - MaxWidthContainer를 활용한 반응형 디자인
