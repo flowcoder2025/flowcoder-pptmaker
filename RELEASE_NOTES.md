@@ -55,7 +55,7 @@
 ### 🐛 Fixes
 
 #### 2025-11-08
-- **Vercel 빌드 에러 수정 (useSearchParams Suspense 요구사항)**
+- **Vercel 빌드 에러 수정 (useSearchParams Suspense 요구사항)** (432c1e2)
   - /editor 페이지에 `export const dynamic = 'force-dynamic'` 추가
   - Next.js 16 useSearchParams() Suspense boundary 요구사항 해결
   - 프리렌더링 에러 해결
