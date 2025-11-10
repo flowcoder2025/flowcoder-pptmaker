@@ -54,6 +54,12 @@
 
 ### 🐛 Fixes
 
+#### 2025-11-08
+- **Vercel 빌드 에러 수정 (Prisma Client 생성)**
+  - package.json에 postinstall 스크립트 추가
+  - build 스크립트에 prisma generate 추가
+  - Vercel 빌드 환경에서 Prisma Client 자동 생성
+
 #### 2025-11-07
 - **TypeScript 타입 에러 수정** (ff086b5)
   - `lib/permissions.ts`: tuples.map() 파라미터에 명시적 타입 지정
