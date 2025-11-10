@@ -33,6 +33,12 @@
 ### 🐛 Fixes
 
 #### 2025-11-10
+- **편집 모드에서 저장 시 새 파일 생성되는 버그 수정**
+  - presentationStore.ts의 isUpdate 판별 로직 수정
+  - UUID를 Number로 변환 시도하던 잘못된 로직 제거
+  - 단순 ID 존재 여부로 업데이트/생성 판별
+  - 편집 후 저장 시 기존 프리젠테이션 업데이트 (PATCH) 정상 작동
+
 - **Next.js outputFileTracingIncludes로 Prisma 바이너리 포함**
   - next.config.ts에 outputFileTracingIncludes 설정 추가
   - API Routes에서 Prisma Client 바이너리 파일 명시적 포함
@@ -65,6 +71,16 @@
   - API 키 검증 및 에러 처리 추가
   - 토큰 사용량 로깅 (비용 추적용)
   - UX Writing 준수 (한글 에러 메시지)
+
+### 🎨 UI/UX
+
+#### 2025-11-10
+- **홈페이지 문구 개선**
+  - "Gemini + Perplexity AI로" → "최적의 Gen AI로"
+  - "2원에 고품질 슬라이드를" → "비용 없이 고품질 슬라이드를"
+  - 서비스 핵심 가치 강조
+
+### ✨ Features
 
 #### 2025-11-08
 - **프로필 페이지 통계 연결 및 히스토리 다운로드 개선** (be1a329)

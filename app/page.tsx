@@ -84,8 +84,8 @@ export default function HomePage() {
               AI 자동 생성
             </h3>
             <p style={{ color: TOSS_COLORS.textSecondary }}>
-              Gemini + Perplexity AI로<br />
-              2원에 고품질 슬라이드를<br />
+              최적의 Gen AI로<br />
+              비용 없이 고품질 슬라이드를<br />
               생성해요
             </p>
           </Card>

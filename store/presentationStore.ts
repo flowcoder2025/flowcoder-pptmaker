@@ -284,7 +284,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     try {
       // 프리젠테이션이 데이터베이스에 이미 있는지 확인
-      const isUpdate = currentPresentation.id && !isNaN(Number(currentPresentation.id)) && Number(currentPresentation.id) < Date.now() - 1000;
+      // ID가 있으면 업데이트, 없으면 새로 생성
+      const isUpdate = !!currentPresentation.id;
 
       // API 호출: 프리젠테이션 저장 (생성 또는 업데이트)
       const method = isUpdate ? 'PATCH' : 'POST';
