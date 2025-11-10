@@ -1,24 +1,23 @@
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
+/**
+ * Prisma Client Singleton
+ *
+ * 개발 환경에서 Hot Reload 시 인스턴스 재생성 방지
+ * Vercel 배포 시 기본 바이너리 엔진 사용 (WASM 문제 해결)
+ */
 
+import { PrismaClient } from '@prisma/client'
+
+// Singleton 패턴
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// PostgreSQL connection pool 생성
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!
-})
-
-// PrismaPg adapter 생성 (Supabase PostgreSQL 호환, Vercel serverless 환경)
-const adapter = new PrismaPg(pool)
-
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma
+}

@@ -21,6 +21,15 @@
 
 ## [Unreleased]
 
+### 🐛 Fixes
+
+#### 2025-11-10
+- **Vercel 배포 Prisma WASM 에러 수정** (d86975d)
+  - engineType=client 제거 (WASM 파일 의존성 제거)
+  - PrismaPg adapter 제거 (기본 PostgreSQL 드라이버 사용)
+  - 이메일, GitHub, Google 로그인 정상화
+  - Vercel serverless 환경에서 Prisma 안정적 작동
+
 ### ✨ Features
 
 #### 2025-11-08
