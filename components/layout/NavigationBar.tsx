@@ -114,8 +114,8 @@ export default function NavigationBar() {
         </Link>
 
         {/* 네비게이션 메뉴 */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          <ul className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0 sm:gap-2">
+          <ul className="flex items-center gap-0 sm:gap-2">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
 
@@ -124,7 +124,7 @@ export default function NavigationBar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all',
+                      'flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg transition-all',
                       'hover:bg-opacity-10',
                       active ? 'font-semibold' : ''
                     )}
