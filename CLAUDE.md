@@ -196,36 +196,27 @@ if (!canEdit) return 403
 
 **모든 커밋 시 RELEASE_NOTES.md를 업데이트해야 합니다.**
 
-#### 권장 방법: 자동화 스크립트 사용
-
-**효율적인 워크플로우** (한 번의 푸시로 완료):
+#### 워크플로우 (한 번의 푸시로 완료)
 
 ```bash
-./scripts/commit-with-release-notes.sh \
-  "feat: 새 기능 추가" \
-  "기능 설명" \
-  "- 세부 내용 1\n- 세부 내용 2"
+# 1. 작업 완료 후 커밋
+git add [변경된 파일들]
+git commit -m "fix: 문제 해결"
+
+# 2. RELEASE_NOTES.md 수동 업데이트 (커밋 해시는 생략 또는 PENDING)
+# 에디터로 RELEASE_NOTES.md 열어서 변경사항 추가
+
+# 3. 릴리즈 노트를 같은 커밋에 포함
+git add RELEASE_NOTES.md
+git commit --amend --no-edit
+
+# 4. 푸시 (한 번만)
+git push origin main
+
+# 끝! 추가 커밋/푸시 없음
 ```
 
-**스크립트 동작**:
-1. 변경사항 커밋 → 해시 추출
-2. RELEASE_NOTES.md 자동 업데이트 (커밋 해시 포함)
-3. `git commit --amend`로 병합
-4. 한 번만 푸시
-
-**장점**:
-- ✅ 두 번 푸시하는 비효율 제거
-- ✅ 커밋 타입에 따라 카테고리 자동 분류
-- ✅ 날짜 헤더 자동 생성
-- ✅ 커밋 해시 자동 삽입
-
-**상세 사용법**: [scripts/README.md](scripts/README.md)
-
----
-
-#### 수동 업데이트 절차 (비권장)
-
-기존 방식 (2단계 푸시):
+#### 릴리즈 노트 형식
 
 1. **커밋 타입 분류**:
    - `feat:` → ✨ Features
@@ -234,19 +225,19 @@ if (!canEdit) return 403
    - `docs:` → 📝 Documentation
    - `refactor:`, `chore:`, `build:` → 🔧 Technical
 
-2. **형식**:
+2. **형식** (커밋 해시는 생략 가능):
 ```markdown
 ### [카테고리 아이콘] [카테고리명]
 
 #### YYYY-MM-DD
-- **[변경사항 요약]** (커밋해시)
+- **[변경사항 요약]**
   - 세부 내용 1
   - 세부 내용 2
 ```
 
 3. **추가 위치**: `[Unreleased]` 섹션의 해당 카테고리
 4. **날짜 헤더**: 당일 첫 커밋인 경우 `#### YYYY-MM-DD` 추가
-5. **커밋 해시**: 7자리 단축 해시만 기록 (URL 제외)
+5. **커밋 해시**: 생략 (직전 변경사항은 해시 없어도 알아볼 수 있음, 다음 작업 시 반영됨)
 
 **예시**:
 ```markdown
@@ -255,7 +246,7 @@ if (!canEdit) return 403
 ### ✨ Features
 
 #### 2025-11-08
-- **결제 시스템 통합** (a1b2c3d)
+- **결제 시스템 통합**
   - Stripe 결제 연동
   - 구독 자동 갱신
 ```
