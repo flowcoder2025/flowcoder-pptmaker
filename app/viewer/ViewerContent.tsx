@@ -460,6 +460,8 @@ export default function ViewerContent() {
         borderBottom: '1px solid #E5E7EB',
         display: 'flex',
         justifyContent: 'center',
+        maxWidth: '100%',
+        overflow: 'hidden',
       }}>
         <KakaoAdMobileThick />
       </div>
@@ -553,50 +555,61 @@ export default function ViewerContent() {
       {/* 네비게이션 - 데스크톱 전용 */}
       {!isMobile && (
         <div style={{
-          padding: '20px',
+          padding: '12px 20px',
           background: '#FFFFFF',
           borderTop: '1px solid #E5E7EB',
           display: 'flex',
           alignItems: 'center',
-          gap: '16px',
+          justifyContent: 'center',
         }}>
-          <Button
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            size="lg"
-            variant="outline"
-            style={{
-              minWidth: '100px',
-              flexShrink: 0,
-            }}
-          >
-            ← 이전
-          </Button>
-
           <div style={{
-            flex: 1,
-            fontSize: '14px',
-            color: TOSS_COLORS.textSecondary,
-            textAlign: 'center',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%',
+            maxWidth: '1200px',
           }}>
-            {currentPresentation.title}
-          </div>
+            <Button
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              size="lg"
+              variant="outline"
+              style={{
+                minWidth: '100px',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ← 이전
+            </Button>
 
-          <Button
-            onClick={handleNext}
-            disabled={currentIndex === slides.length - 1}
-            size="lg"
-            variant="outline"
-            style={{
-              minWidth: '100px',
-              flexShrink: 0,
-            }}
-          >
-            다음 →
-          </Button>
+            <div style={{
+              flex: 1,
+              minWidth: 0,
+              fontSize: '14px',
+              color: TOSS_COLORS.textSecondary,
+              textAlign: 'center',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {currentPresentation.title}
+            </div>
+
+            <Button
+              onClick={handleNext}
+              disabled={currentIndex === slides.length - 1}
+              size="lg"
+              variant="outline"
+              style={{
+                minWidth: '100px',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              다음 →
+            </Button>
+          </div>
         </div>
       )}
 
@@ -607,6 +620,8 @@ export default function ViewerContent() {
         borderTop: '1px solid #E5E7EB',
         display: 'flex',
         justifyContent: 'center',
+        maxWidth: '100%',
+        overflow: 'hidden',
       }}>
         <KakaoAdBanner />
       </div>

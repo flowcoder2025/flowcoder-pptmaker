@@ -44,15 +44,21 @@ export default function KakaoAdMobileThick() {
     <div
       ref={scriptElement}
       className="kakao-ad-mobile-thick-container flex justify-center items-center w-full py-4 bg-gray-50"
+      style={{
+        maxWidth: '100%',
+        overflow: 'hidden',
+      }}
     >
       {/* 광고 영역 */}
-      <ins
-        className="kakao_ad_area"
-        style={{ display: 'none' }}
-        data-ad-unit={adUnit}
-        data-ad-width="320"
-        data-ad-height="100"
-      />
+      <div style={{ maxWidth: '320px', width: '100%' }}>
+        <ins
+          className="kakao_ad_area"
+          style={{ display: 'none' }}
+          data-ad-unit={adUnit}
+          data-ad-width="320"
+          data-ad-height="100"
+        />
+      </div>
     </div>
   );
 }

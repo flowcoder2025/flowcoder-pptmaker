@@ -44,15 +44,21 @@ export default function KakaoAdBanner() {
     <div
       ref={scriptElement}
       className="kakao-ad-banner-container flex justify-center items-center w-full py-4 bg-gray-50"
+      style={{
+        maxWidth: '100%',
+        overflow: 'hidden',
+      }}
     >
       {/* 광고 영역 */}
-      <ins
-        className="kakao_ad_area"
-        style={{ display: 'none' }}
-        data-ad-unit={adUnit}
-        data-ad-width="728"
-        data-ad-height="90"
-      />
+      <div style={{ maxWidth: '728px', width: '100%' }}>
+        <ins
+          className="kakao_ad_area"
+          style={{ display: 'none' }}
+          data-ad-unit={adUnit}
+          data-ad-width="728"
+          data-ad-height="90"
+        />
+      </div>
     </div>
   );
 }
