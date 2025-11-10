@@ -55,7 +55,7 @@
 ### 🐛 Fixes
 
 #### 2025-11-08
-- **Vercel 빌드 에러 수정 (useSearchParams Suspense 경계 추가)**
+- **Vercel 빌드 에러 수정 (useSearchParams Suspense 경계 추가)** (f2c8dcf)
   - /editor 페이지를 page.tsx + EditorContent.tsx로 분리
   - Suspense 경계로 EditorContent 감싸기
   - Next.js 16 클라이언트 컴포넌트 useSearchParams() 요구사항 해결
