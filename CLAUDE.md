@@ -23,6 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 디렉토리 | 역할 | 문서 |
 |---------|------|------|
 | **app/** | Next.js 페이지 및 API Routes | [app/claude.md](app/claude.md) |
+| **app/viewer/** | 슬라이드 뷰어 페이지 (레이아웃 규칙) | [app/viewer/claude.md](app/viewer/claude.md) ⭐ |
 | **components/** | React 컴포넌트 (shadcn/ui) | [components/claude.md](components/claude.md) |
 | **services/** | 비즈니스 로직 (AI 파이프라인) | [services/claude.md](services/claude.md) |
 | **store/** | Zustand 상태 관리 | [store/claude.md](store/claude.md) |
@@ -34,6 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 📖 작업별 문서 선택 가이드
 
 **페이지/API 개발 시** → [app/claude.md](app/claude.md)
+**뷰어 페이지 레이아웃 수정 시** → [app/viewer/claude.md](app/viewer/claude.md) ⭐ 반응형 규칙
 **UI 컴포넌트 개발 시** → [components/claude.md](components/claude.md)
 **AI 서비스 개발 시** → [services/claude.md](services/claude.md)
 **상태 관리 개발 시** → [store/claude.md](store/claude.md)
