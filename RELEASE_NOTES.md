@@ -54,6 +54,13 @@
 
 ### 🐛 Fixes
 
+#### 2025-11-10
+- **Vercel 빌드 에러 수정 (viewer useSearchParams Suspense 요구사항)** (9a3635f)
+  - /viewer 페이지를 page.tsx + ViewerContent.tsx로 분리
+  - Suspense 경계로 ViewerContent 감싸기
+  - Next.js 16 클라이언트 컴포넌트 useSearchParams() 요구사항 해결
+  - /editor와 동일한 패턴 적용
+
 #### 2025-11-08
 - **Vercel 빌드 에러 수정 (useSearchParams Suspense 경계 추가)** (f2c8dcf)
   - /editor 페이지를 page.tsx + EditorContent.tsx로 분리
