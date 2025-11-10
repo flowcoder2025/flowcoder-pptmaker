@@ -455,6 +455,7 @@ export default function ViewerContent() {
       {/* 광고 - 상단 */}
       <div style={{
         padding: isMobile ? '8px 12px' : '16px 20px',
+        paddingBottom: isMobile ? '20px' : '32px',
         background: '#FFFFFF',
         borderBottom: '1px solid #E5E7EB',
         display: 'flex',
