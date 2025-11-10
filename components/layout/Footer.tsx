@@ -38,11 +38,11 @@ export default function Footer() {
 
           {/* 추가 링크 (선택) */}
           <div className="flex gap-4 text-xs text-gray-500">
-            <a href="/privacy" className="hover:text-gray-700 hover:underline">
+            <a href="https://www.flow-coder.com/terms/external/privacy-policy" className="hover:text-gray-700 hover:underline">
               개인정보 처리방침
             </a>
             <span>•</span>
-            <a href="/terms" className="hover:text-gray-700 hover:underline">
+            <a href="https://www.flow-coder.com/terms/external/ppt-maker" className="hover:text-gray-700 hover:underline">
               서비스 이용약관
             </a>
           </div>
