@@ -24,6 +24,12 @@
 ### 🐛 Fixes
 
 #### 2025-11-10
+- **Vercel 빌드 명령어 최적화로 Prisma 바이너리 배포 수정** (5b5bdd9)
+  - vercel.json의 buildCommand에서 `rm -rf node_modules/.prisma` 제거
+  - 불필요한 Prisma Client 삭제가 바이너리 파일 트레이싱 방해하는 문제 해결
+  - package.json의 기본 build 스크립트 사용 (`prisma generate && next build`)
+  - Vercel의 자동 파일 트레이싱으로 바이너리 파일 정상 포함 보장
+
 - **Vercel용 Prisma 바이너리 타겟 추가** (add1dbb)
   - binaryTargets에 rhel-openssl-3.0.x 추가
   - Vercel serverless 환경에서 Query Engine 바이너리 찾기 실패 해결
