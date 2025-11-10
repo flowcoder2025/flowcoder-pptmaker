@@ -21,6 +21,25 @@
 
 ## [Unreleased]
 
+### ✨ Features
+
+#### 2025-11-10
+- **회원가입 및 로그인 시 기존 가입 경로 안내 기능 추가**
+  - **회원가입 API**: 이메일 중복 시 Account 테이블 조회하여 가입 경로 확인
+  - **OAuth 로그인**: 다른 provider로 로그인 시도 시 기존 가입 경로 안내
+  - **Email 로그인**: OAuth로 가입한 사용자가 이메일/패스워드 로그인 시도 시 안내
+  - GitHub, Google, Email 등 기존 가입 방법을 사용자에게 안내
+  - 복수 OAuth provider로 가입한 경우도 모두 안내
+  - 로그인 페이지에서 에러 메시지를 toast로 표시 (URL 파라미터 활용)
+  - 사용자에게 올바른 로그인 방법 제시로 UX 개선
+  - 예시: "Google 계정으로 가입하셨어요. Google로 로그인해주세요"
+
+- **전역 푸터 컴포넌트 추가**
+  - MIT 라이센스, 회사명(FlowCoder), 문의메일 정보 포함
+  - MaxWidthContainer를 활용한 반응형 디자인
+  - 개인정보 처리방침, 서비스 이용약관 링크 포함
+  - 모든 페이지 하단에 자동 표시 (LayoutWrapper 통합)
+
 ### 📝 Documentation
 
 #### 2025-11-10
@@ -33,6 +52,18 @@
 ### 🐛 Fixes
 
 #### 2025-11-10
+- **무료 크레딧 차감 타이밍 및 저장 오류 수정**
+  - 무료 크레딧 차감 시점을 생성 완료 시점에서 저장 성공 후로 변경
+  - 저장 실패 시 무료 크레딧이 차감되지 않도록 보장
+  - 임시 ID 형식 변경: `Date.now().toString()` → `temp_${Date.now()}`
+  - 임시 ID 감지 로직 추가: `id.startsWith('temp_')` 체크
+  - 새 프리젠테이션 저장 시 항상 POST 사용 (403 에러 해결)
+  - 기존 프리젠테이션 편집 시 PATCH 사용 유지
+  - Fallback 모드 완전 제거: 에러를 사용자에게 명확히 표시
+  - presentationStore.ts: savePresentation 함수 완전 재작성
+  - presentationStore.ts: generatePresentation에서 무료 크레딧 차감 로직 제거
+  - presentationStore.ts: 사용하지 않는 import 제거 (savePresentationToStorage)
+
 - **편집 모드에서 저장 시 새 파일 생성되는 버그 수정**
   - presentationStore.ts의 isUpdate 판별 로직 수정
   - UUID를 Number로 변환 시도하던 잘못된 로직 제거
@@ -75,6 +106,13 @@
 ### 🎨 UI/UX
 
 #### 2025-11-10
+- **여러 OAuth 프로바이더 로그인 안내 메시지 개선**
+  - 복수 OAuth로 가입한 경우 모호한 표현 제거
+  - "해당 방법으로" → "Google 또는 GitHub으로" 등 구체적 프로바이더 명시
+  - 2개: "Google 또는 GitHub으로 로그인해주세요"
+  - 3개 이상: "Google, GitHub 또는 Facebook으로 로그인해주세요"
+  - 사용자가 정확히 어떤 방법으로 로그인해야 하는지 명확하게 안내
+
 - **홈페이지 문구 개선**
   - "Gemini + Perplexity AI로" → "최적의 Gen AI로"
   - "2원에 고품질 슬라이드를" → "비용 없이 고품질 슬라이드를"

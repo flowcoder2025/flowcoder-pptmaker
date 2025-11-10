@@ -11,7 +11,6 @@ import { useHistoryStore } from './historyStore';
 import { researchTopic } from '@/services/perplexity/researcher';
 import { generateSlideContent } from '@/services/gemini/content-generator';
 import { TemplateEngine } from '@/services/template';
-import { savePresentation as savePresentationToStorage } from '@/services/storage/presentation';
 import { RESEARCH_MODE_CONFIG } from '@/types/research';
 import type { UnifiedPPTJSON, Slide, SlideType } from '@/types/slide';
 import { createDefaultSlide } from '@/utils/slideDefaults';
@@ -223,7 +222,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           : ('title' in firstSlide.props ? firstSlide.props.title : '무제');
 
       const presentation: Presentation = {
-        id: Date.now().toString(),
+        id: `temp_${Date.now()}`,  // 임시 ID (저장 후 실제 ID로 교체)
         title: presentationTitle || '무제',
         slides: htmlSlides,
         slideData: slideJSON,              // Phase 1: 편집용 구조화 데이터 저장
@@ -240,31 +239,15 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       console.log('🎉 프리젠테이션 생성 완료!');
 
-      // 🆕 무료 카운트 차감 (생성 성공 후)
-      const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
-      if (researchMode === 'deep' && creditStore.isFirstTimeFree('deepResearch')) {
-        await creditStore.useFirstTimeFree('deepResearch');
-        console.log('✅ 심층 검색 최초 무료 사용 완료');
-      }
-      if (useProContentModel && creditStore.isFirstTimeFree('qualityGeneration')) {
-        await creditStore.useFirstTimeFree('qualityGeneration');
-        console.log('✅ 고품질 생성 최초 무료 사용 완료');
-      }
-
-      // 생성 즉시 자동 저장
+      // 생성 즉시 자동 저장 (무료 카운트는 저장 성공 후 차감)
       try {
         console.log('💾 데이터베이스에 저장 중...');
         await get().savePresentation();
         console.log('✅ 데이터베이스 저장 완료!');
       } catch (saveError) {
-        console.error('⚠️ 자동 저장 실패 (로컬 저장으로 폴백):', saveError);
-        // 저장 실패 시 로컬 저장 시도
-        try {
-          await savePresentationToStorage(presentation);
-          console.log('💾 로컬 저장 완료 (fallback)');
-        } catch (localError) {
-          console.error('❌ 로컬 저장도 실패:', localError);
-        }
+        console.error('❌ 데이터베이스 저장 실패:', saveError);
+        // 에러를 사용자에게 명확히 전달
+        throw new Error(`프리젠테이션 저장에 실패했어요: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
       }
 
     } catch (error) {
@@ -288,21 +271,22 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   },
 
   savePresentation: async () => {
-    const { currentPresentation } = get();
+    const { currentPresentation, researchMode, useProContentModel } = get();
     if (!currentPresentation) {
       throw new Error('저장할 프리젠테이션이 없어요');
     }
 
     try {
-      // 프리젠테이션이 데이터베이스에 이미 있는지 확인
-      // ID가 있으면 업데이트, 없으면 새로 생성
-      const isUpdate = !!currentPresentation.id;
+      // 임시 ID 체크: temp_로 시작하면 새 프리젠테이션
+      const isNew = !currentPresentation.id || currentPresentation.id.startsWith('temp_');
 
       // API 호출: 프리젠테이션 저장 (생성 또는 업데이트)
-      const method = isUpdate ? 'PATCH' : 'POST';
-      const url = isUpdate
-        ? `/api/presentations/${currentPresentation.id}`
-        : '/api/presentations';
+      const method = isNew ? 'POST' : 'PATCH';
+      const url = isNew
+        ? '/api/presentations'
+        : `/api/presentations/${currentPresentation.id}`;
+
+      console.log(`[savePresentation] ${method} ${url}`, { isNew, id: currentPresentation.id });
 
       const response = await fetch(url, {
         method,
@@ -330,26 +314,37 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       const data = await response.json();
 
       // 저장 후 ID 업데이트 (새로 생성된 경우)
-      if (!isUpdate && data.presentation?.id) {
+      if (isNew && data.presentation?.id) {
         set({
           currentPresentation: {
             ...currentPresentation,
             id: data.presentation.id,
           },
         });
+        console.log(`[savePresentation] 새 ID로 업데이트: ${data.presentation.id}`);
       }
 
       console.log('✅ 프리젠테이션 저장 완료!');
+
+      // 🆕 저장 성공 후 무료 카운트 차감
+      if (isNew) {
+        const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
+
+        // 심층 검색 무료 카운트 차감
+        if (researchMode === 'deep' && creditStore.isFirstTimeFree('deepResearch')) {
+          await creditStore.useFirstTimeFree('deepResearch');
+          console.log('✅ 심층 검색 최초 무료 사용 완료');
+        }
+
+        // 고품질 생성 무료 카운트 차감
+        if (useProContentModel && creditStore.isFirstTimeFree('qualityGeneration')) {
+          await creditStore.useFirstTimeFree('qualityGeneration');
+          console.log('✅ 고품질 생성 최초 무료 사용 완료');
+        }
+      }
     } catch (error) {
       console.error('❌ 저장 실패:', error);
-      // 에러 시 로컬 저장 시도 (fallback)
-      try {
-        await savePresentationToStorage(currentPresentation);
-        console.log('💾 로컬 저장 완료 (fallback)');
-      } catch (localError) {
-        console.error('❌ 로컬 저장도 실패:', localError);
-      }
-      throw error;
+      throw error;  // Fallback 없이 에러 전파
     }
   },
 
