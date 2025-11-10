@@ -134,6 +134,11 @@ export default function HomePage() {
         </div>
       </MaxWidthContainer>
 
+      {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
+      <div className="md:hidden">
+        <KakaoAdMobileThick />
+      </div>
+
       {/* How It Works Section */}
       <div style={{ backgroundColor: TOSS_COLORS.surface }}>
         <MaxWidthContainer className="py-16 sm:py-20 lg:py-24">
@@ -172,11 +177,6 @@ export default function HomePage() {
             ))}
           </div>
         </MaxWidthContainer>
-      </div>
-
-      {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
-      <div className="md:hidden">
-        <KakaoAdMobileThick />
       </div>
 
       {/* CTA Section */}

@@ -177,6 +177,11 @@ export default function InputPage() {
               </div>
             </Card>
 
+            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
+            <div className="md:hidden">
+              <KakaoAdMobileThick />
+            </div>
+
             {/* 색상 테마 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
@@ -212,11 +217,6 @@ export default function InputPage() {
                   );
                 })}
               </div>
-            </div>
-
-            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
-            <div className="md:hidden">
-              <KakaoAdMobileThick />
             </div>
 
             {/* 자료 조사 */}
