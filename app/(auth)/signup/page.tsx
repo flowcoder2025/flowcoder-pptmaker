@@ -81,9 +81,9 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
-      <MaxWidthContainer className="py-8">
-        <Card className="max-w-md mx-auto p-8">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: TOSS_COLORS.background }}>
+      <MaxWidthContainer className="py-8 w-full">
+        <Card className="max-w-md mx-auto p-6 sm:p-8 w-full">
           {/* 헤더 */}
           <div className="text-center mb-8">
             <h1
