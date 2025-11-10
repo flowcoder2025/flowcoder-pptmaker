@@ -1,6 +1,7 @@
 'use client';
 
 import NavigationBar from './layout/NavigationBar';
+import Footer from './layout/Footer';
 import { SessionProvider } from './auth/SessionProvider';
 import { Toaster } from 'sonner';
 
@@ -33,9 +34,10 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <SessionProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen flex flex-col">
         <NavigationBar />
-        {children}
+        <main className="flex-1">{children}</main>
+        <Footer />
         <Toaster position="top-center" />
       </div>
     </SessionProvider>

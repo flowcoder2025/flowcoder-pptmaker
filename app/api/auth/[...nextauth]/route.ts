@@ -42,13 +42,41 @@ export const authOptions: NextAuthOptions = {
           throw new Error('이메일과 비밀번호를 입력해주세요')
         }
 
-        // 사용자 조회
+        // 사용자 조회 (Account 정보 포함)
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
+          include: {
+            accounts: {
+              select: {
+                provider: true,
+              },
+            },
+          },
         })
 
-        if (!user || !user.password) {
+        if (!user) {
           throw new Error('이메일 또는 비밀번호가 올바르지 않아요')
+        }
+
+        // OAuth로 가입한 사용자인 경우 (password가 없음)
+        if (!user.password) {
+          const providers = user.accounts.map((acc) => acc.provider)
+
+          if (providers.length === 1) {
+            // 단일 OAuth provider로 가입한 경우
+            const provider = providers[0]
+            const providerName = provider === 'github' ? 'GitHub' : provider === 'google' ? 'Google' : provider
+            throw new Error(`${providerName} 계정으로 가입하셨어요. ${providerName}으로 로그인해주세요`)
+          } else if (providers.length > 1) {
+            // 여러 OAuth provider로 가입한 경우
+            const providerNames = providers.map((p) => (p === 'github' ? 'GitHub' : p === 'google' ? 'Google' : p))
+            const lastProvider = providerNames.pop()!
+            const otherProviders = providerNames.join(', ')
+            throw new Error(`${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 가입하셨어요. ${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 로그인해주세요`)
+          } else {
+            // Account는 없는데 password도 없는 예외 상황
+            throw new Error('이메일 또는 비밀번호가 올바르지 않아요')
+          }
         }
 
         // 비밀번호 검증
@@ -87,9 +115,16 @@ export const authOptions: NextAuthOptions = {
             providerAccountId: account.providerAccountId
           })
 
-          // 이메일로 기존 사용자 조회
+          // 이메일로 기존 사용자 조회 (모든 Account 포함)
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
+            include: {
+              accounts: {
+                select: {
+                  provider: true,
+                },
+              },
+            },
           })
           console.log('👤 Existing user:', existingUser ? `Found (${existingUser.id})` : 'Not found')
 
@@ -106,24 +141,40 @@ export const authOptions: NextAuthOptions = {
             console.log('🔗 Existing account:', existingAccount ? 'Found' : 'Not found')
 
             if (!existingAccount) {
-              // Account가 없으면 생성
-              console.log('📝 Creating new account link...')
-              await prisma.account.create({
-                data: {
-                  userId: existingUser.id,
-                  type: account.type,
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                  refresh_token: account.refresh_token,
-                  access_token: account.access_token,
-                  expires_at: account.expires_at,
-                  token_type: account.token_type,
-                  scope: account.scope,
-                  id_token: account.id_token,
-                  session_state: account.session_state,
-                },
-              })
-              console.log('✅ Account link created')
+              // 다른 provider로 이미 가입한 경우 안내 메시지 생성
+              const providers = existingUser.accounts.map((acc) => acc.provider)
+              const hasPassword = !!existingUser.password
+
+              let errorMessage = '이미 사용 중인 이메일이에요. '
+
+              if (providers.length === 0 && hasPassword) {
+                // 이메일로만 가입한 경우
+                errorMessage += '이메일과 비밀번호로 로그인해주세요'
+              } else if (providers.length === 1) {
+                // 단일 OAuth provider로 가입한 경우
+                const existingProvider = providers[0]
+                const providerName = existingProvider === 'github' ? 'GitHub' : existingProvider === 'google' ? 'Google' : existingProvider
+                errorMessage += `${providerName} 계정으로 이미 가입하셨어요. ${providerName}으로 로그인해주세요`
+              } else if (providers.length > 1) {
+                // 여러 OAuth provider로 가입한 경우
+                const providerNames = providers.map((p) => (p === 'github' ? 'GitHub' : p === 'google' ? 'Google' : p))
+                const lastProvider = providerNames.pop()!
+                const otherProviders = providerNames.join(', ')
+                errorMessage += `${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 가입하셨어요. ${providerNames.length > 0 ? otherProviders + ' 또는 ' : ''}${lastProvider}로 로그인해주세요`
+              } else {
+                // 예외 상황
+                const providerNames = providers.map((p) => (p === 'github' ? 'GitHub' : p === 'google' ? 'Google' : p))
+                if (providerNames.length > 0) {
+                  errorMessage += `${providerNames.join('과 ')} 또는 이메일로 로그인해주세요`
+                } else {
+                  errorMessage += '로그인해주세요'
+                }
+              }
+
+              // 에러 메시지를 URL에 인코딩하여 로그인 페이지로 리다이렉트
+              console.log('⚠️ Provider mismatch detected:', errorMessage)
+              const encodedMessage = encodeURIComponent(errorMessage)
+              return `/login?error=ProviderMismatch&message=${encodedMessage}`
             }
 
             // user.id를 기존 사용자 ID로 설정

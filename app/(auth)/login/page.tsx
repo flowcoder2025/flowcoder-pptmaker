@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -21,10 +21,24 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const error = searchParams.get('error');
+  const message = searchParams.get('message');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // URL에서 에러 메시지 확인 및 표시
+  useEffect(() => {
+    if (error === 'ProviderMismatch' && message) {
+      toast.error(decodeURIComponent(message));
+      // URL에서 에러 파라미터 제거
+      router.replace('/login');
+    } else if (error) {
+      toast.error('로그인 중 문제가 발생했어요');
+      router.replace('/login');
+    }
+  }, [error, message, router]);
 
   // 이메일 로그인
   const handleEmailLogin = async (e: React.FormEvent) => {

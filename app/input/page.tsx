@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { usePresentationStore } from '@/store/presentationStore';
@@ -10,9 +11,12 @@ import { useCreditStore } from '@/store/creditStore';
 import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
+import KakaoAd from '@/components/ads/KakaoAd';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 
 export default function InputPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const {
     generatePresentation,
     isGenerating,
@@ -35,6 +39,27 @@ export default function InputPage() {
   const [paymentModalType, setPaymentModalType] = useState<'pro' | 'deep' | null>(null);
 
   const isPremiumUser = (plan === 'pro' || plan === 'premium') && isActive();
+
+  // 로그인 체크
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/input');
+    }
+  }, [status, router]);
+
+  // 로딩 상태 표시
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-600">불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 미로그인 상태면 빈 화면 (리다이렉트 중)
+  if (!session) {
+    return null;
+  }
 
   const handleQualityClick = (usePro: boolean) => {
     if (!usePro) {
@@ -85,8 +110,8 @@ export default function InputPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <MaxWidthContainer className="py-8 px-4">
+    <div className="min-h-screen bg-white pb-32 md:pb-36">
+      <MaxWidthContainer className="py-8 px-4 relative">
         {/* 페이지 헤더 */}
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
@@ -263,7 +288,7 @@ export default function InputPage() {
                       ⚡ 빠른 생성
                     </span>
                     <span className="text-xs font-semibold text-green-600">
-                      {isPremiumUser ? '무료' : '무료 (광고)'}
+                      무료
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
@@ -307,28 +332,32 @@ export default function InputPage() {
             </div>
           </div>
 
-          {/* 오른쪽: 텍스트 입력 */}
+          {/* 중앙: 텍스트 입력 */}
           <div className="flex flex-col gap-4 h-full">
-            {/* 템플릿 예시 */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                📄 템플릿 예시
-              </h3>
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {TEMPLATE_EXAMPLES.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleTemplateClick(template.example)}
-                    className="flex-shrink-0 px-4 py-2 text-sm font-medium text-blue-600 bg-white border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-                  >
-                    {template.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* 텍스트 입력 */}
             <Card className="p-6 flex flex-col flex-1">
+              {/* 템플릿 예시 (카드 내부 상단) */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    📄 템플릿 예시
+                  </h3>
+                  <span className="text-xs text-gray-500">
+                    클릭하면 내용이 자동으로 입력돼요
+                  </span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {TEMPLATE_EXAMPLES.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleTemplateClick(template.example)}
+                      className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                    >
+                      {template.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -359,6 +388,11 @@ export default function InputPage() {
               </Button>
             </Card>
           </div>
+        </div>
+
+        {/* 오른쪽 여백에 세로 광고 (절대 위치) */}
+        <div className="hidden xl:block fixed right-4 top-24 z-30">
+          <KakaoAd />
         </div>
       </MaxWidthContainer>
 
@@ -459,6 +493,11 @@ export default function InputPage() {
           </Card>
         </div>
       )}
+
+      {/* 하단 고정 가로 배너 광고 */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
+        <KakaoAdBanner />
+      </div>
     </div>
   );
 }
