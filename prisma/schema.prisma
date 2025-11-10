@@ -11,7 +11,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -25,6 +24,10 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?   // Nullable - OAuth 사용자는 null, 이메일 로그인은 해시된 패스워드
+
+  // 무료 카운트 (Supabase에서 제어 가능)
+  firstTimeDeepResearchUsed      Boolean @default(false)
+  firstTimeQualityGenerationUsed Boolean @default(false)
 
   // Relations
   accounts         Account[]

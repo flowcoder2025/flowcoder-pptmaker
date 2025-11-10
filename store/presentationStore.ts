@@ -131,7 +131,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       set({ generationStep: 'parsing' });
 
       // 2단계: JSON 파싱 (Parser 단계 제거 - Content generator가 직접 UnifiedPPTJSON 출력)
-      console.log('🔍 2️⃣ JSON 파싱 중... (Parser 단계 제거 - 8원 절감)');
+      console.log('🔍 2️⃣ JSON 파싱 중...');
 
       // 🆕 디버깅: Gemini API 원시 응답 로깅
       console.log('📝 Gemini API 원시 응답 (전체):', enrichedContent);
@@ -209,11 +209,11 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       set({ generationStep: 'generating' });
 
-      // 3단계: HTML 생성 (TemplateEngine - 비용 0원)
+      // 3단계: HTML 생성 (TemplateEngine)
       console.log(`🎨 3️⃣ HTML 슬라이드 생성 중... (템플릿: ${selectedColorPresetId})`);
       const engine = new TemplateEngine();
       const htmlSlides = engine.generateAll(slideJSON, selectedColorPresetId);
-      console.log('✅ HTML 생성 완료 (0원):', htmlSlides.length, '개 슬라이드');
+      console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
 
       // 4단계: 프리젠테이션 객체 생성
       const firstSlide = slideJSON.slides[0];
@@ -238,7 +238,18 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         generationStep: 'done',
       });
 
-      console.log('🎉 프리젠테이션 생성 완료! (총 비용: 2원 - Parser 8원 절감)');
+      console.log('🎉 프리젠테이션 생성 완료!');
+
+      // 🆕 무료 카운트 차감 (생성 성공 후)
+      const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
+      if (researchMode === 'deep' && creditStore.isFirstTimeFree('deepResearch')) {
+        await creditStore.useFirstTimeFree('deepResearch');
+        console.log('✅ 심층 검색 최초 무료 사용 완료');
+      }
+      if (useProContentModel && creditStore.isFirstTimeFree('qualityGeneration')) {
+        await creditStore.useFirstTimeFree('qualityGeneration');
+        console.log('✅ 고품질 생성 최초 무료 사용 완료');
+      }
 
       // 생성 즉시 자동 저장
       try {

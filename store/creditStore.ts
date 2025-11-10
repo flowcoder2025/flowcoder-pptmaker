@@ -44,7 +44,12 @@ interface CreditState {
   /**
    * 최초 무료 사용 처리
    */
-  useFirstTimeFree: (type: CreditUsageType) => void;
+  useFirstTimeFree: (type: CreditUsageType) => Promise<void>;
+
+  /**
+   * Supabase에서 무료 카운트 동기화
+   */
+  fetchFirstTimeFree: () => Promise<void>;
 
   /**
    * 특정 타입의 크래딧 비용 확인
@@ -186,7 +191,7 @@ export const useCreditStore = create<CreditState>()(
         return !firstTimeFree[type]; // false면 아직 사용 안함 (무료 가능)
       },
 
-      useFirstTimeFree: (type) => {
+      useFirstTimeFree: async (type) => {
         const { firstTimeFree } = get();
 
         if (firstTimeFree[type]) {
@@ -194,6 +199,24 @@ export const useCreditStore = create<CreditState>()(
           return;
         }
 
+        // 🆕 Supabase 업데이트 (먼저 시도)
+        try {
+          const response = await fetch('/api/user/first-time-free', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type }),
+          });
+
+          if (!response.ok) {
+            console.warn('⚠️ Supabase 업데이트 실패 (로컬 저장으로 폴백)');
+          } else {
+            console.log(`✅ Supabase 무료 카운트 업데이트 완료: ${type}`);
+          }
+        } catch (error) {
+          console.error('❌ Supabase 업데이트 실패:', error);
+        }
+
+        // localStorage 업데이트 (항상 실행)
         set({
           firstTimeFree: {
             ...firstTimeFree,
@@ -202,6 +225,36 @@ export const useCreditStore = create<CreditState>()(
         });
 
         console.log(`[Credit] 최초 무료 사용: ${type}`);
+      },
+
+      fetchFirstTimeFree: async () => {
+        try {
+          const response = await fetch('/api/user/first-time-free');
+
+          if (!response.ok) {
+            // 401/403이면 로그인 필요
+            if (response.status === 401 || response.status === 403) {
+              console.log('⚠️ 인증 필요: 로그인 후 무료 카운트 조회 가능');
+              return;
+            }
+            throw new Error(`무료 카운트 조회 실패: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Supabase 데이터로 동기화
+          set({
+            firstTimeFree: {
+              deepResearch: data.firstTimeDeepResearchUsed,
+              qualityGeneration: data.firstTimeQualityGenerationUsed,
+            },
+          });
+
+          console.log('✅ Supabase 무료 카운트 동기화 완료');
+        } catch (error) {
+          console.error('❌ 무료 카운트 동기화 실패:', error);
+          // 에러 시 로컬 상태 유지 (fallback)
+        }
       },
 
       getCreditCost: (type) => {
