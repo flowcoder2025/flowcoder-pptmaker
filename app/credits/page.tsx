@@ -8,6 +8,8 @@ import { useCreditStore } from '@/store/creditStore';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { TOSS_COLORS } from '@/constants/design';
 import { Coins, Sparkles, TrendingUp } from 'lucide-react';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 /**
  * 크레딧 관리 페이지
@@ -28,6 +30,11 @@ export default function CreditsPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
+      {/* 광고 - 상단 */}
+      <div className="mb-8">
+        <KakaoAdMobileThick />
+      </div>
+
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
         <h1
@@ -175,6 +182,11 @@ export default function CreditsPage() {
             />
           ))}
         </div>
+      </div>
+
+      {/* 광고 - 중간 */}
+      <div className="my-10">
+        <KakaoAdBanner />
       </div>
 
       {/* 사용 내역 */}

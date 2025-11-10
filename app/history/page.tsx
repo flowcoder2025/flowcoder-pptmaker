@@ -10,6 +10,8 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { TOSS_COLORS } from '@/constants/design';
 import { Search, Plus, Calendar, Trash2, Eye, Edit, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 /**
  * PPT 히스토리 페이지
@@ -173,6 +175,11 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
       <MaxWidthContainer className="py-8 lg:py-12">
+        {/* 광고 - 상단 */}
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div>
@@ -201,6 +208,11 @@ export default function HistoryPage() {
             <Plus className="mr-2" size={20} />
             새로 만들기
           </Button>
+        </div>
+
+        {/* 광고 - 검색 전 */}
+        <div className="mb-6">
+          <KakaoAdBanner />
         </div>
 
         {/* 검색 */}

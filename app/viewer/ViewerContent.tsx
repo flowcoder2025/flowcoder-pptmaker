@@ -12,6 +12,8 @@ import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { TOSS_COLORS } from '@/constants/design';
 import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 export default function ViewerContent() {
   const router = useRouter();
@@ -450,6 +452,17 @@ export default function ViewerContent() {
         </div>
       </div>
 
+      {/* 광고 - 상단 */}
+      <div style={{
+        padding: isMobile ? '8px 12px' : '16px 20px',
+        background: '#FFFFFF',
+        borderBottom: '1px solid #E5E7EB',
+        display: 'flex',
+        justifyContent: 'center',
+      }}>
+        <KakaoAdMobileThick />
+      </div>
+
       {/* 슬라이드 뷰어 */}
       {isMobile ? (
         // 모바일: 세로 스크롤 레이아웃 (1200×675 비율 유지, 화면에 맞게 스케일 조정)
@@ -573,6 +586,17 @@ export default function ViewerContent() {
           </Button>
         </div>
       )}
+
+      {/* 광고 - 하단 */}
+      <div style={{
+        padding: isMobile ? '12px' : '20px',
+        background: '#FFFFFF',
+        borderTop: '1px solid #E5E7EB',
+        display: 'flex',
+        justifyContent: 'center',
+      }}>
+        <KakaoAdBanner />
+      </div>
     </div>
   );
 }

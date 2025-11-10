@@ -11,6 +11,8 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { TOSS_COLORS } from '@/constants/design';
 import { User, Mail, Calendar, CreditCard, FileText, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 /**
  * 유저 프로필 페이지
@@ -84,6 +86,11 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
       <MaxWidthContainer className="py-8 lg:py-12">
+        {/* 광고 - 상단 */}
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+
         {/* 페이지 헤더 */}
         <div className="mb-8">
           <h1
@@ -364,6 +371,11 @@ export default function ProfilePage() {
               </div>
             </Card>
           </div>
+        </div>
+
+        {/* 광고 - 하단 */}
+        <div className="mt-10">
+          <KakaoAdBanner />
         </div>
       </MaxWidthContainer>
     </div>

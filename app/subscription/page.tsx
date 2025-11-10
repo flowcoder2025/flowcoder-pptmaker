@@ -9,6 +9,8 @@ import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TOSS_COLORS } from '@/constants/design';
 import { Check, X, Star, Sparkles } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 /**
  * 구독 관리 페이지
@@ -37,6 +39,11 @@ export default function SubscriptionPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
+      {/* 광고 - 상단 */}
+      <div className="mb-8">
+        <KakaoAdMobileThick />
+      </div>
+
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
         <h1
@@ -141,6 +148,11 @@ export default function SubscriptionPage() {
 
       {/* 플랜 비교표 */}
       <PlanComparisonTable />
+
+      {/* 광고 - 하단 */}
+      <div className="my-10">
+        <KakaoAdBanner />
+      </div>
 
       {/* FAQ 또는 추가 정보 */}
       <div className="text-center mt-10">

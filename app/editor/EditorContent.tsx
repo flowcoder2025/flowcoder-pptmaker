@@ -16,6 +16,8 @@ import AddSlideDialog from '@/components/editor/AddSlideDialog';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import TemplateSelector from '@/components/editor/TemplateSelector';
 import MoreMenu from '@/components/editor/MoreMenu';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import type { SlideType } from '@/types/slide';
 
 
@@ -310,6 +312,11 @@ export default function EditorContent() {
         </div>
       </header>
 
+      {/* 광고 - 상단 */}
+      <div className="border-b border-gray-200 bg-white px-4 py-3 flex justify-center">
+        <KakaoAdMobileThick />
+      </div>
+
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 좌측: 슬라이드 리스트 + 편집 폼 */}
@@ -344,6 +351,11 @@ export default function EditorContent() {
         <p className="text-sm text-blue-800 text-center">
           💡 더 나은 편집 경험을 위해 데스크톱을 권장해요
         </p>
+      </div>
+
+      {/* 광고 - 하단 */}
+      <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-center">
+        <KakaoAdBanner />
       </div>
 
       {/* 슬라이드 추가 다이얼로그 */}

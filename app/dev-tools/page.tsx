@@ -5,6 +5,8 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
 import { TOSS_COLORS } from '@/constants/design';
 import { useState } from 'react';
+import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
+import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
 /**
  * 개발자 도구 페이지 (크래딧 시스템 v4.0)
@@ -142,6 +144,17 @@ export default function DevToolsPage() {
         >
           홈으로
         </button>
+      </div>
+
+      {/* 광고 - 상단 */}
+      <div style={{
+        marginBottom: '20px',
+        padding: '12px 0',
+        display: 'flex',
+        justifyContent: 'center',
+        borderBottom: '1px solid #E5E7EB',
+      }}>
+        <KakaoAdMobileThick />
       </div>
 
       {/* 메시지 표시 */}
@@ -464,6 +477,17 @@ export default function DevToolsPage() {
           <li><strong>크래딧 부족 테스트</strong>: 크래딧 초기화 + 최초 무료 소진 → 결제 모달 확인</li>
           <li><strong>월간 크래딧 제공 테스트</strong>: Pro 구독 → &ldquo;월간 크래딧 제공&rdquo; 버튼 클릭 → 490 크래딧 추가</li>
         </ul>
+      </div>
+
+      {/* 광고 - 하단 */}
+      <div style={{
+        marginTop: '30px',
+        padding: '12px 0',
+        display: 'flex',
+        justifyContent: 'center',
+        borderTop: '1px solid #E5E7EB',
+      }}>
+        <KakaoAdBanner />
       </div>
     </div>
   );
