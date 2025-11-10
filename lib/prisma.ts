@@ -1,14 +1,18 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Neon adapter 생성 (Vercel serverless 환경 호환)
-const adapter = new PrismaNeon({
+// PostgreSQL connection pool 생성
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL!
 })
+
+// PrismaPg adapter 생성 (Supabase PostgreSQL 호환, Vercel serverless 환경)
+const adapter = new PrismaPg(pool)
 
 export const prisma =
   globalForPrisma.prisma ??
