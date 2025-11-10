@@ -43,7 +43,7 @@ export default function RootLayout({
           async
           type="text/javascript"
           src="https://t1.daumcdn.net/kas/static/ba.min.js"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
       </body>
     </html>
