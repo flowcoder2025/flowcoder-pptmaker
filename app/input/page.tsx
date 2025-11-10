@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import type { DraftResponse } from '@/types/draft';
 
 export default function InputPage() {
   const router = useRouter();
@@ -39,6 +40,9 @@ export default function InputPage() {
   const [text, setText] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentModalType, setPaymentModalType] = useState<'pro' | 'deep' | null>(null);
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [draftContent, setDraftContent] = useState<string | null>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isPremiumUser = (plan === 'pro' || plan === 'premium') && isActive();
 
@@ -48,6 +52,78 @@ export default function InputPage() {
       router.push('/login?callbackUrl=/input');
     }
   }, [status, router]);
+
+  // 페이지 로드 시 임시저장 복원
+  useEffect(() => {
+    const loadDraft = async () => {
+      if (status !== 'authenticated' || !session) return;
+
+      try {
+        const res = await fetch('/api/drafts');
+        if (!res.ok) return;
+
+        const data: DraftResponse = await res.json();
+        if (data.draft && data.draft.content.trim()) {
+          setDraftContent(data.draft.content);
+          setShowDraftModal(true);
+        }
+      } catch (error) {
+        console.error('Failed to load draft:', error);
+      }
+    };
+
+    loadDraft();
+  }, [status, session]);
+
+  // 텍스트 변경 시 자동 저장 (디바운스 1초)
+  useEffect(() => {
+    // 로그인 안 되어있거나 생성 중이면 저장 안 함
+    if (status !== 'authenticated' || !session || isGenerating) {
+      return;
+    }
+
+    // 빈 텍스트면 저장 안 함
+    if (!text.trim()) {
+      return;
+    }
+
+    // 기존 타이머 취소
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    console.log('[Draft] 자동 저장 타이머 시작:', text.slice(0, 50) + '...');
+
+    // 1초 후 자동 저장
+    saveTimeoutRef.current = setTimeout(async () => {
+      console.log('[Draft] 서버에 저장 시작...');
+      try {
+        const res = await fetch('/api/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: text }),
+        });
+
+        if (!res.ok) {
+          const error = await res.text();
+          console.error('[Draft] 저장 실패:', error);
+          return;
+        }
+
+        const data = await res.json();
+        console.log('[Draft] 저장 성공:', data);
+      } catch (error) {
+        console.error('[Draft] 저장 에러:', error);
+      }
+    }, 1000);
+
+    // 클린업
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [text, status, session, isGenerating]);
 
   // 로딩 상태 표시
   if (status === 'loading') {
@@ -104,7 +180,34 @@ export default function InputPage() {
     }
 
     await generatePresentation(text);
+
+    // 생성 완료 시 임시저장 삭제
+    try {
+      await fetch('/api/drafts', { method: 'DELETE' });
+    } catch (error) {
+      console.error('Failed to delete draft:', error);
+    }
+
     router.push('/viewer');
+  };
+
+  const handleRestoreDraft = () => {
+    if (draftContent) {
+      setText(draftContent);
+    }
+    setShowDraftModal(false);
+  };
+
+  const handleDiscardDraft = async () => {
+    setShowDraftModal(false);
+    setDraftContent(null);
+
+    // 임시저장 삭제
+    try {
+      await fetch('/api/drafts', { method: 'DELETE' });
+    } catch (error) {
+      console.error('Failed to delete draft:', error);
+    }
   };
 
   const handleTemplateClick = (example: string) => {
@@ -462,6 +565,49 @@ export default function InputPage() {
                   </div>
                 )}
               </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 임시저장 복원 모달 */}
+      {showDraftModal && (
+        <div
+          onClick={() => setShowDraftModal(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="p-6 max-w-md w-full mx-4 bg-white shadow-2xl"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
+              이전에 작성하던 내용이 있어요
+            </h3>
+
+            <p className="text-gray-600 mb-4">
+              이전에 작성하던 내용을 불러올까요?
+            </p>
+
+            <div className="p-4 bg-gray-50 rounded-lg mb-4 max-h-40 overflow-y-auto">
+              <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-6">
+                {draftContent}
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleRestoreDraft}
+                className="flex-1"
+              >
+                불러오기
+              </Button>
+              <Button
+                onClick={handleDiscardDraft}
+                variant="outline"
+                className="flex-1"
+              >
+                새로 작성하기
+              </Button>
             </div>
           </Card>
         </div>
