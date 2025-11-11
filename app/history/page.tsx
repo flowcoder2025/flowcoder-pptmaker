@@ -492,30 +492,35 @@ function PresentationCard({
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg" ref={cardRef}>
-      {/* 썸네일 영역 - 16:9 비율 유지 */}
+      {/* 썸네일 영역 */}
       <div
-        className="w-full flex items-center justify-center relative overflow-hidden bg-white"
+        className="relative overflow-hidden w-full"
         style={{
           aspectRatio: '16/9',
           background: thumbnailDoc ? '#FFFFFF' : `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
         }}
       >
         {isVisible && thumbnailDoc ? (
-          <iframe
-            srcDoc={thumbnailDoc}
-            sandbox="allow-same-origin"
+          <div
             className="absolute inset-0"
             style={{
-              width: '1200px',
-              height: '675px',
-              border: 'none',
-              pointerEvents: 'none',
-              transform: 'scale(0.28)',
-              transformOrigin: 'center center',
+              transform: 'scale(0.29167)',
+              transformOrigin: 'top left',
             }}
-          />
+          >
+            <iframe
+              srcDoc={thumbnailDoc}
+              sandbox="allow-same-origin"
+              style={{
+                width: '1200px',
+                height: '675px',
+                border: 'none',
+                pointerEvents: 'none',
+              }}
+            />
+          </div>
         ) : (
-          <div className="text-white text-6xl">📊</div>
+          <div className="absolute inset-0 flex items-center justify-center text-white text-6xl">📊</div>
         )}
       </div>
 
