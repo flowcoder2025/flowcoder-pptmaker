@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,15 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
+import { CreditSourceType } from '@/types/credits'
 
 interface User {
   id: string
@@ -38,8 +46,19 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [creditAmount, setCreditAmount] = useState<string>('')
   const [creditDescription, setCreditDescription] = useState<string>('')
+  const [creditSourceType, setCreditSourceType] = useState<CreditSourceType>(
+    CreditSourceType.EVENT
+  )
+  const [creditExpiresInDays, setCreditExpiresInDays] = useState<string>('')
   const [selectedTier, setSelectedTier] = useState<'FREE' | 'PRO' | 'PREMIUM'>('FREE')
   const [processing, setProcessing] = useState(false)
+
+  // 검색/필터 상태
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [subscriptionFilter, setSubscriptionFilter] = useState<
+    'ALL' | 'FREE' | 'PRO' | 'PREMIUM'
+  >('ALL')
+  const [adminFilter, setAdminFilter] = useState<'ALL' | 'ADMIN' | 'USER'>('ALL')
 
   // 사용자 목록 조회
   useEffect(() => {
@@ -61,14 +80,50 @@ export default function AdminUsersPage() {
     }
   }
 
+  // 필터링된 사용자 목록
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      // 검색어 필터 (이메일 또는 이름)
+      const matchesSearch =
+        !searchQuery ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.name?.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // 구독 필터
+      const matchesSubscription =
+        subscriptionFilter === 'ALL' ||
+        (subscriptionFilter === 'FREE' && !user.subscription) ||
+        user.subscription?.tier === subscriptionFilter
+
+      // 관리자 필터
+      const matchesAdmin =
+        adminFilter === 'ALL' ||
+        (adminFilter === 'ADMIN' && user.isAdmin) ||
+        (adminFilter === 'USER' && !user.isAdmin)
+
+      return matchesSearch && matchesSubscription && matchesAdmin
+    })
+  }, [users, searchQuery, subscriptionFilter, adminFilter])
+
   // 크레딧 조정 처리
   async function handleCreditAdjustment() {
     if (!selectedUser) return
 
     const amount = parseInt(creditAmount)
-    if (isNaN(amount) || amount === 0) {
-      toast.error('유효한 금액을 입력해주세요.')
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('양수의 크레딧 금액을 입력해주세요.')
       return
+    }
+
+    // expiresInDays 검증 (제공된 경우)
+    let expiresInDays: number | undefined
+    if (creditExpiresInDays) {
+      const days = parseInt(creditExpiresInDays)
+      if (isNaN(days) || days <= 0) {
+        toast.error('유효기간은 양수여야 해요.')
+        return
+      }
+      expiresInDays = days
     }
 
     try {
@@ -76,23 +131,30 @@ export default function AdminUsersPage() {
       const res = await fetch(`/api/admin/users/${selectedUser.id}/credits`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, description: creditDescription }),
+        body: JSON.stringify({
+          amount,
+          sourceType: creditSourceType,
+          description: creditDescription,
+          expiresInDays,
+        }),
       })
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.error || '크레딧 조정 실패')
+        throw new Error(error.error || '크레딧 지급 실패')
       }
 
-      toast.success(amount > 0 ? '크레딧을 지급했어요.' : '크레딧을 차감했어요.')
+      toast.success('크레딧을 지급했어요.')
       setCreditDialogOpen(false)
       setCreditAmount('')
       setCreditDescription('')
+      setCreditSourceType(CreditSourceType.EVENT)
+      setCreditExpiresInDays('')
       setSelectedUser(null)
       fetchUsers() // 목록 새로고침
     } catch (error) {
       console.error(error)
-      toast.error(error instanceof Error ? error.message : '크레딧 조정에 실패했어요.')
+      toast.error(error instanceof Error ? error.message : '크레딧 지급에 실패했어요.')
     } finally {
       setProcessing(false)
     }
@@ -198,10 +260,96 @@ export default function AdminUsersPage() {
         </p>
       </div>
 
+      {/* 검색 및 필터 */}
+      <Card style={{ marginBottom: '24px' }}>
+        <CardContent style={{ paddingTop: '24px' }}>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'end' }}>
+            {/* 검색 */}
+            <div style={{ flex: '1', minWidth: '240px' }}>
+              <Label htmlFor="search" className="text-gray-700 font-medium">
+                검색
+              </Label>
+              <Input
+                id="search"
+                placeholder="이메일 또는 이름으로 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+
+            {/* 구독 필터 */}
+            <div style={{ minWidth: '180px' }}>
+              <Label className="text-gray-700 font-medium">구독 상태</Label>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <Button
+                  size="sm"
+                  variant={subscriptionFilter === 'ALL' ? 'default' : 'outline'}
+                  onClick={() => setSubscriptionFilter('ALL')}
+                >
+                  전체
+                </Button>
+                <Button
+                  size="sm"
+                  variant={subscriptionFilter === 'FREE' ? 'default' : 'outline'}
+                  onClick={() => setSubscriptionFilter('FREE')}
+                >
+                  FREE
+                </Button>
+                <Button
+                  size="sm"
+                  variant={subscriptionFilter === 'PRO' ? 'default' : 'outline'}
+                  onClick={() => setSubscriptionFilter('PRO')}
+                >
+                  PRO
+                </Button>
+                <Button
+                  size="sm"
+                  variant={subscriptionFilter === 'PREMIUM' ? 'default' : 'outline'}
+                  onClick={() => setSubscriptionFilter('PREMIUM')}
+                >
+                  PREMIUM
+                </Button>
+              </div>
+            </div>
+
+            {/* 관리자 필터 */}
+            <div style={{ minWidth: '160px' }}>
+              <Label className="text-gray-700 font-medium">권한</Label>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <Button
+                  size="sm"
+                  variant={adminFilter === 'ALL' ? 'default' : 'outline'}
+                  onClick={() => setAdminFilter('ALL')}
+                >
+                  전체
+                </Button>
+                <Button
+                  size="sm"
+                  variant={adminFilter === 'ADMIN' ? 'default' : 'outline'}
+                  onClick={() => setAdminFilter('ADMIN')}
+                >
+                  관리자
+                </Button>
+                <Button
+                  size="sm"
+                  variant={adminFilter === 'USER' ? 'default' : 'outline'}
+                  onClick={() => setAdminFilter('USER')}
+                >
+                  일반
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 사용자 목록 */}
       <Card>
         <CardHeader>
-          <CardTitle>사용자 목록 ({users.length}명)</CardTitle>
+          <CardTitle>
+            사용자 목록 ({filteredUsers.length}/{users.length}명)
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div style={{ overflowX: 'auto' }}>
@@ -237,7 +385,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr
                     key={user.id}
                     style={{
@@ -334,17 +482,71 @@ export default function AdminUsersPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px' }}>
             <div>
               <Label htmlFor="amount" className="text-gray-700 font-medium">
-                금액 (양수는 지급, 음수는 차감)
+                금액 (양수만 가능)
               </Label>
               <Input
                 id="amount"
                 type="number"
+                min="1"
                 value={creditAmount}
                 onChange={(e) => setCreditAmount(e.target.value)}
-                placeholder="예: 100 또는 -50"
+                placeholder="예: 100"
                 className="mt-2"
               />
             </div>
+            <div>
+              <Label htmlFor="sourceType" className="text-gray-700 font-medium">
+                크레딧 타입
+              </Label>
+              <Select
+                value={creditSourceType}
+                onValueChange={(value) => setCreditSourceType(value as CreditSourceType)}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="타입 선택" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-2 border-gray-300 shadow-lg">
+                  <SelectItem value={CreditSourceType.FREE} className="bg-white hover:bg-gray-100 cursor-pointer">
+                    FREE (영구, 무료 가입)
+                  </SelectItem>
+                  <SelectItem value={CreditSourceType.EVENT} className="bg-white hover:bg-gray-100 cursor-pointer">
+                    EVENT (유효기간 있음, 이벤트)
+                  </SelectItem>
+                  <SelectItem value={CreditSourceType.SUBSCRIPTION} className="bg-white hover:bg-gray-100 cursor-pointer">
+                    SUBSCRIPTION (30일, 구독)
+                  </SelectItem>
+                  <SelectItem value={CreditSourceType.PURCHASE} className="bg-white hover:bg-gray-100 cursor-pointer">
+                    PURCHASE (영구, 결제)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(creditSourceType === CreditSourceType.EVENT ||
+              creditSourceType === CreditSourceType.SUBSCRIPTION) && (
+              <div>
+                <Label htmlFor="expiresInDays" className="text-gray-700 font-medium">
+                  유효기간 (일)
+                  {creditSourceType === CreditSourceType.SUBSCRIPTION && (
+                    <span style={{ fontSize: '12px', color: '#6B7280', marginLeft: '8px' }}>
+                      (기본: 30일)
+                    </span>
+                  )}
+                </Label>
+                <Input
+                  id="expiresInDays"
+                  type="number"
+                  min="1"
+                  value={creditExpiresInDays}
+                  onChange={(e) => setCreditExpiresInDays(e.target.value)}
+                  placeholder={
+                    creditSourceType === CreditSourceType.SUBSCRIPTION
+                      ? '30'
+                      : '예: 7'
+                  }
+                  className="mt-2"
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="description" className="text-gray-700 font-medium">
                 사유 (선택)
@@ -373,6 +575,9 @@ export default function AdminUsersPage() {
                 setCreditDialogOpen(false)
                 setCreditAmount('')
                 setCreditDescription('')
+                setCreditSourceType(CreditSourceType.EVENT)
+                setCreditExpiresInDays('')
+                setSelectedUser(null)
               }}
               disabled={processing}
             >

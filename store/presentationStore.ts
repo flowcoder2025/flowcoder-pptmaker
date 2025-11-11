@@ -466,7 +466,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       console.log('✅ 프리젠테이션 저장 완료!');
 
-      // 🆕 저장 성공 후 무료 카운트 차감
+      // 🆕 저장 성공 후 무료 카운트 차감 및 크레딧 동기화
       if (isNew) {
         const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
 
@@ -481,6 +481,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           await creditStore.useFirstTimeFree('qualityGeneration');
           console.log('✅ 고품질 생성 최초 무료 사용 완료');
         }
+
+        // 크레딧 잔액 동기화 (프레젠테이션 생성 시 서버에서 1 크레딧 차감)
+        await creditStore.fetchBalance();
+        console.log('✅ 크레딧 잔액 동기화 완료');
       }
     } catch (error) {
       console.error('❌ 저장 실패:', error);
