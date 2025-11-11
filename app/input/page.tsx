@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { FileText } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
@@ -550,13 +551,15 @@ export default function InputPage() {
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {TEMPLATE_EXAMPLES.map((template) => (
-                    <button
+                    <Button
                       key={template.id}
                       onClick={() => handleTemplateClick(template.example)}
-                      className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0 text-xs"
                     >
                       {template.title}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -658,35 +661,66 @@ export default function InputPage() {
         >
           <Card
             onClick={(e) => e.stopPropagation()}
-            className="p-6 max-w-md w-full mx-4 bg-white shadow-2xl"
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
           >
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowDraftModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 파란색 문서 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <FileText size={48} className="text-primary" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
               이전에 작성하던 내용이 있어요
             </h3>
 
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-4 text-center">
               이전에 작성하던 내용을 불러올까요?
             </p>
 
-            <div className="p-4 bg-gray-50 rounded-lg mb-4 max-h-40 overflow-y-auto">
+            <div className="p-4 bg-gray-50 rounded-lg mb-6 max-h-40 overflow-y-auto">
               <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-6">
                 {draftContent}
               </p>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                onClick={handleRestoreDraft}
-                className="flex-1"
-              >
-                불러오기
-              </Button>
+            <div className="flex gap-3 justify-end">
               <Button
                 onClick={handleDiscardDraft}
                 variant="outline"
-                className="flex-1"
+                size="lg"
+                className="px-8"
               >
                 새로 작성하기
+              </Button>
+              <Button
+                onClick={handleRestoreDraft}
+                size="lg"
+                className="px-8"
+              >
+                불러오기
               </Button>
             </div>
           </Card>

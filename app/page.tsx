@@ -26,7 +26,7 @@ export default function HomePage() {
         <div className="text-center space-y-4 px-4">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
             한줄로 만드는{' '}
-            <span className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-blue-500 to-gray-800 bg-clip-text text-transparent">
               간편한 프리젠테이션
             </span>
           </h1>
@@ -155,7 +155,7 @@ export default function HomePage() {
           size="lg"
           className="min-w-[200px]"
         >
-          {BUTTON_TEXT.startFree} →
+          ✨ {BUTTON_TEXT.startFree}
         </Button>
 
         {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}

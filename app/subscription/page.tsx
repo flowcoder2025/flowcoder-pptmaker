@@ -132,7 +132,7 @@ export default function SubscriptionPage() {
                 }
               }}
             >
-              구독 취소해요
+              구독 취소
             </Button>
           )}
         </div>
@@ -302,8 +302,8 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
 
         {/* 구독 버튼 */}
         <Button
-          className={`w-full ${!current && !comingSoon ? 'bg-primary text-white' : ''}`}
-          variant={current || comingSoon ? 'outline' : 'default'}
+          className={`w-full ${recommended && !current && !comingSoon ? 'bg-primary text-white' : ''}`}
+          variant={current || comingSoon || !recommended ? 'outline' : 'default'}
           disabled={current || comingSoon}
           onClick={() => onSubscribe(plan)}
         >

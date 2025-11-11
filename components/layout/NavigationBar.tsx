@@ -78,7 +78,7 @@ export default function NavigationBar() {
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           {/* 모바일: 텍스트 2줄 로고 */}
-          <div className="flex flex-col leading-none md:hidden bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+          <div className="flex flex-col leading-none md:hidden bg-gradient-to-br from-blue-500 to-gray-800 bg-clip-text text-transparent">
             <div className="text-sm font-bold">PPT</div>
             <div className="text-sm font-bold">Maker</div>
           </div>
@@ -89,7 +89,7 @@ export default function NavigationBar() {
             alt="PPT Maker Logo"
             className="h-12 w-12 object-contain hidden md:block"
           />
-          <div className="text-lg font-bold hidden md:block bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+          <div className="text-lg font-bold hidden md:block bg-gradient-to-br from-blue-500 to-gray-800 bg-clip-text text-transparent">
             PPT Maker by FlowCoder
           </div>
         </Link>
