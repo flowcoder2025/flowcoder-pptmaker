@@ -301,44 +301,100 @@ export default function CreditsPage() {
 
       {/* 결제 채널 선택 다이얼로그 */}
       <Dialog open={isChannelDialogOpen} onOpenChange={setIsChannelDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>결제 방법을 선택해주세요</DialogTitle>
             <DialogDescription>
               {selectedBundle && (
                 <span>
                   크레딧 {selectedBundle.credits}개 (₩
-                  {selectedBundle.price.toLocaleString()})를 구매해요
+                  {selectedBundle.price.toLocaleString()})를 빠르고 안전하게 결제할 수 있어요
                 </span>
               )}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-4">
-            {Object.entries(PAYMENT_CHANNELS).map(([key, channel]) => (
-              <Button
-                key={key}
-                variant="outline"
-                className="w-full justify-start text-left h-auto py-4"
-                onClick={() => handlePaymentChannelSelect(channel.key)}
-                disabled={isLoading}
-              >
-                <div>
-                  <div
-                    className="font-semibold mb-1"
-                    style={{ color: TOSS_COLORS.text }}
-                  >
-                    {channel.name}
-                  </div>
-                  <div
-                    className="text-xs"
-                    style={{ color: TOSS_COLORS.textSecondary }}
-                  >
-                    {channel.pgProvider} • {channel.mid}
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6">
+            {/* 토스페이 */}
+            <button
+              type="button"
+              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.TOSSPAY.key)}
+              disabled={isLoading}
+              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-3xl">💳</span>
+                <div className="text-left">
+                  <div className="font-bold text-lg text-blue-700">토스페이</div>
                 </div>
-              </Button>
-            ))}
+              </div>
+            </button>
+
+            {/* 카카오페이 (일반) */}
+            <button
+              type="button"
+              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.KAKAOPAY_ONETIME.key)}
+              disabled={isLoading}
+              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-yellow-50 to-yellow-100 hover:border-yellow-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-3xl">💛</span>
+                <div className="text-left">
+                  <div className="font-bold text-lg text-yellow-800">카카오페이</div>
+                </div>
+              </div>
+            </button>
+
+            {/* 카카오페이 (정기) */}
+            <button
+              type="button"
+              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.KAKAOPAY_SUBSCRIPTION.key)}
+              disabled={isLoading}
+              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-yellow-100 to-yellow-200 hover:border-yellow-600 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-3xl">🔄</span>
+                <div className="text-left">
+                  <div className="font-bold text-lg text-yellow-900">카카오페이</div>
+                  <span className="text-xs px-2 py-0.5 bg-yellow-300 text-yellow-900 rounded-full font-semibold">
+                    정기
+                  </span>
+                </div>
+              </div>
+            </button>
+
+            {/* 이니시스 (일반) */}
+            <button
+              type="button"
+              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.INICIS_ONETIME.key)}
+              disabled={isLoading}
+              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-gray-50 to-gray-100 hover:border-gray-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-3xl">🏦</span>
+                <div className="text-left">
+                  <div className="font-bold text-lg text-gray-700">이니시스</div>
+                </div>
+              </div>
+            </button>
+
+            {/* 이니시스 (정기) */}
+            <button
+              type="button"
+              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key)}
+              disabled={isLoading}
+              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-gray-100 to-gray-200 hover:border-gray-600 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-3xl">🔄</span>
+                <div className="text-left">
+                  <div className="font-bold text-lg text-gray-800">이니시스</div>
+                  <span className="text-xs px-2 py-0.5 bg-gray-300 text-gray-800 rounded-full font-semibold">
+                    정기
+                  </span>
+                </div>
+              </div>
+            </button>
           </div>
 
           <DialogFooter>

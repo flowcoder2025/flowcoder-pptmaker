@@ -54,6 +54,18 @@
 
 ### 🎨 UI/UX
 
+#### 2025-11-12
+- **결제 채널 선택 UI를 modern grid card 레이아웃으로 개선** (2ea8b51)
+  - 구독/크레딧 페이지 Dialog 디자인 전면 개선
+  - 레이아웃: 세로 Button 리스트 → 2-column responsive grid
+  - 브랜드 색상 gradient 배경 적용 (토스: blue, 카카오: yellow, 이니시스: gray)
+  - 대형 emoji 아이콘 추가 (💳, 💛, 🔄, 🏦)
+  - Hover 효과: scale-105, border 색상 변경, shadow 강화
+  - 정기 결제 옵션에 배지 추가
+  - 불필요한 기술 정보 제거 (PG provider, MID)
+  - Dialog description 단순화
+  - 사용자 피드백 반영: 심플하고 모던한 디자인으로 변경
+
 #### 2025-11-11
 - **네비게이션 바 재구성으로 사용자 경험 개선**
   - 메인 nav 바: 핵심 기능 중심 재배치
