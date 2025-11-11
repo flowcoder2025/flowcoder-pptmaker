@@ -38,7 +38,7 @@ interface PresentationState {
   useProHtmlModel: boolean; // true: Pro (고품질 HTML), false: Flash (빠른 HTML)
 
   // 목표 슬라이드 분량
-  targetSlideCount: number; // 10-40 범위
+  targetSlideCount: number; // 플랜별로 동적 제한 (Free: 10, Pro: 20, Premium: 50)
 
   // 액션
   setCurrentPresentation: (presentation: Presentation | null) => void;
@@ -86,7 +86,9 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
   setUseProHtmlModel: (usePro) => set({ useProHtmlModel: usePro }),
 
-  setTargetSlideCount: (count) => set({ targetSlideCount: Math.max(10, Math.min(40, count)) }),
+  // 플랜별 최대값 검증은 UI 레벨(app/input/page.tsx)에서 처리
+  // 최소값 5만 보장
+  setTargetSlideCount: (count) => set({ targetSlideCount: Math.max(5, count) }),
 
   generatePresentation: async (text: string, attachments?: AttachmentFile[]) => {
     set({

@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
 import type { AttachmentFile } from '@/types/research';
@@ -88,6 +89,17 @@ export default function InputPage() {
 
     loadDraft();
   }, [status, session]);
+
+  // 플랜 변경 시 슬라이더 값 조정
+  useEffect(() => {
+    const planMaxSlides = PLAN_BENEFITS[plan].benefits.maxSlides;
+
+    // 현재 슬라이더 값이 플랜 최대값을 초과하면 조정
+    if (targetSlideCount > planMaxSlides) {
+      console.log(`📊 플랜 제한에 맞춰 슬라이드 수 조정: ${targetSlideCount}장 → ${planMaxSlides}장`);
+      setTargetSlideCount(planMaxSlides);
+    }
+  }, [plan, targetSlideCount, setTargetSlideCount]);
 
   // 텍스트 변경 시 자동 저장 (디바운스 1초)
   useEffect(() => {
@@ -494,20 +506,23 @@ export default function InputPage() {
               <Slider
                 value={[targetSlideCount]}
                 onValueChange={([value]) => setTargetSlideCount(value)}
-                min={10}
-                max={40}
+                min={5}
+                max={PLAN_BENEFITS[plan].benefits.maxSlides}
                 step={1}
                 className="mb-4"
               />
 
               <div className="flex justify-between text-xs text-gray-500 mb-3">
-                <span>10장</span>
-                <span>40장</span>
+                <span>5장</span>
+                <span>{PLAN_BENEFITS[plan].benefits.maxSlides}장</span>
               </div>
 
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-xs text-yellow-800">
                   ⚠️ AI 특성상 ±2-3장 오차가 있을 수 있어요
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  💡 {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
                 </p>
               </div>
             </div>
