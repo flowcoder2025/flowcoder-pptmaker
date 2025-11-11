@@ -49,20 +49,13 @@ export async function generateSlideContent(options: ContentGenerationOptions): P
 ${userInput}
 `;
 
-  // 자료 조사 결과가 있으면 포함 (길이 제한: 최대 3000자)
+  // 자료 조사 결과가 있으면 포함
+  // Perplexity API에서 이미 3000자로 제한되어 있음 (app/api/research/route.ts)
   if (research && research.content) {
-    let researchContent = research.content;
-
-    // 자료가 너무 길면 요약 (토큰 절약)
-    if (researchContent.length > 5000) {
-      console.log(`⚠️ 자료 조사 결과가 너무 깁니다 (${researchContent.length}자). 3000자로 축약합니다.`);
-      researchContent = researchContent.substring(0, 3000) + '\n\n... (이하 생략, 핵심 내용만 포함)';
-    }
-
     prompt += `
 
 **조사된 자료:**
-${researchContent}
+${research.content}
 
 **출처 (${research.sources.length}개):**
 ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).join('\n')}
