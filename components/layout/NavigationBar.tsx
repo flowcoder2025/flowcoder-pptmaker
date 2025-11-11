@@ -36,8 +36,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: '홈', href: '/', icon: Home },
   { label: '만들기', href: '/input', icon: Sparkles },
   { label: '히스토리', href: '/history', icon: FileText },
-  { label: '구독', href: '/subscription', icon: Star },
-  { label: '크레딧', href: '/credits', icon: Gem },
 ];
 
 export default function NavigationBar() {
@@ -213,13 +211,6 @@ export default function NavigationBar() {
                   >
                     <User size={16} className="mr-2" />
                     프로필
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => router.push('/history')}
-                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
-                  >
-                    <FileText size={16} className="mr-2" />
-                    내 프리젠테이션
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => router.push('/subscription')}
