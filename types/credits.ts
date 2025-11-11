@@ -34,6 +34,9 @@ export enum CreditTransactionType {
   SUBSCRIPTION = 'SUBSCRIPTION',
   PURCHASE = 'PURCHASE',
 
+  // 지급 전체 (쿼리용)
+  GRANT = 'GRANT', // FREE, EVENT, SUBSCRIPTION, PURCHASE 모두 포함
+
   // 액션 타입 (사용/환불/만료)
   USAGE = 'USAGE', // 크레딧 사용
   REFUND = 'REFUND', // 환불
@@ -92,7 +95,7 @@ export interface ExpiringCredit {
  * 크레딧 사용 내역 (타입별)
  */
 export interface CreditUsageBreakdown {
-  sourceType: CreditSourceType
+  sourceType: CreditSourceType | null // null은 LEGACY 크레딧
   amount: number
 }
 

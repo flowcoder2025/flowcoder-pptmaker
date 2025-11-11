@@ -149,14 +149,15 @@ export async function consumeCredits(
   const availableCredits = await prisma.creditTransaction.findMany({
     where: {
       userId,
-      sourceType: {
+      type: {
         in: [
-          CreditSourceType.FREE,
-          CreditSourceType.EVENT,
-          CreditSourceType.SUBSCRIPTION,
-          CreditSourceType.PURCHASE,
-        ],
-      },
+          CreditTransactionType.FREE,
+          CreditTransactionType.EVENT,
+          CreditTransactionType.SUBSCRIPTION,
+          CreditTransactionType.PURCHASE,
+        ]
+      }, // 지급된 크레딧만 (USAGE, REFUND, EXPIRED 제외)
+      amount: { gt: 0 }, // 양수만 (적립)
       OR: [
         { expiresAt: null },
         { expiresAt: { gt: new Date() } },
@@ -171,6 +172,11 @@ export async function consumeCredits(
     },
   })
 
+  console.log(`[consumeCredits] 사용 가능한 크레딧: ${availableCredits.length}건`)
+  if (availableCredits.length > 0) {
+    console.log('[consumeCredits] 크레딧 샘플:', availableCredits[0])
+  }
+
   // 2. 타입별로 그룹화 및 잔액 계산
   interface CreditGroup {
     balance: number
@@ -180,7 +186,8 @@ export async function consumeCredits(
   const balanceByType: Record<string, CreditGroup> = {}
 
   for (const tx of availableCredits) {
-    const key = tx.sourceType!
+    // sourceType이 null인 경우 LEGACY로 처리 (하위 호환성)
+    const key = tx.sourceType || 'LEGACY'
     if (!balanceByType[key]) {
       balanceByType[key] = { balance: 0, transactions: [] }
     }
@@ -202,11 +209,12 @@ export async function consumeCredits(
   let remaining = amount
   const usageRecords: CreditUsageBreakdown[] = []
 
-  const priorityOrder: CreditSourceType[] = [
+  const priorityOrder: (CreditSourceType | 'LEGACY')[] = [
     CreditSourceType.FREE,
     CreditSourceType.EVENT,
     CreditSourceType.SUBSCRIPTION,
     CreditSourceType.PURCHASE,
+    'LEGACY', // sourceType이 null인 구형 크레딧 (가장 낮은 우선순위)
   ]
 
   for (const sourceType of priorityOrder) {
@@ -217,7 +225,10 @@ export async function consumeCredits(
     const toConsume = Math.min(remaining, available)
 
     if (toConsume > 0) {
-      usageRecords.push({ sourceType, amount: toConsume })
+      usageRecords.push({
+        sourceType: sourceType === 'LEGACY' ? null : (sourceType as CreditSourceType),
+        amount: toConsume,
+      })
       remaining -= toConsume
     }
   }
