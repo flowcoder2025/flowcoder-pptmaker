@@ -1,52 +1,110 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { prisma } from '@/lib/prisma'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 const typeLabels: Record<string, { label: string; color: string }> = {
+  FREE: { label: '무료', color: 'bg-blue-100 text-blue-800' },
+  EVENT: { label: '이벤트', color: 'bg-purple-100 text-purple-800' },
+  SUBSCRIPTION: { label: '구독', color: 'bg-green-100 text-green-800' },
   PURCHASE: { label: '구매', color: 'bg-green-100 text-green-800' },
   USAGE: { label: '사용', color: 'bg-red-100 text-red-800' },
   REFUND: { label: '환불', color: 'bg-orange-100 text-orange-800' },
-  BONUS: { label: '보너스', color: 'bg-blue-100 text-blue-800' },
+  EXPIRED: { label: '만료', color: 'bg-gray-100 text-gray-800' },
 }
 
-export default async function AdminCreditsPage() {
-  // 병렬로 통계 및 거래 내역 조회
-  const [stats, transactions] = await Promise.all([
-    // type별 통계
-    prisma.creditTransaction.groupBy({
-      by: ['type'],
-      _sum: { amount: true },
-    }),
+const sourceTypeLabels: Record<string, string> = {
+  FREE: '무료',
+  EVENT: '이벤트',
+  SUBSCRIPTION: '구독',
+  PURCHASE: '구매',
+}
 
-    // 최근 거래 내역 (50개)
-    prisma.creditTransaction.findMany({
-      take: 50,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-    }),
-  ])
+interface Transaction {
+  id: string
+  userId: string
+  userName: string
+  type: string
+  sourceType: string | null
+  amount: number
+  balance: number
+  description: string | null
+  expiresAt: string | null
+  createdAt: string
+}
 
-  // 통계 데이터 변환
-  const statsMap = stats.reduce(
-    (acc, stat) => {
-      acc[stat.type] = stat._sum.amount || 0
-      return acc
-    },
-    {} as Record<string, number>
-  )
+interface Stats {
+  purchase: number
+  usage: number
+  refund: number
+  bonus: number
+}
 
-  const creditStats = {
-    purchase: statsMap.PURCHASE || 0,
-    usage: Math.abs(statsMap.USAGE || 0),
-    refund: Math.abs(statsMap.REFUND || 0),
-    bonus: statsMap.BONUS || 0,
+export default function AdminCreditsPage() {
+  const [stats, setStats] = useState<Stats>({
+    purchase: 0,
+    usage: 0,
+    refund: 0,
+    bonus: 0,
+  })
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // 필터 상태
+  const [search, setSearch] = useState('')
+  const [sourceType, setSourceType] = useState('')
+  const [includeExpired, setIncludeExpired] = useState(false)
+
+  // 데이터 가져오기
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (search) params.append('search', search)
+      if (sourceType) params.append('sourceType', sourceType)
+      params.append('includeExpired', String(includeExpired))
+
+      const res = await fetch(`/api/admin/credits?${params}`)
+      if (!res.ok) throw new Error('데이터 로드 실패')
+
+      const data = await res.json()
+      setStats(data.stats)
+      setTransactions(data.transactions)
+    } catch (error) {
+      console.error('Error fetching credits:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 초기 로드 및 필터 변경 시 재로드
+  useEffect(() => {
+    fetchData()
+  }, [search, sourceType, includeExpired])
+
+  // 유효기간 표시 헬퍼
+  const getExpirationDisplay = (expiresAt: string | null) => {
+    if (!expiresAt) {
+      return { text: '영구', color: 'text-green-600', days: null }
+    }
+
+    const now = new Date()
+    const expiry = new Date(expiresAt)
+    const diffMs = expiry.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) {
+      return { text: '만료됨', color: 'text-red-600', days: diffDays }
+    } else if (diffDays === 0) {
+      return { text: '오늘 만료', color: 'text-orange-600', days: diffDays }
+    } else if (diffDays <= 7) {
+      return { text: `${diffDays}일 남음`, color: 'text-orange-600', days: diffDays }
+    } else {
+      return { text: `${diffDays}일 남음`, color: 'text-gray-600', days: diffDays }
+    }
   }
 
   return (
@@ -85,7 +143,7 @@ export default async function AdminCreditsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">
-              {creditStats.purchase.toLocaleString()}
+              {stats.purchase.toLocaleString()}
             </div>
             <p className="text-xs text-gray-500 mt-1">총 판매 크래딧</p>
           </CardContent>
@@ -99,7 +157,7 @@ export default async function AdminCreditsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-red-600">
-              {creditStats.usage.toLocaleString()}
+              {stats.usage.toLocaleString()}
             </div>
             <p className="text-xs text-gray-500 mt-1">총 소비 크래딧</p>
           </CardContent>
@@ -113,7 +171,7 @@ export default async function AdminCreditsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-orange-600">
-              {creditStats.refund.toLocaleString()}
+              {stats.refund.toLocaleString()}
             </div>
             <p className="text-xs text-gray-500 mt-1">총 환불 크래딧</p>
           </CardContent>
@@ -127,96 +185,193 @@ export default async function AdminCreditsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">
-              {creditStats.bonus.toLocaleString()}
+              {stats.bonus.toLocaleString()}
             </div>
             <p className="text-xs text-gray-500 mt-1">총 지급 보너스</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* 필터 및 검색 */}
+      <Card style={{ marginBottom: '20px' }}>
+        <CardHeader>
+          <CardTitle>필터 및 검색</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* 검색 */}
+            <div>
+              <label style={{ fontSize: '14px', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
+                사용자 검색 (이메일 또는 이름)
+              </label>
+              <Input
+                type="text"
+                placeholder="이메일 또는 이름을 입력하세요"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* 소스 타입 필터 */}
+            <div>
+              <label style={{ fontSize: '14px', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
+                소스 타입 필터
+              </label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <Button
+                  variant={sourceType === '' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSourceType('')}
+                >
+                  전체
+                </Button>
+                {Object.entries(sourceTypeLabels).map(([key, label]) => (
+                  <Button
+                    key={key}
+                    variant={sourceType === key ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSourceType(key)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* 만료 포함 여부 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                id="includeExpired"
+                checked={includeExpired}
+                onChange={(e) => setIncludeExpired(e.target.checked)}
+                style={{ width: '16px', height: '16px' }}
+              />
+              <label htmlFor="includeExpired" style={{ fontSize: '14px', cursor: 'pointer' }}>
+                만료된 크래딧 포함
+              </label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 거래 내역 */}
       <Card>
         <CardHeader>
-          <CardTitle>최근 거래 내역</CardTitle>
+          <CardTitle>거래 내역 ({transactions.length}개)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: '2px solid #E5E7EB',
-                    textAlign: 'left',
-                  }}
-                >
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    사용자
-                  </th>
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    타입
-                  </th>
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    금액
-                  </th>
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    잔액
-                  </th>
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    사유
-                  </th>
-                  <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
-                    거래 시간
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((tx) => {
-                  const typeInfo = typeLabels[tx.type] || { label: tx.type, color: '' }
-                  return (
-                    <tr
-                      key={tx.id}
-                      style={{
-                        borderBottom: '1px solid #F3F4F6',
-                      }}
-                    >
-                      <td style={{ padding: '12px 8px', fontSize: '14px', color: '#374151' }}>
-                        {tx.user.name || tx.user.email || '알 수 없음'}
-                      </td>
-                      <td style={{ padding: '12px 8px' }}>
-                        <Badge variant="outline">{typeInfo.label}</Badge>
-                      </td>
-                      <td
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>
+              불러오고 있어요...
+            </div>
+          ) : transactions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280' }}>
+              거래 내역이 없어요.
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr
+                    style={{
+                      borderBottom: '2px solid #E5E7EB',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      사용자
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      타입
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      소스
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      금액
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      잔액
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      유효기간
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      사유
+                    </th>
+                    <th style={{ padding: '12px 8px', fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>
+                      거래 시간
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx) => {
+                    const typeInfo = typeLabels[tx.type] || { label: tx.type, color: '' }
+                    const sourceInfo = tx.sourceType ? sourceTypeLabels[tx.sourceType] : '-'
+                    const expiration = getExpirationDisplay(tx.expiresAt)
+
+                    return (
+                      <tr
+                        key={tx.id}
                         style={{
-                          padding: '12px 8px',
-                          fontSize: '14px',
-                          fontWeight: 600,
-                          color: tx.amount > 0 ? '#10B981' : '#EF4444',
+                          borderBottom: '1px solid #F3F4F6',
                         }}
                       >
-                        {tx.amount > 0 ? '+' : ''}
-                        {tx.amount.toLocaleString()}
-                      </td>
-                      <td style={{ padding: '12px 8px', fontSize: '14px', color: '#374151' }}>
-                        {tx.balance.toLocaleString()}
-                      </td>
-                      <td style={{ padding: '12px 8px', fontSize: '14px', color: '#6B7280' }}>
-                        {tx.description || '-'}
-                      </td>
-                      <td style={{ padding: '12px 8px', fontSize: '14px', color: '#9CA3AF' }}>
-                        {new Date(tx.createdAt).toLocaleString('ko-KR', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <td style={{ padding: '12px 8px', fontSize: '14px', color: '#374151' }}>
+                          {tx.userName}
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <Badge variant="outline" className={typeInfo.color}>
+                            {typeInfo.label}
+                          </Badge>
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '14px', color: '#6B7280' }}>
+                          {sourceInfo}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 8px',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: tx.amount > 0 ? '#10B981' : '#EF4444',
+                          }}
+                        >
+                          {tx.amount > 0 ? '+' : ''}
+                          {tx.amount.toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '14px', color: '#374151' }}>
+                          {tx.balance.toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '14px' }}>
+                          <span className={expiration.color}>
+                            {expiration.text}
+                          </span>
+                          {tx.expiresAt && (
+                            <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>
+                              {new Date(tx.expiresAt).toLocaleDateString('ko-KR')}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '14px', color: '#6B7280' }}>
+                          {tx.description || '-'}
+                        </td>
+                        <td style={{ padding: '12px 8px', fontSize: '14px', color: '#9CA3AF' }}>
+                          {new Date(tx.createdAt).toLocaleString('ko-KR', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
