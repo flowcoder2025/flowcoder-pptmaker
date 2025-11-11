@@ -37,12 +37,16 @@ interface PresentationState {
   // HTML 생성 모델 선택 (독립적으로 제어)
   useProHtmlModel: boolean; // true: Pro (고품질 HTML), false: Flash (빠른 HTML)
 
+  // 목표 슬라이드 분량
+  targetSlideCount: number; // 10-40 범위
+
   // 액션
   setCurrentPresentation: (presentation: Presentation | null) => void;
   setSelectedColorPreset: (presetId: string) => void;
   setResearchMode: (mode: ResearchMode) => void;
   setUseProContentModel: (usePro: boolean) => void;
   setUseProHtmlModel: (usePro: boolean) => void;
+  setTargetSlideCount: (count: number) => void;
   generatePresentation: (text: string, attachments?: AttachmentFile[]) => Promise<void>;
   savePresentation: () => Promise<void>;
   fetchPresentations: () => Promise<Presentation[]>;
@@ -70,6 +74,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   researchMode: 'none', // 기본값: 자료 조사 안함
   useProContentModel: false, // 기본값: Flash (빠른속도)
   useProHtmlModel: true, // 기본값: Pro (고품질 HTML) - A/B 테스트 후 변경 고려
+  targetSlideCount: 20, // 기본값: 20장 (10-40 범위)
 
   setCurrentPresentation: (presentation) => set({ currentPresentation: presentation }),
 
@@ -80,6 +85,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   setUseProContentModel: (usePro) => set({ useProContentModel: usePro }),
 
   setUseProHtmlModel: (usePro) => set({ useProHtmlModel: usePro }),
+
+  setTargetSlideCount: (count) => set({ targetSlideCount: Math.max(10, Math.min(40, count)) }),
 
   generatePresentation: async (text: string, attachments?: AttachmentFile[]) => {
     set({
@@ -95,11 +102,12 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       console.log('✅ 슬라이드 생성 시작');
 
-      const { selectedColorPresetId, researchMode, useProContentModel } = get();
+      const { selectedColorPresetId, researchMode, useProContentModel, targetSlideCount } = get();
 
       // 멀티모달 분기: 파일 첨부가 있으면 /api/generate 엔드포인트 호출
       if (attachments && attachments.length > 0) {
         console.log(`📎 멀티모달 생성 모드 (파일 ${attachments.length}개)`);
+        console.log(`🎯 목표 슬라이드 분량: ${targetSlideCount}장 (±2-3장 오차 가능)`);
 
         set({ generationStep: 'parsing' });
 
@@ -111,7 +119,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             attachments,
             researchMode,
             model: useProContentModel ? 'pro' : 'flash',
-            slideCount: maxSlides,
+            slideCount: targetSlideCount, // 사용자 설정값 사용
             plan: subscriptionStore.plan,
           }),
         });
@@ -174,6 +182,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       // 기존 로직 (파일 첨부 없는 경우)
       let enrichedContent = text;
 
+      console.log(`🎯 목표 슬라이드 분량: ${targetSlideCount}장 (±2-3장 오차 가능)`);
+
       // 1단계 (선택): 자료 조사
       if (researchMode !== 'none') {
         const config = RESEARCH_MODE_CONFIG[researchMode];
@@ -188,7 +198,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             userInput: text,
             research: researchResult,
             useProModel: useProContentModel,
-            maxSlides,
+            maxSlides: targetSlideCount, // 사용자 설정값 사용
           });
           console.log('✅ 슬라이드 콘텐츠 생성 완료');
         }
@@ -198,7 +208,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         enrichedContent = await generateSlideContent({
           userInput: text,
           useProModel: useProContentModel,
-          maxSlides,
+          maxSlides: targetSlideCount, // 사용자 설정값 사용
         });
         console.log('✅ 슬라이드 콘텐츠 생성 완료');
       }

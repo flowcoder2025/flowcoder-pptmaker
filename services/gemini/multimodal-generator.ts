@@ -67,10 +67,10 @@ export async function generateMultimodalSlideContent(
   // 프롬프트 구성 - content-generator.ts와 100% 동일
   let prompt = `당신은 프리젠테이션 콘텐츠 전문가입니다. 주어진 정보를 바탕으로 UnifiedPPTJSON 형식의 슬라이드 데이터를 생성해주세요.
 
-🚨 **중요: 슬라이드 수 제한 = 최대 ${maxSlides}장** (플랜별 엄격한 제한)
-- 절대 ${maxSlides}장을 초과하지 마세요
-- 초과 시 자동으로 삭제됩니다
-- 핵심 내용만 간결하게 구성하세요
+🚨 **중요: 슬라이드 수 목표 = ${maxSlides}장 (±2-3장 오차 허용)**
+- 목표: ${maxSlides}장
+- 허용 범위: ${maxSlides - 3} ~ ${maxSlides + 3}장
+- AI 특성상 정확히 맞추기 어려울 수 있지만 최대한 목표에 맞춰주세요
 
 **사용자 요청:**
 ${userInput}
@@ -605,9 +605,8 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
    - ❌ 절대 금지: 아젠다 중복 생성
 
 3. 슬라이드 수 목표:
-   - 최소: 15개
-   - 권장: 20~25개
-   - 최대: 30개
+   - 목표: ${maxSlides}개 (±2-3개 오차 허용)
+   - 예상 범위: ${maxSlides - 3} ~ ${maxSlides + 3}개
    - 불필요한 중복 슬라이드 생성 금지
 
 **수치 신뢰성 규칙 (CRITICAL):**

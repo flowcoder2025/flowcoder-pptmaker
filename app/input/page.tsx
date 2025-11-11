@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
@@ -33,7 +34,9 @@ export default function InputPage() {
     researchMode,
     setResearchMode,
     useProContentModel,
-    setUseProContentModel
+    setUseProContentModel,
+    targetSlideCount,
+    setTargetSlideCount
   } = usePresentationStore();
 
   const { plan, isActive, fetchSubscription } = useSubscriptionStore();
@@ -415,10 +418,10 @@ export default function InputPage() {
               </div>
             </div>
 
-            {/* 생성 품질 */}
+            {/* 생성 모델 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                🤖 생성 품질
+                🤖 생성 모델
               </h3>
               <div className="space-y-2">
                 <button
@@ -431,14 +434,14 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ⚡ 빠른 생성
+                      ⚡ Flash 모델
                     </span>
                     <span className="text-xs font-semibold text-green-600">
                       무료
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
-                    빠르고 경제적이에요
+                    빠르고 많은 슬라이드 (~{Math.ceil(targetSlideCount * 1.2)}개)
                   </p>
                 </button>
 
@@ -452,7 +455,7 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ✨ 고품질 생성
+                      ✨ Pro 모델
                     </span>
                     <span className="text-xs font-semibold text-blue-600">
                       {(() => {
@@ -471,9 +474,41 @@ export default function InputPage() {
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
-                    더 나은 품질이에요
+                    정제된 핵심 슬라이드 (~{targetSlideCount}개)
                   </p>
                 </button>
+              </div>
+            </div>
+
+            {/* 슬라이드 분량 */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  📊 슬라이드 분량
+                </h3>
+                <span className="text-sm font-bold text-blue-600">
+                  {targetSlideCount}장
+                </span>
+              </div>
+
+              <Slider
+                value={[targetSlideCount]}
+                onValueChange={([value]) => setTargetSlideCount(value)}
+                min={10}
+                max={40}
+                step={1}
+                className="mb-4"
+              />
+
+              <div className="flex justify-between text-xs text-gray-500 mb-3">
+                <span>10장</span>
+                <span>40장</span>
+              </div>
+
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800">
+                  ⚠️ AI 특성상 ±2-3장 오차가 있을 수 있어요
+                </p>
               </div>
             </div>
           </div>
