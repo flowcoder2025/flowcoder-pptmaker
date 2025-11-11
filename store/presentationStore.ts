@@ -98,13 +98,61 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     });
 
     try {
-      // 웹 서비스에서는 광고 없이 진행 (향후 구독 모델로 수익화)
+      // Store 가져오기
       const subscriptionStore = await import('@/store/subscriptionStore').then(m => m.useSubscriptionStore.getState());
+      const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
       const maxSlides = subscriptionStore.getMaxSlides();
 
       console.log('✅ 슬라이드 생성 시작');
 
       const { selectedColorPresetId, researchMode, useProContentModel, targetSlideCount } = get();
+
+      // 💳 크레딧 차감 로직
+      // 1. 깊은 조사 사용 시
+      if (researchMode === 'deep') {
+        const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
+
+        if (isFirstFree) {
+          console.log('🎁 깊은 조사 최초 1회 무료 사용');
+          await creditStore.useFirstTimeFree('deepResearch');
+        } else {
+          const deepResearchCost = creditStore.getCreditCost('deepResearch');
+          const hasCredits = creditStore.canUseCredits(deepResearchCost);
+
+          if (!hasCredits) {
+            throw new Error(`크레딧이 부족해요. 깊은 조사를 사용하려면 ${deepResearchCost} 크레딧이 필요해요.`);
+          }
+
+          const success = await creditStore.useCredits(deepResearchCost);
+          if (!success) {
+            throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+          }
+          console.log(`💳 깊은 조사 크레딧 차감: -${deepResearchCost}`);
+        }
+      }
+
+      // 2. Pro 모델 사용 시
+      if (useProContentModel) {
+        const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
+
+        if (isFirstFree) {
+          console.log('🎁 고품질 생성 최초 1회 무료 사용');
+          await creditStore.useFirstTimeFree('qualityGeneration');
+        } else {
+          const qualityCost = creditStore.getCreditCost('qualityGeneration');
+          const hasCredits = creditStore.canUseCredits(qualityCost);
+
+          if (!hasCredits) {
+            throw new Error(`크레딧이 부족해요. 고품질 생성을 사용하려면 ${qualityCost} 크레딧이 필요해요.`);
+          }
+
+          const success = await creditStore.useCredits(qualityCost);
+          if (!success) {
+            throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+          }
+          console.log(`💳 고품질 생성 크레딧 차감: -${qualityCost}`);
+        }
+      }
 
       // 멀티모달 분기: 파일 첨부가 있으면 /api/generate 엔드포인트 호출
       if (attachments && attachments.length > 0) {
