@@ -53,6 +53,9 @@ export default function InputPage() {
 
   const isPremiumUser = (plan === 'pro' || plan === 'premium') && isActive();
 
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
+
   // 로그인 체크
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -331,10 +334,12 @@ export default function InputPage() {
               </div>
             </Card>
 
-            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
-            <div className="md:hidden">
-              <KakaoAdMobileThick />
-            </div>
+            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시, 무료 플랜만 */}
+            {showAds && (
+              <div className="md:hidden">
+                <KakaoAdMobileThick />
+              </div>
+            )}
 
             {/* 색상 테마 */}
             <div>
@@ -596,10 +601,12 @@ export default function InputPage() {
           </div>
         </div>
 
-        {/* 오른쪽 여백에 세로 광고 (절대 위치) */}
-        <div className="hidden xl:block fixed right-4 top-24 z-30">
-          <KakaoAd />
-        </div>
+        {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}
+        {showAds && (
+          <div className="hidden xl:block fixed right-4 top-24 z-30">
+            <KakaoAd />
+          </div>
+        )}
       </MaxWidthContainer>
 
       {/* 로딩 모달 */}
@@ -743,15 +750,19 @@ export default function InputPage() {
         </div>
       )}
 
-      {/* 하단 고정 가로 배너 광고 - 데스크톱 */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
-        <KakaoAdBanner />
-      </div>
+      {/* 하단 고정 가로 배너 광고 - 데스크톱 (무료 플랜만) */}
+      {showAds && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
+          <KakaoAdBanner />
+        </div>
+      )}
 
-      {/* 하단 고정 얇은 광고 - 모바일 */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <KakaoAdMobileThin />
-      </div>
+      {/* 하단 고정 얇은 광고 - 모바일 (무료 플랜만) */}
+      {showAds && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+          <KakaoAdMobileThin />
+        </div>
+      )}
     </div>
   );
 }

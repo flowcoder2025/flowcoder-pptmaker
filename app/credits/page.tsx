@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useCreditStore } from '@/store/creditStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { TOSS_COLORS } from '@/constants/design';
 import { Coins, Sparkles, TrendingUp } from 'lucide-react';
@@ -24,6 +26,10 @@ export default function CreditsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
+  const { plan } = useSubscriptionStore();
+
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   // 로그인 체크
   useEffect(() => {
@@ -61,10 +67,12 @@ export default function CreditsPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
-      {/* 광고 - 상단 */}
-      <div className="mb-8">
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만) */}
+      {showAds && (
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
@@ -215,10 +223,12 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* 광고 - 중간 */}
-      <div className="my-10">
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 중간 (무료 플랜만) */}
+      {showAds && (
+        <div className="my-10">
+          <KakaoAdBanner />
+        </div>
+      )}
 
       {/* 사용 내역 */}
       <div>

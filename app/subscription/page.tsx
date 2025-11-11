@@ -35,6 +35,9 @@ export default function SubscriptionPage() {
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
 
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[currentPlan].benefits.adFree;
+
   // 로그인 체크
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -76,10 +79,12 @@ export default function SubscriptionPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
-      {/* 광고 - 상단 */}
-      <div className="mb-8">
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만 표시) */}
+      {showAds && (
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
@@ -186,10 +191,12 @@ export default function SubscriptionPage() {
       {/* 플랜 비교표 */}
       <PlanComparisonTable />
 
-      {/* 광고 - 하단 */}
-      <div className="my-10">
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 하단 (무료 플랜만 표시) */}
+      {showAds && (
+        <div className="my-10">
+          <KakaoAdBanner />
+        </div>
+      )}
 
       {/* FAQ 또는 추가 정보 */}
       <div className="text-center mt-10">
