@@ -135,6 +135,36 @@ PERPLEXITY_API_KEY=your_perplexity_key  # 서버 전용
 
 ## ⚠️ 필수 규칙
 
+### 0. 작업 범위 및 코드 보호 (최우선)
+
+**🔒 PPT 생성 관련 코드는 읽기 전용입니다.**
+
+현재 프로젝트에서는 **UI 시스템만 작업**합니다. 다음 영역은 **읽기 권한만** 있고 **쓰기 권한이 없습니다**:
+
+**📖 읽기 전용 (Read-Only) 영역**:
+- `services/gemini/` - Gemini API 통합
+- `services/perplexity/` - Perplexity AI 통합
+- `services/template/` - 템플릿 시스템 (98% 비용 절감 핵심)
+- `services/slide/` - 슬라이드 변환 엔진
+- `types/slide.ts` - 슬라이드 타입 정의 (21개 슬라이드 타입)
+
+**✅ 작업 허용 영역**:
+- `components/` - React UI 컴포넌트 (shadcn/ui)
+- `components/ui/` - shadcn/ui 기본 컴포넌트
+- `app/*/page.tsx` - Next.js 페이지 (UI 부분만)
+- `app/api/` - API Routes (UI 관련만)
+- 스타일링 및 레이아웃 개선
+- UX/UI 개선 작업
+
+**🚫 절대 금지 사항**:
+- ❌ PPT 생성 로직 수정 (services/)
+- ❌ AI 파이프라인 변경 (gemini, perplexity)
+- ❌ 템플릿 시스템 수정 (template/)
+- ❌ 슬라이드 타입 변경 (types/slide.ts)
+- ❌ 슬라이드 변환 로직 수정 (slide/)
+
+**이유**: PPT 생성 시스템은 완성되었으며, 비용 최적화(98% 절감)와 안정성이 검증되었습니다. 현재는 UI/UX 개선에만 집중합니다.
+
 ### 1. 한글 소통 규칙
 
 **최우선 규칙**: 이 프로젝트에서는 **한국어로 모든 커뮤니케이션**을 진행합니다.
@@ -311,6 +341,103 @@ vim RELEASE_NOTES.md
 ```
 
 **참조**: [../MIGRATION_QUEUE.md](../MIGRATION_QUEUE.md)
+
+---
+
+## 📝 작업 관리
+
+**모든 복잡한 작업은 TASK.md를 생성하여 체계적으로 관리합니다.**
+
+### TASK.md 사용 시나리오
+
+**다음 경우에 TASK.md를 생성합니다**:
+- 3개 이상의 Phase로 구성된 작업
+- 여러 파일을 수정해야 하는 작업 (>5개)
+- 단계별 검증이 필요한 작업
+- 장시간 소요될 것으로 예상되는 작업 (>1시간)
+
+### TASK.md 구조
+
+```markdown
+# [작업명] (YYYY-MM-DD)
+
+## 📋 작업 개요
+[작업에 대한 간략한 설명]
+
+## 🎯 Phase 1: [Phase 제목]
+**목표**: [이 Phase의 목표]
+
+### 체크리스트
+- [ ] 작업 1
+- [ ] 작업 2
+- [ ] 작업 3
+
+**파일**: [수정할 파일 목록]
+**변경 사항**: [구체적인 변경 내용]
+
+## 📝 작업 진행 상황
+### Phase 1: [제목]
+- [ ] 시작
+- [ ] 진행 중
+- [ ] 완료
+- [ ] 테스트 완료
+
+[추가 Phase들...]
+
+## 🔍 테스트 체크리스트
+- [ ] 테스트 항목 1
+- [ ] 테스트 항목 2
+
+## 📊 예상 소요 시간
+| Phase | 예상 시간 | 실제 시간 |
+|-------|----------|----------|
+| Phase 1 | XX분 | - |
+```
+
+### TodoWrite 도구 연동
+
+**실시간 진행상황 추적**:
+1. Phase 시작 시 TodoWrite로 todo 생성
+2. Phase 완료 시 즉시 상태 업데이트
+3. 항상 하나의 Phase만 `in_progress` 상태 유지
+
+**예시**:
+```typescript
+TodoWrite([
+  { content: "Phase 1: 네비게이션바 아이콘 개선", status: "in_progress", activeForm: "네비게이션바 아이콘 개선 중" },
+  { content: "Phase 2: 버튼 호버 효과 통일", status: "pending", activeForm: "버튼 호버 효과 통일 작업 중" },
+  { content: "Phase 3: CTA 버튼 크기 조정", status: "pending", activeForm: "CTA 버튼 크기 조정 중" }
+])
+```
+
+### CLAUDE.md 업데이트
+
+**작업 완료 후 필수 업데이트**:
+- 새로운 규칙이나 패턴 추가
+- 작업 관리 프로세스 개선사항 반영
+- 참조할 만한 예시 추가
+
+### 작업 흐름 (Workflow)
+
+1. **계획 (Planning)**
+   - 작업 요구사항 분석
+   - Phase 단위로 분해
+   - TASK.md 생성
+
+2. **실행 (Execution)**
+   - Phase별로 순차 진행
+   - TodoWrite로 실시간 추적
+   - 각 Phase 완료 시 체크리스트 업데이트
+
+3. **검증 (Validation)**
+   - Phase 완료 후 즉시 테스트
+   - 에러 발생 시 즉시 수정
+   - 다음 Phase로 진행 전 확인
+
+4. **문서화 (Documentation)**
+   - TASK.md 최종 업데이트
+   - CLAUDE.md에 새로운 패턴 추가
+   - RELEASE_NOTES.md 업데이트
 
 ---
 

@@ -45,11 +45,7 @@ export default function HomePage() {
             <Button
               onClick={() => router.push('/input')}
               size="lg"
-              className="text-lg px-8 py-6 h-auto"
-              style={{
-                backgroundColor: TOSS_COLORS.primary,
-                color: '#FFFFFF',
-              }}
+              className="min-w-[200px]"
             >
               ✨ 무료로 시작해요
             </Button>
@@ -57,7 +53,7 @@ export default function HomePage() {
               onClick={() => router.push('/subscription')}
               size="lg"
               variant="outline"
-              className="text-lg px-8 py-6 h-auto"
+              className="min-w-[200px]"
             >
               요금제 보기
             </Button>
@@ -196,11 +192,7 @@ export default function HomePage() {
         <Button
           onClick={() => router.push('/input')}
           size="lg"
-          className="text-lg px-12 py-6 h-auto"
-          style={{
-            backgroundColor: TOSS_COLORS.primary,
-            color: '#FFFFFF',
-          }}
+          className="min-w-[200px]"
         >
           무료로 시작하기 →
         </Button>

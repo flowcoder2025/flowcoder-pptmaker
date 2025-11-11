@@ -515,6 +515,7 @@ export default function InputPage() {
 
               {/* 생성 버튼 */}
               <Button
+                variant="default"
                 onClick={handleGenerate}
                 disabled={isGenerating || !text.trim()}
                 className="w-full mt-4 h-14 text-lg font-bold"

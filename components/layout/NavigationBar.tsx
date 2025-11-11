@@ -14,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, FileText, LogOut, ChevronDown } from 'lucide-react';
+import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 /**
  * NavigationBar 컴포넌트
@@ -28,14 +29,14 @@ import { User, FileText, LogOut, ChevronDown } from 'lucide-react';
 interface NavItem {
   label: string;
   href: string;
-  icon?: string;
+  icon?: LucideIcon;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: '홈', href: '/', icon: '🏠' },
-  { label: '만들기', href: '/input', icon: '✨' },
-  { label: '구독', href: '/subscription', icon: '⭐' },
-  { label: '크레딧', href: '/credits', icon: '💎' },
+  { label: '홈', href: '/', icon: Home },
+  { label: '만들기', href: '/input', icon: Sparkles },
+  { label: '구독', href: '/subscription', icon: Star },
+  { label: '크레딧', href: '/credits', icon: Gem },
 ];
 
 export default function NavigationBar() {
@@ -118,33 +119,26 @@ export default function NavigationBar() {
           <ul className="flex items-center gap-0 sm:gap-2">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
+              const Icon = item.icon;
 
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg transition-all',
-                      'hover:bg-opacity-10',
-                      active ? 'font-semibold' : ''
+                      'flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg transition-all font-semibold',
+                      'hover:text-primary',
+                      active ? 'text-primary' : 'text-muted-foreground'
                     )}
-                    style={{
-                      backgroundColor: active ? `${TOSS_COLORS.primary}15` : 'transparent',
-                      color: active ? TOSS_COLORS.primary : TOSS_COLORS.textSecondary,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = `${TOSS_COLORS.surface}`;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
                     aria-current={active ? 'page' : undefined}
                   >
-                    {item.icon && <span className="text-lg">{item.icon}</span>}
+                    {Icon && (
+                      <Icon
+                        size={18}
+                        strokeWidth={2}
+                        className="transition-colors"
+                      />
+                    )}
                     <span className="hidden sm:inline">{item.label}</span>
                   </Link>
                 </li>
@@ -214,14 +208,14 @@ export default function NavigationBar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => router.push('/profile')}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
                   >
                     <User size={16} className="mr-2" />
                     프로필
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => router.push('/history')}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
                   >
                     <FileText size={16} className="mr-2" />
                     내 프리젠테이션
@@ -229,8 +223,7 @@ export default function NavigationBar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
-                    className="cursor-pointer"
-                    style={{ color: TOSS_COLORS.error }}
+                    className="cursor-pointer hover:bg-transparent hover:text-destructive focus:bg-transparent focus:text-destructive transition-colors"
                   >
                     <LogOut size={16} className="mr-2" />
                     로그아웃
@@ -244,16 +237,14 @@ export default function NavigationBar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push('/login')}
+                  className="min-w-[80px]"
                 >
                   로그인
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => router.push('/signup')}
-                  style={{
-                    backgroundColor: TOSS_COLORS.primary,
-                    color: '#FFFFFF',
-                  }}
+                  className="min-w-[100px]"
                 >
                   회원가입
                 </Button>
