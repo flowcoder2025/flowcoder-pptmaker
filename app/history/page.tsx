@@ -506,6 +506,7 @@ function PresentationCard({
             variant="outline"
             onClick={() => onDelete(presentation.id)}
             style={{ color: TOSS_COLORS.error }}
+            className="hover:border-current"
           >
             <Trash2 size={16} className="mr-1" />
             삭제
