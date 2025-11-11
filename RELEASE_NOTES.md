@@ -50,6 +50,11 @@
 ### 🐛 Fixes
 
 #### 2025-11-11
+- **Geist 폰트 로딩 에러 해결**
+  - Geist, Geist_Mono 폰트 제거
+  - 시스템 폰트 사용으로 변경
+  - 빌드 에러 해결 및 테스트 통과 확인
+
 - **GET /api/presentations에서 slideData 반환 누락 수정**
   - select에 slideData 추가
   - 히스토리 페이지 썸네일 렌더링 문제 해결
