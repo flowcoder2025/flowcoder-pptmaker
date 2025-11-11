@@ -86,3 +86,38 @@ export const RESEARCH_MODE_CONFIG: Record<ResearchMode, {
     price: 400, // +₩400
   },
 };
+
+// ==========================================
+// 멀티모달 (Multimodal) 관련 타입
+// ==========================================
+
+/**
+ * 첨부 파일 정보
+ */
+export interface AttachmentFile {
+  /** 파일명 */
+  name: string;
+  /** MIME 타입 (예: image/jpeg, application/pdf) */
+  mimeType: string;
+  /** Base64 인코딩된 파일 데이터 */
+  data: string;
+  /** 파일 크기 (바이트) */
+  size: number;
+}
+
+/**
+ * 멀티모달 생성 요청
+ * (텍스트 + PDF/이미지 첨부)
+ */
+export interface MultimodalRequest {
+  /** 사용자 입력 텍스트 */
+  topic: string;
+  /** 첨부 파일 목록 (PDF, 이미지) */
+  attachments: AttachmentFile[];
+  /** 자료 조사 모드 */
+  researchMode?: ResearchMode;
+  /** Gemini 모델 선택 */
+  model?: 'flash' | 'pro';
+  /** 슬라이드 개수 */
+  slideCount?: number;
+}
