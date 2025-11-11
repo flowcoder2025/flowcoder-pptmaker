@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
         id: true,
         title: true,
         description: true,
+        slideData: true,  // 썸네일 렌더링을 위해 필요
         metadata: true,
         isPublic: true,
         createdAt: true,
