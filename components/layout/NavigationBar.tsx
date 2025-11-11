@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, FileText, LogOut, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown, Star, Gem } from 'lucide-react';
 
 /**
  * NavigationBar 컴포넌트
@@ -34,8 +34,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: '홈', href: '/', icon: '🏠' },
   { label: '만들기', href: '/input', icon: '✨' },
-  { label: '구독', href: '/subscription', icon: '⭐' },
-  { label: '크레딧', href: '/credits', icon: '💎' },
+  { label: '히스토리', href: '/history', icon: '📁' },
 ];
 
 export default function NavigationBar() {
@@ -220,11 +219,18 @@ export default function NavigationBar() {
                     프로필
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => router.push('/history')}
+                    onClick={() => router.push('/subscription')}
                     className="cursor-pointer"
                   >
-                    <FileText size={16} className="mr-2" />
-                    내 프리젠테이션
+                    <Star size={16} className="mr-2" />
+                    구독
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push('/credits')}
+                    className="cursor-pointer"
+                  >
+                    <Gem size={16} className="mr-2" />
+                    크레딧
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -233,7 +239,7 @@ export default function NavigationBar() {
                     style={{ color: TOSS_COLORS.error }}
                   >
                     <LogOut size={16} className="mr-2" />
-                    로그아웃
+                    로그아웃해요
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -245,7 +251,7 @@ export default function NavigationBar() {
                   size="sm"
                   onClick={() => router.push('/login')}
                 >
-                  로그인
+                  로그인해요
                 </Button>
                 <Button
                   size="sm"
@@ -255,7 +261,7 @@ export default function NavigationBar() {
                     color: '#FFFFFF',
                   }}
                 >
-                  회원가입
+                  회원가입해요
                 </Button>
               </div>
             )}
