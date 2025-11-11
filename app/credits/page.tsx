@@ -1,10 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useCreditStore } from '@/store/creditStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { TOSS_COLORS } from '@/constants/design';
 import { Coins, Sparkles, TrendingUp } from 'lucide-react';
@@ -20,7 +24,40 @@ import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
  */
 export default function CreditsPage() {
   const router = useRouter();
-  const { totalCredits, isFirstTimeFree, useFirstTimeFree } = useCreditStore();
+  const { data: session, status } = useSession();
+  const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
+  const { plan } = useSubscriptionStore();
+
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
+
+  // 로그인 체크
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/credits');
+    }
+  }, [status, router]);
+
+  // 서버에서 크레딧 데이터 가져오기
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchBalance();
+    }
+  }, [status, session, fetchBalance]);
+
+  // 로딩 상태
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-600">불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 미로그인 시 리다이렉트 중
+  if (!session) {
+    return null;
+  }
 
   // 크레딧 구매 처리
   const handlePurchase = async (bundleId: string, amount: number) => {
@@ -30,10 +67,12 @@ export default function CreditsPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
-      {/* 광고 - 상단 */}
-      <div className="mb-8">
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만) */}
+      {showAds && (
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
@@ -123,7 +162,7 @@ export default function CreditsPage() {
             className="text-sm mb-1"
             style={{ color: TOSS_COLORS.textSecondary }}
           >
-            Perplexity AI로 웹 자료를 조사해요
+            검색 전용 AI로 웹 자료를 조사해요
           </p>
           <p
             className="text-2xl font-bold"
@@ -153,7 +192,7 @@ export default function CreditsPage() {
             className="text-sm mb-1"
             style={{ color: TOSS_COLORS.textSecondary }}
           >
-            Gemini Pro로 더 나은 품질을 제공해요
+            추론 모델로 더 나은 품질을 제공해요
           </p>
           <p
             className="text-2xl font-bold"
@@ -184,10 +223,12 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* 광고 - 중간 */}
-      <div className="my-10">
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 중간 (무료 플랜만) */}
+      {showAds && (
+        <div className="my-10">
+          <KakaoAdBanner />
+        </div>
+      )}
 
       {/* 사용 내역 */}
       <div>

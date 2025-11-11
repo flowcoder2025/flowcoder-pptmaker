@@ -21,9 +21,94 @@
 
 ## [Unreleased]
 
+### 🎨 UI/UX
+
+#### 2025-11-11
+- **네비게이션 바 재구성으로 사용자 경험 개선**
+  - 메인 nav 바: 핵심 기능 중심 재배치
+    - 구독, 크레딧 링크 제거
+    - 히스토리 링크 추가 (내 프리젠테이션 → 히스토리로 이름 변경)
+  - 프로필 드롭다운 메뉴: 계정 관련 기능 그룹화
+    - 내 프리젠테이션 링크 제거
+    - 구독 링크 추가 (Star 아이콘)
+    - 크레딧 링크 추가 (Gem 아이콘)
+  - UX Writing 규칙 적용: 동작 버튼에 ~해요체 사용
+    - 로그인, 회원가입, 로그아웃 버튼 텍스트 개선
+  - 더 나은 정보 아키텍처: 자주 사용하는 기능(히스토리)은 메인 nav, 계정 설정(구독, 크레딧)은 드롭다운
+
+### 🐛 Fixes
+
+#### 2025-11-11
+- **크레딧 정책 완전 적용 및 차감 로직 개선**
+  - Flash 모델 + 조사 안함 = 0 크레딧 (무료)
+  - Flash 모델 + 빠른 조사 = 0 크레딧 (무료)
+  - Flash 모델 + 심층 조사 = 40 크레딧
+  - Pro 모델 + 조사 안함 = 50 크레딧
+  - Pro 모델 + 빠른 조사 = 50 크레딧
+  - Pro 모델 + 심층 조사 = 90 크레딧 (50 + 40)
+  - 크레딧 차감 금액 동적 계산 (useProContentModel + researchMode)
+  - GenerationHistory에 실제 사용한 크레딧 기록
+  - 상세한 설명 메시지 추가 (어떤 옵션으로 몇 크레딧 사용했는지)
+  - 크레딧 부족 시 필요한 크레딧 수 명확히 표시
+
 ### ✨ Features
 
 #### 2025-11-11
+- **크레딧 시스템 유효기간 관리 및 우선순위 기반 소모 로직 구현**
+  - 크레딧 타입별 유효기간 설정:
+    - FREE/PURCHASE: 영구 (expiresAt = null)
+    - SUBSCRIPTION: 30일 자동 설정
+    - EVENT: 설정 가능 (expiresInDays 파라미터)
+  - 우선순위 기반 크레딧 소모: FREE → EVENT → SUBSCRIPTION → PURCHASE
+  - 만료된 크레딧 실시간 필터링 (자동 제외)
+  - 타입별 크레딧 잔액 조회 (balanceByType)
+  - 7일 이내 만료 예정 크레딧 조회 (expiringCredits)
+  - 구독 생성 시 자동 크레딧 지급 (PRO 플랜: 490 크레딧, 30일 유효)
+  - 프리젠테이션 생성 시 크레딧 차감 (1 크레딧)
+  - Prisma 스키마 업데이트: sourceType, expiresAt 필드 추가
+  - TypeScript 타입 정의 (types/credits.ts)
+  - 크레딧 유틸리티 함수 (lib/credits.ts)
+  - API 엔드포인트:
+    - GET /api/credits: 타입별 잔액 및 만료 예정 크레딧 조회
+    - POST /api/credits/consume: 우선순위 기반 크레딧 사용
+    - POST /api/credits/grant: 크레딧 지급 (유효기간 설정)
+    - POST /api/subscriptions: 구독 생성 및 크레딧 자동 지급
+
+- **사용자 지정 슬라이드 분량 설정 기능**
+  - 슬라이더로 원하는 슬라이드 수 조절 가능 (10-40장 범위)
+  - Flash 모델: 예상 슬라이드 수 자동 표시 (~목표 * 1.2)
+  - Pro 모델: 예상 슬라이드 수 자동 표시 (~목표)
+  - ±2-3장 오차 경고 문구 추가
+  - Gemini 프롬프트에 사용자 설정값 동적 반영
+  - 슬라이더 가시성 개선 (더 큰 손잡이, 진한 색상, 호버 효과)
+  - shadcn/ui Slider 컴포넌트 통합
+  - **플랜별 슬라이드 분량 제한 적용**:
+    - Free: 5-10장, Pro: 5-20장, Premium: 5-50장
+    - 플랜 변경 시 슬라이더 값 자동 조정
+    - UI 레벨에서 플랜별 검증 처리 (useEffect)
+
+- **멀티모달 슬라이드 생성 기능 (PDF 및 이미지 첨부)**
+  - PDF와 이미지 파일을 첨부하여 슬라이드 생성 가능
+  - 플랜별 파일 개수 제한: Free(1개), Pro(3개), Premium(5개)
+  - 플랜별 파일 크기 제한: Free(5MB), Pro(10MB), Premium(20MB)
+  - 지원 파일 형식: PDF, JPG, PNG, GIF, WebP
+  - Base64 인코딩으로 파일 전송
+  - Gemini Multimodal API와 통합하여 첨부 파일 내용 분석
+  - FileUploader 컴포넌트: 파일 선택, 검증, 미리보기, 제거 기능
+  - 실시간 파일 크기 표시 (KB/MB 자동 변환)
+  - 에러 메시지: UX Writing 가이드 준수 (~해요체)
+  - API 엔드포인트: POST /api/generate (멀티모달 생성)
+
+- **Perplexity AI 비용 최적화 (3000자 제한)**
+  - System prompt에 구조화된 3000자 제한 추가
+  - 5가지 섹션 구조: 개요(300자), 트렌드(800자), 통계(800자), 사례(800자), 요약(300자)
+  - max_tokens 4000 → 2000으로 감소
+  - **Sonar 비용 27% 절감**: ₩4 → ₩3 (₩1 절감)
+  - **Reasoning 비용 44% 절감**: ₩28.6 → ₩15.9 (₩12.7 절감)
+  - 빠른 조사 조합: ₩4 → ₩3
+  - 깊은 조사 조합: ₩53 → ₩41
+  - services/gemini/content-generator.ts에서 5000자 축약 로직 제거
+
 - **텍스트 입력 임시저장 기능 (서버 기반)**
   - 사용자가 입력 페이지에서 작성 중인 텍스트가 페이지 이탈 시에도 보존돼요
   - Prisma Draft 모델 추가 (userId @unique, content @db.Text)
@@ -157,6 +242,19 @@
   - 다음 작업 시 자연스럽게 반영되는 워크플로우로 변경
 
 ### 🐛 Fixes
+
+#### 2025-11-11
+- **멀티모달 파일 첨부 시 빈 슬라이드 생성 버그 수정** (25bffed)
+  - Document Parser 모델 업데이트: gemini-1.5-flash-latest → gemini-2.5-flash
+  - 404 Not Found 에러 해결
+  - AgendaSlideForm 방어 코딩 추가: `slide.props.items || []`
+  - AgendaSlideForm 빈 상태 UI 추가 (항목 없을 때 안내 표시)
+  - AgendaSlide 최대 항목: 3개 → 8개로 확장
+  - AgendaSlide 레이아웃: 1-4개(1열), 5-8개(2열 그리드)
+  - AgendaSlide 1열 제목 간격 개선: 50px (2열과 비슷한 시각적 균형)
+  - Gemini 프롬프트 업데이트: agenda items 최대 8개 제약사항 명시
+  - JSON 파싱 개선: 마크다운 코드 블록 제거 로직 추가
+  - 결과: PDF 25,320자 추출 성공, 슬라이드 정상 생성 확인
 
 #### 2025-11-10
 - **viewer 페이지 무한 API 호출 버그 수정**

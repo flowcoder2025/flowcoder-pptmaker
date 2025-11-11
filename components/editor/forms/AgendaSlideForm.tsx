@@ -16,6 +16,9 @@ export default function AgendaSlideForm({
   slide,
   onChange,
 }: AgendaSlideFormProps) {
+  // ✅ items가 없을 때 기본값 설정
+  const items = slide.props.items || [];
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange({
       ...slide,
@@ -31,7 +34,7 @@ export default function AgendaSlideForm({
     field: 'title' | 'description',
     value: string
   ) => {
-    const newItems = [...slide.props.items];
+    const newItems = [...items];
     newItems[index] = {
       ...newItems[index],
       [field]: value,
@@ -46,7 +49,7 @@ export default function AgendaSlideForm({
   };
 
   const handleAddItem = () => {
-    const newItems = [...slide.props.items, { title: '', description: '' }];
+    const newItems = [...items, { title: '', description: '' }];
     onChange({
       ...slide,
       props: {
@@ -57,11 +60,11 @@ export default function AgendaSlideForm({
   };
 
   const handleRemoveItem = (index: number) => {
-    if (slide.props.items.length <= 1) {
+    if (items.length <= 1) {
       alert('최소 1개의 항목이 필요해요');
       return;
     }
-    const newItems = slide.props.items.filter((_, i) => i !== index);
+    const newItems = items.filter((_, i) => i !== index);
     onChange({
       ...slide,
       props: {
@@ -116,7 +119,19 @@ export default function AgendaSlideForm({
           </div>
 
           <div className="space-y-4">
-            {slide.props.items.map((item, index) => (
+            {items.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <p className="text-gray-500 mb-3">아직 항목이 없어요</p>
+                <button
+                  type="button"
+                  onClick={handleAddItem}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  첫 항목 추가하기
+                </button>
+              </div>
+            ) : (
+              items.map((item, index) => (
               <div
                 key={index}
                 className="border border-gray-300 rounded-lg p-4 space-y-3"
@@ -125,7 +140,7 @@ export default function AgendaSlideForm({
                   <span className="text-xs font-semibold text-gray-500">
                     항목 {index + 1}
                   </span>
-                  {slide.props.items.length > 1 && (
+                  {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
@@ -177,7 +192,8 @@ export default function AgendaSlideForm({
                   />
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
 
           <p className="text-xs text-gray-500 mt-2">

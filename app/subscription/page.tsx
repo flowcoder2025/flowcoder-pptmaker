@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
@@ -21,10 +23,48 @@ import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
  */
 export default function SubscriptionPage() {
   const router = useRouter();
-  const { plan: currentPlan, expiresAt, getDaysRemaining, isActive } = useSubscriptionStore();
+  const { data: session, status } = useSession();
+  const {
+    plan: currentPlan,
+    expiresAt,
+    getDaysRemaining,
+    isActive,
+    fetchSubscription,
+  } = useSubscriptionStore();
 
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
+
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[currentPlan].benefits.adFree;
+
+  // 로그인 체크
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/subscription');
+    }
+  }, [status, router]);
+
+  // 사용자 데이터 로드
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchSubscription();
+    }
+  }, [status, session, fetchSubscription]);
+
+  // 로딩 상태
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-600">불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 미로그인 상태면 빈 화면 (리다이렉트 중)
+  if (!session) {
+    return null;
+  }
 
   // 구독 처리
   const handleSubscribe = async (planId: SubscriptionPlan) => {
@@ -39,10 +79,12 @@ export default function SubscriptionPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
-      {/* 광고 - 상단 */}
-      <div className="mb-8">
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만 표시) */}
+      {showAds && (
+        <div className="mb-8">
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
@@ -149,10 +191,12 @@ export default function SubscriptionPage() {
       {/* 플랜 비교표 */}
       <PlanComparisonTable />
 
-      {/* 광고 - 하단 */}
-      <div className="my-10">
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 하단 (무료 플랜만 표시) */}
+      {showAds && (
+        <div className="my-10">
+          <KakaoAdBanner />
+        </div>
+      )}
 
       {/* FAQ 또는 추가 정보 */}
       <div className="text-center mt-10">

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { grantPresentationOwnership } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { calculateBalance, consumeCredits } from '@/lib/credits'
 
 // ============================================
 // GET /api/presentations
@@ -113,38 +114,169 @@ export async function POST(request: NextRequest) {
       hasMetadata: !!metadata,
     })
 
-    // 프레젠테이션 생성
-    const presentation = await prisma.presentation.create({
-      data: {
+    // 1. 크레딧 차감 금액 계산
+    const useProContentModel = metadata?.useProContentModel || false
+    const researchMode = metadata?.researchMode || 'none'
+
+    let creditsToCharge = 0
+
+    // Pro 모델 사용 시 50 크레딧
+    if (useProContentModel) {
+      creditsToCharge += 50
+    }
+
+    // 심층 조사 사용 시 40 크레딧 추가
+    if (researchMode === 'deep') {
+      creditsToCharge += 40
+    }
+
+    // Flash + 빠른 조사 = 0 크레딧 (무료)
+    // Flash + 조사 안함 = 0 크레딧 (무료)
+
+    if (creditsToCharge > 0) {
+      console.log(`[POST /api/presentations] 유료 옵션 사용 - ${creditsToCharge} 크레딧 필요`)
+
+      // 크레딧 잔액 확인
+      let balance = 0
+      try {
+        const balanceResult = await calculateBalance(userId)
+        balance = balanceResult.balance
+        console.log('[POST /api/presentations] 크레딧 잔액:', balance)
+      } catch (balanceError) {
+        console.error('❌ [POST /api/presentations] 잔액 조회 실패:', balanceError)
+        return NextResponse.json(
+          { error: '크레딧 잔액 조회에 실패했어요' },
+          { status: 500 }
+        )
+      }
+
+      if (balance < creditsToCharge) {
+        return NextResponse.json(
+          {
+            error: '크레딧이 부족해요',
+            currentBalance: balance,
+            required: creditsToCharge,
+          },
+          { status: 400 }
+        )
+      }
+    } else {
+      console.log('[POST /api/presentations] 무료 옵션 (Flash + 조사 안함/빠른 조사) - 크레딧 차감 안함')
+    }
+
+    // 2. 프레젠테이션 생성
+    let presentation
+    try {
+      presentation = await prisma.presentation.create({
+        data: {
+          userId,
+          title,
+          description: description || null,
+          slideData,
+          slides: slides || null,  // HTML 캐시 (optional)
+          metadata: metadata || null,
+          isPublic: false,
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          metadata: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+      console.log('[POST /api/presentations] Presentation created:', presentation.id)
+    } catch (dbError) {
+      console.error('❌ [POST /api/presentations] DB 생성 실패:', dbError)
+      console.error('DB Error details:', {
+        error: dbError instanceof Error ? dbError.message : String(dbError),
+        stack: dbError instanceof Error ? dbError.stack : undefined,
+      })
+      throw new Error(`데이터베이스 저장에 실패했어요: ${dbError instanceof Error ? dbError.message : '알 수 없는 오류'}`)
+    }
+
+    // 3. 크레딧 차감 (유료 옵션만)
+    if (creditsToCharge > 0) {
+      try {
+        const description = `프리젠테이션 생성: ${title} (${useProContentModel ? 'Pro 모델 50' : ''}${useProContentModel && researchMode === 'deep' ? ' + ' : ''}${researchMode === 'deep' ? '심층 조사 40' : ''} 크레딧)`
+        await consumeCredits(userId, creditsToCharge, description)
+        console.log(`[POST /api/presentations] Credit consumed (${creditsToCharge} credits)`)
+      } catch (creditError) {
+        console.error('❌ [POST /api/presentations] 크레딧 차감 실패:', creditError)
+        console.error('Credit Error details:', {
+          error: creditError instanceof Error ? creditError.message : String(creditError),
+          stack: creditError instanceof Error ? creditError.stack : undefined,
+        })
+        // 크레딧 차감 실패 시 프레젠테이션 삭제 (롤백)
+        try {
+          await prisma.presentation.delete({ where: { id: presentation.id } })
+          console.log('[POST /api/presentations] Rollback: Presentation deleted')
+        } catch (rollbackError) {
+          console.error('❌ [POST /api/presentations] Rollback 실패:', rollbackError)
+        }
+        throw new Error(`크레딧 차감에 실패했어요: ${creditError instanceof Error ? creditError.message : '알 수 없는 오류'}`)
+      }
+    } else {
+      console.log('[POST /api/presentations] 무료 옵션 - 크레딧 차감 건너뜀')
+    }
+
+    // 4. GenerationHistory 생성 (모니터링용)
+    try {
+      const historyData = {
         userId,
-        title,
-        description: description || null,
-        slideData,
-        slides: slides || null,  // HTML 캐시 (optional)
-        metadata: metadata || null,
-        isPublic: false,
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        metadata: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
+        presentationId: presentation.id,
+        prompt: (metadata?.prompt as string) || title, // fallback: title
+        model: (metadata?.model as string) || 'gemini-flash', // fallback
+        useResearch: (metadata?.useResearch as boolean) || false,
+        creditsUsed: creditsToCharge, // 실제 사용한 크레딧
+        result: slideData, // 생성된 데이터
+      }
 
-    console.log('[POST /api/presentations] Presentation created:', presentation.id)
+      console.log('[POST /api/presentations] Creating GenerationHistory with:', {
+        userId,
+        presentationId: presentation.id,
+        prompt: historyData.prompt.substring(0, 50) + '...',
+        model: historyData.model,
+        useResearch: historyData.useResearch,
+      })
 
-    // Zanzibar 권한 부여: 생성자를 owner로 설정
-    await grantPresentationOwnership(presentation.id, userId)
+      await prisma.generationHistory.create({ data: historyData })
+      console.log('[POST /api/presentations] GenerationHistory created')
+    } catch (historyError) {
+      console.error('❌ [POST /api/presentations] GenerationHistory 생성 실패:', historyError)
+      console.error('History Error details:', {
+        error: historyError instanceof Error ? historyError.message : String(historyError),
+        stack: historyError instanceof Error ? historyError.stack : undefined,
+        metadata,
+      })
+      // 히스토리 생성 실패는 치명적이지 않으므로 계속 진행
+    }
 
-    console.log('[POST /api/presentations] Ownership granted')
+    // 5. Zanzibar 권한 부여: 생성자를 owner로 설정
+    try {
+      await grantPresentationOwnership(presentation.id, userId)
+      console.log('[POST /api/presentations] Ownership granted')
+    } catch (permissionError) {
+      console.error('❌ [POST /api/presentations] 권한 부여 실패:', permissionError)
+      console.error('Permission Error details:', {
+        error: permissionError instanceof Error ? permissionError.message : String(permissionError),
+        stack: permissionError instanceof Error ? permissionError.stack : undefined,
+      })
+      // 권한 부여 실패 시 프레젠테이션 삭제 (롤백)
+      try {
+        await prisma.presentation.delete({ where: { id: presentation.id } })
+        console.log('[POST /api/presentations] Rollback: Presentation deleted')
+      } catch (rollbackError) {
+        console.error('❌ [POST /api/presentations] Rollback 실패:', rollbackError)
+      }
+      throw new Error(`권한 설정에 실패했어요: ${permissionError instanceof Error ? permissionError.message : '알 수 없는 오류'}`)
+    }
 
     return NextResponse.json(
       {
         presentation,
-        message: '프레젠테이션을 생성했어요.',
+        message: '프리젠테이션을 생성했어요.',
       },
       { status: 201 }
     )

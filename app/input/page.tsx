@@ -5,11 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
+import type { AttachmentFile } from '@/types/research';
+import FileUploader from '@/components/input/FileUploader';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -31,13 +35,16 @@ export default function InputPage() {
     researchMode,
     setResearchMode,
     useProContentModel,
-    setUseProContentModel
+    setUseProContentModel,
+    targetSlideCount,
+    setTargetSlideCount
   } = usePresentationStore();
 
-  const { plan, isActive } = useSubscriptionStore();
-  const { totalCredits, isFirstTimeFree, getCreditCost } = useCreditStore();
+  const { plan, isActive, fetchSubscription } = useSubscriptionStore();
+  const { totalCredits, isFirstTimeFree, getCreditCost, fetchBalance } = useCreditStore();
 
   const [text, setText] = useState('');
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentModalType, setPaymentModalType] = useState<'pro' | 'deep' | null>(null);
   const [showDraftModal, setShowDraftModal] = useState(false);
@@ -46,12 +53,23 @@ export default function InputPage() {
 
   const isPremiumUser = (plan === 'pro' || plan === 'premium') && isActive();
 
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
+
   // 로그인 체크
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login?callbackUrl=/input');
     }
   }, [status, router]);
+
+  // 서버에서 구독 및 크레딧 데이터 가져오기
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchSubscription();
+      fetchBalance();
+    }
+  }, [status, session, fetchSubscription, fetchBalance]);
 
   // 페이지 로드 시 임시저장 복원
   useEffect(() => {
@@ -74,6 +92,17 @@ export default function InputPage() {
 
     loadDraft();
   }, [status, session]);
+
+  // 플랜 변경 시 슬라이더 값 조정
+  useEffect(() => {
+    const planMaxSlides = PLAN_BENEFITS[plan].benefits.maxSlides;
+
+    // 현재 슬라이더 값이 플랜 최대값을 초과하면 조정
+    if (targetSlideCount > planMaxSlides) {
+      console.log(`📊 플랜 제한에 맞춰 슬라이드 수 조정: ${targetSlideCount}장 → ${planMaxSlides}장`);
+      setTargetSlideCount(planMaxSlides);
+    }
+  }, [plan, targetSlideCount, setTargetSlideCount]);
 
   // 텍스트 변경 시 자동 저장 (디바운스 1초)
   useEffect(() => {
@@ -179,7 +208,7 @@ export default function InputPage() {
       return;
     }
 
-    await generatePresentation(text);
+    await generatePresentation(text, attachments);
 
     // 생성 완료 시 임시저장 삭제
     try {
@@ -305,10 +334,12 @@ export default function InputPage() {
               </div>
             </Card>
 
-            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시 */}
-            <div className="md:hidden">
-              <KakaoAdMobileThick />
-            </div>
+            {/* 모바일 굵은 광고 (320x100) - md 미만에서만 표시, 무료 플랜만 */}
+            {showAds && (
+              <div className="md:hidden">
+                <KakaoAdMobileThick />
+              </div>
+            )}
 
             {/* 색상 테마 */}
             <div>
@@ -404,10 +435,10 @@ export default function InputPage() {
               </div>
             </div>
 
-            {/* 생성 품질 */}
+            {/* 생성 모델 */}
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                🤖 생성 품질
+                🤖 생성 모델
               </h3>
               <div className="space-y-2">
                 <button
@@ -420,14 +451,14 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ⚡ 빠른 생성
+                      ⚡ 빠른 모델
                     </span>
                     <span className="text-xs font-semibold text-green-600">
                       무료
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
-                    빠르고 경제적이에요
+                    빠르고 많은 슬라이드 (~{Math.ceil(targetSlideCount * 1.2)}개)
                   </p>
                 </button>
 
@@ -441,7 +472,7 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ✨ 고품질 생성
+                      ✨ 추론 모델
                     </span>
                     <span className="text-xs font-semibold text-blue-600">
                       {(() => {
@@ -460,9 +491,44 @@ export default function InputPage() {
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">
-                    더 나은 품질이에요
+                    정제된 핵심 슬라이드 (~{targetSlideCount}개)
                   </p>
                 </button>
+              </div>
+            </div>
+
+            {/* 슬라이드 분량 */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  📊 슬라이드 분량
+                </h3>
+                <span className="text-sm font-bold text-blue-600">
+                  {targetSlideCount}장
+                </span>
+              </div>
+
+              <Slider
+                value={[targetSlideCount]}
+                onValueChange={([value]) => setTargetSlideCount(value)}
+                min={5}
+                max={PLAN_BENEFITS[plan].benefits.maxSlides}
+                step={1}
+                className="mb-4"
+              />
+
+              <div className="flex justify-between text-xs text-gray-500 mb-3">
+                <span>5장</span>
+                <span>{PLAN_BENEFITS[plan].benefits.maxSlides}장</span>
+              </div>
+
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800">
+                  ⚠️ AI 특성상 ±2-3장 오차가 있을 수 있어요
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  💡 {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
+                </p>
               </div>
             </div>
           </div>
@@ -500,6 +566,16 @@ export default function InputPage() {
                 className="w-full flex-1 p-4 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
+              {/* 파일 첨부 */}
+              <div className="mt-4">
+                <FileUploader
+                  files={attachments}
+                  onChange={setAttachments}
+                  plan={plan}
+                  disabled={isGenerating}
+                />
+              </div>
+
               {/* 에러 메시지 */}
               {generationError && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -526,10 +602,12 @@ export default function InputPage() {
           </div>
         </div>
 
-        {/* 오른쪽 여백에 세로 광고 (절대 위치) */}
-        <div className="hidden xl:block fixed right-4 top-24 z-30">
-          <KakaoAd />
-        </div>
+        {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}
+        {showAds && (
+          <div className="hidden xl:block fixed right-4 top-24 z-30">
+            <KakaoAd />
+          </div>
+        )}
       </MaxWidthContainer>
 
       {/* 로딩 모달 */}
@@ -673,15 +751,19 @@ export default function InputPage() {
         </div>
       )}
 
-      {/* 하단 고정 가로 배너 광고 - 데스크톱 */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
-        <KakaoAdBanner />
-      </div>
+      {/* 하단 고정 가로 배너 광고 - 데스크톱 (무료 플랜만) */}
+      {showAds && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block">
+          <KakaoAdBanner />
+        </div>
+      )}
 
-      {/* 하단 고정 얇은 광고 - 모바일 */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-        <KakaoAdMobileThin />
-      </div>
+      {/* 하단 고정 얇은 광고 - 모바일 (무료 플랜만) */}
+      {showAds && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+          <KakaoAdMobileThin />
+        </div>
+      )}
     </div>
   );
 }

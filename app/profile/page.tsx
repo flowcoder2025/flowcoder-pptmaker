@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { TOSS_COLORS } from '@/constants/design';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { User, Mail, Calendar, CreditCard, FileText, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -24,6 +26,10 @@ import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { plan } = useSubscriptionStore();
+
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   const [stats, setStats] = useState({
     presentationsCount: 0,
@@ -86,10 +92,12 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
       <MaxWidthContainer className="py-8 lg:py-12">
-        {/* 광고 - 상단 */}
-        <div className="mb-8">
-          <KakaoAdMobileThick />
-        </div>
+        {/* 광고 - 상단 (무료 플랜만) */}
+        {showAds && (
+          <div className="mb-8">
+            <KakaoAdMobileThick />
+          </div>
+        )}
 
         {/* 페이지 헤더 */}
         <div className="mb-8">
@@ -373,10 +381,12 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 광고 - 하단 */}
-        <div className="mt-10">
-          <KakaoAdBanner />
-        </div>
+        {/* 광고 - 하단 (무료 플랜만) */}
+        {showAds && (
+          <div className="mt-10">
+            <KakaoAdBanner />
+          </div>
+        )}
       </MaxWidthContainer>
     </div>
   );

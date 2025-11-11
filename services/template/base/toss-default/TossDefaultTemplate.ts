@@ -241,7 +241,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderBullet(slide: BulletSlide): HTMLSlide {
     const { title, bullets } = slide.props;
 
-    const bulletItems = bullets
+    // 빈 bullets 방어 (에러 방지용)
+    const bulletItems = (bullets || [])
       .map((bullet) => {
         const indent = bullet.level * 30; // level 0: 0px, level 1: 30px, level 2: 60px
         const fontSize = bullet.level === 0 ? 18 : bullet.level === 1 ? 16 : 14;
@@ -327,7 +328,12 @@ export class TossDefaultTemplate implements SlideTemplate {
     const { title, leftContent, rightContent } = slide.props;
 
     // 콘텐츠 파싱 헬퍼 함수
-    const parseColumnContent = (content: string) => {
+    const parseColumnContent = (content: string | undefined) => {
+      // 빈 콘텐츠 방어 (에러 방지용, 플레이스홀더는 보여주지 않음)
+      if (!content || typeof content !== 'string') {
+        return { columnTitle: '', bulletItems: [] };
+      }
+
       const lines = content.split('\n').filter(line => line.trim());
       const columnTitle = lines[0] || ''; // 첫 줄은 제목
       const bulletItems = lines
@@ -521,8 +527,84 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderChart(slide: ChartSlide): HTMLSlide {
     const { title, data } = slide.props;
 
+    // 빈 데이터 방어 (에러 방지용)
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      // 빈 차트 표시
+      const html = `
+<div class="slide" style="
+  background-color: var(--color-background);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: ${this.ctx.spacing.padding}px;
+  display: flex;
+  flex-direction: column;
+">
+  <div>
+    <div style="
+      width: ${this.ctx.spacing.accentBar.width}px;
+      height: ${this.ctx.spacing.accentBar.height}px;
+      background-color: var(--color-primary);
+      margin-bottom: ${this.ctx.spacing.gapSmall}px;
+    "></div>
+    <h3 style="
+      color: var(--color-text-primary);
+      font-size: ${this.ctx.fonts.size.heading}px;
+      font-family: var(--font-family-base);
+      font-weight: bold;
+      margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+    ">${this.escapeHtml(title)}</h3>
+  </div>
+  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+    <p style="color: var(--color-text-secondary); font-size: 18px;">차트 데이터가 없어요</p>
+  </div>
+</div>
+      `.trim();
+      const css = this.generateCSSVariables();
+      return { html, css };
+    }
+
     // 첫 번째 데이터 시리즈만 사용 (단순화)
     const series = data[0];
+
+    // series 검증 (labels와 values 필수)
+    if (!series || !series.labels || !series.values) {
+      const html = `
+<div class="slide" style="
+  background-color: var(--color-background);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: ${this.ctx.spacing.padding}px;
+  display: flex;
+  flex-direction: column;
+">
+  <div>
+    <div style="
+      width: ${this.ctx.spacing.accentBar.width}px;
+      height: ${this.ctx.spacing.accentBar.height}px;
+      background-color: var(--color-primary);
+      margin-bottom: ${this.ctx.spacing.gapSmall}px;
+    "></div>
+    <h3 style="
+      color: var(--color-text-primary);
+      font-size: ${this.ctx.fonts.size.heading}px;
+      font-family: var(--font-family-base);
+      font-weight: bold;
+      margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+    ">${this.escapeHtml(title)}</h3>
+  </div>
+  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+    <p style="color: var(--color-text-secondary); font-size: 18px;">차트 데이터가 올바르지 않아요</p>
+  </div>
+</div>
+      `.trim();
+      const css = this.generateCSSVariables();
+      return { html, css };
+    }
+
     const dataPoints = series.labels.map((label, index) => ({
       label,
       value: series.values[index],
@@ -644,7 +726,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderTable(slide: TableSlide): HTMLSlide {
     const { title, headers, rows } = slide.props;
 
-    const headerCells = headers
+    // 빈 배열 방어 (에러 방지용)
+    const headerCells = (headers || [])
       .map(
         (header) => `
             <th style="
@@ -657,9 +740,9 @@ export class TossDefaultTemplate implements SlideTemplate {
       )
       .join('');
 
-    const bodyRows = rows
+    const bodyRows = (rows || [])
       .map((row, index) => {
-        const cells = row
+        const cells = (row || [])
           .map(
             (cell) => `
               <td style="
@@ -743,7 +826,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderStats(slide: StatsSlide): HTMLSlide {
     const { title, stats, citation } = slide.props;
 
-    const statCards = stats
+    // 빈 배열 방어 (에러 방지용)
+    const statCards = (stats || [])
       .map(
         (stat) => `
       <div style="
@@ -1035,9 +1119,11 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderTimeline(slide: TimelineSlide): HTMLSlide {
     const { title, items } = slide.props;
 
-    const timelineItems = items
+    // 빈 배열 방어 (에러 방지용)
+    const safeItems = items || [];
+    const timelineItems = safeItems
       .map((item, index) => {
-        const isLast = index === items.length - 1;
+        const isLast = index === safeItems.length - 1;
 
         return `
         <div style="
@@ -1147,8 +1233,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderFeatureGrid(slide: FeatureGridSlide): HTMLSlide {
     const { title, features } = slide.props;
 
-    // 기능 카드 생성 (최대 3개)
-    const featureCards = features
+    // 기능 카드 생성 (최대 3개), 빈 배열 방어
+    const featureCards = (features || [])
       .slice(0, 3)
       .map(
         (feature) => `
@@ -1206,13 +1292,16 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderTeamProfile(slide: TeamProfileSlide): HTMLSlide {
     const { title, profiles } = slide.props;
 
+    // 빈 프로필 방어 (에러 방지용)
+    const safeProfiles = profiles || [];
+
     // 프로필 개수에 따른 그리드 컬럼 계산
-    const profileCount = profiles.length;
+    const profileCount = safeProfiles.length;
     const columns =
       profileCount <= 3 ? profileCount : profileCount <= 6 ? 3 : 4;
 
     // 프로필 카드 생성 (제한 없음)
-    const profileCards = profiles
+    const profileCards = safeProfiles
       .map(
         (profile) => `
       <div style="min-height: 340px; text-align: center; display: flex; flex-direction: column; align-items: center;">
@@ -1275,11 +1364,11 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderProcess(slide: ProcessSlide): HTMLSlide {
     const { title, steps } = slide.props;
 
-    // 프로세스 스텝 생성 (최대 3개)
-    const processSteps = steps
-      .slice(0, 3)
+    // 프로세스 스텝 생성 (최대 3개), 빈 배열 방어
+    const safeSteps = (steps || []).slice(0, 3);
+    const processSteps = safeSteps
       .map((step, index) => {
-        const isLast = index === steps.slice(0, 3).length - 1;
+        const isLast = index === safeSteps.length - 1;
         return `
       <!-- Step ${index + 1} -->
       <div style="display: flex; align-items: center; width: 80%; margin: 0 auto;">
@@ -1343,11 +1432,11 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderRoadmap(slide: RoadmapSlide): HTMLSlide {
     const { title, items } = slide.props;
 
-    // 로드맵 아이템 생성 (최대 3개)
-    const roadmapItems = items
-      .slice(0, 3)
+    // 로드맵 아이템 생성 (최대 3개), 빈 배열 방어
+    const safeItems = (items || []).slice(0, 3);
+    const roadmapItems = safeItems
       .map((item, index) => {
-        const isLast = index === items.slice(0, 3).length - 1;
+        const isLast = index === safeItems.length - 1;
         const isInProgress = item.status.toLowerCase().includes('progress');
         const nodeColor = isInProgress
           ? this.ctx.colors.primary
@@ -1416,8 +1505,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderPricing(slide: PricingSlide): HTMLSlide {
     const { title, tiers } = slide.props;
 
-    // 가격표 티어 생성 (최대 3개)
-    const pricingTiers = tiers
+    // 가격표 티어 생성 (최대 3개), 빈 배열 방어
+    const pricingTiers = (tiers || [])
       .slice(0, 3)
       .map((tier) => {
         const isRecommended = tier.recommended || false;
@@ -1431,7 +1520,8 @@ export class TossDefaultTemplate implements SlideTemplate {
           ? this.ctx.colors.primary
           : this.ctx.colors.border;
 
-        const featureList = tier.features
+        // 빈 features 방어 (에러 방지용)
+        const featureList = (tier.features || [])
           .map(
             (feature) => `
           <li style="display: flex; align-items: flex-start; font-size: 15px; color: ${this.ctx.colors.textSecondary}; margin-bottom: 12px;">
@@ -1505,8 +1595,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderImageText(slide: ImageTextSlide): HTMLSlide {
     const { title, image, imagePosition, bullets } = slide.props;
 
-    // 불릿 리스트 생성
-    const bulletList = bullets
+    // 불릿 리스트 생성 (빈 배열 방어)
+    const bulletList = (bullets || [])
       .map(
         (bullet) => `
       <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
@@ -1572,19 +1662,34 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderAgenda(slide: AgendaSlide): HTMLSlide {
     const { title, items } = slide.props;
 
-    // 아젠다 아이템 생성 (최대 3개)
-    const agendaItems = items
-      .slice(0, 3)
+    // ✅ 아젠다 아이템 생성 (최대 8개), 빈 배열 방어
+    const safeItems = (items || []).slice(0, 8);
+    const itemCount = safeItems.length;
+
+    // ✅ 5개 이상이면 2열, 4개 이하면 1열
+    const useGrid = itemCount > 4;
+
+    const agendaItems = safeItems
       .map((item, index) => {
-        const isLast = index === items.slice(0, 3).length - 1;
         const number = String(index + 1).padStart(2, '0');
 
+        // ✅ 2열일 때는 border 제거, 1열일 때만 border
+        const isLastInColumn = useGrid ? false : (index === safeItems.length - 1);
+        const borderStyle = isLastInColumn ? 'none' : `1px solid ${this.ctx.colors.border}`;
+
         return `
-      <div style="display: flex; align-items: flex-start; width: 100%; padding-bottom: ${this.ctx.spacing.gap}px; margin-bottom: ${this.ctx.spacing.gap}px; border-bottom: ${isLast ? 'none' : `1px solid ${this.ctx.colors.border}`};">
-        <div style="flex: 0 0 80px; font-size: 28px; font-weight: 700; color: ${this.ctx.colors.primary}; line-height: 1.2;">${number}</div>
+      <div style="
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+        padding-bottom: ${useGrid ? '20px' : this.ctx.spacing.gap + 'px'};
+        margin-bottom: ${useGrid ? '20px' : this.ctx.spacing.gap + 'px'};
+        border-bottom: ${borderStyle};
+      ">
+        <div style="flex: 0 0 ${useGrid ? '60px' : '80px'}; font-size: ${useGrid ? '24px' : '28px'}; font-weight: 700; color: ${this.ctx.colors.primary}; line-height: 1.2;">${number}</div>
         <div style="flex: 1;">
-          <h4 style="font-size: ${this.ctx.fonts.size.subtitle}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0 0 8px 0; line-height: 1.2;">${this.escapeHtml(item.title)}</h4>
-          <p style="font-size: 16px; color: ${this.ctx.colors.textSecondary}; line-height: 1.6; margin: 0;">${this.escapeHtml(item.description)}</p>
+          <h4 style="font-size: ${useGrid ? '20px' : this.ctx.fonts.size.subtitle + 'px'}; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0 0 6px 0; line-height: 1.2;">${this.escapeHtml(item.title)}</h4>
+          <p style="font-size: ${useGrid ? '14px' : '16px'}; color: ${this.ctx.colors.textSecondary}; line-height: 1.5; margin: 0;">${this.escapeHtml(item.description)}</p>
         </div>
       </div>
     `;
@@ -1603,13 +1708,17 @@ export class TossDefaultTemplate implements SlideTemplate {
   font-family: ${this.ctx.fonts.main};
 ">
   <!-- Accent Bar + Title -->
-  <div style="margin-bottom: ${this.ctx.spacing.gap}px;">
+  <div style="margin-bottom: ${useGrid ? this.ctx.spacing.gap : 50}px;">
     <div style="width: ${this.ctx.spacing.accentBar.width}px; height: ${this.ctx.spacing.accentBar.height}px; background: ${this.ctx.colors.primary}; margin-bottom: 12px;"></div>
     <h2 style="font-size: ${this.ctx.fonts.size.heading}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
   </div>
 
-  <!-- Agenda List -->
-  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+  <!-- Agenda List (1열 또는 2열) -->
+  <div style="
+    flex: 1;
+    display: ${useGrid ? 'grid' : 'flex'};
+    ${useGrid ? 'grid-template-columns: 1fr 1fr; gap: 30px; align-content: center;' : 'flex-direction: column; justify-content: center;'}
+  ">
     ${agendaItems}
   </div>
 </div>
@@ -1673,8 +1782,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderGallery(slide: GallerySlide): HTMLSlide {
     const { title, images } = slide.props;
 
-    // 이미지 카드 생성 (최대 4개 - 2x2 그리드)
-    const imageCards = images
+    // 이미지 카드 생성 (최대 4개 - 2x2 그리드), 빈 배열 방어
+    const imageCards = (images || [])
       .slice(0, 4)
       .map(
         (img) => `
@@ -1742,7 +1851,12 @@ export class TossDefaultTemplate implements SlideTemplate {
    *
    * XSS 방지를 위한 HTML 특수문자 이스케이프
    */
-  private escapeHtml(text: string): string {
+  private escapeHtml(text: string | undefined | null): string {
+    // 빈 값 방어 (에러 방지용)
+    if (text === undefined || text === null || typeof text !== 'string') {
+      return '';
+    }
+
     const map: Record<string, string> = {
       '&': '&amp;',
       '<': '&lt;',

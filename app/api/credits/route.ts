@@ -1,155 +1,65 @@
 /**
- * Credit API - 크레딧 잔액 및 구매
+ * 크레딧 정보 조회 API
  *
- * GET /api/credits - 내 크레딧 잔액 조회
- * POST /api/credits - 크레딧 구매
+ * GET /api/credits
+ * 현재 로그인한 사용자의 크레딧 잔액과 최초 무료 사용 여부를 반환해요
+ *
+ * v2.0: 유효기간 관리 및 타입별 잔액 추가
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUserId } from '@/lib/auth'
+import {
+  calculateBalance,
+  getExpiringCredits,
+} from '@/lib/credits'
 
-// ============================================
-// GET /api/credits
-// ============================================
-
-/**
- * 내 크레딧 잔액 조회
- *
- * @auth Required
- * @permission 본인만 조회 가능
- * @returns {
- *   balance: number  // 현재 크레딧 잔액
- *   lastTransactionAt?: DateTime
- * }
- */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // NextAuth 세션에서 userId 가져오기
-    const userId = await getCurrentUserId()
-
-    if (!userId) {
+    // 1. 인증 체크
+    const session = await auth()
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: '로그인이 필요해요.' },
+        { error: '로그인이 필요해요' },
         { status: 401 }
       )
     }
 
-    // 최신 거래의 balance 필드로 잔액 조회
-    const latestTransaction = await prisma.creditTransaction.findFirst({
-      where: {
-        userId,
-      },
+    // 2. User 테이블에서 최초 무료 사용 플래그 조회
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
       select: {
-        balance: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
+        firstTimeDeepResearchUsed: true,
+        firstTimeQualityGenerationUsed: true,
       },
     })
 
-    // 거래가 없으면 잔액 0
-    const balance = latestTransaction?.balance ?? 0
-    const lastTransactionAt = latestTransaction?.createdAt
+    if (!user) {
+      return NextResponse.json(
+        { error: '사용자 정보를 찾을 수 없어요' },
+        { status: 404 }
+      )
+    }
 
+    // 3. 크레딧 잔액 계산 (만료되지 않은 크레딧만, 타입별 분리)
+    const { balance, balanceByType } = await calculateBalance(session.user.id)
+
+    // 4. 곧 만료될 크레딧 조회 (7일 이내)
+    const expiringCredits = await getExpiringCredits(session.user.id)
+
+    // 5. 응답 반환
     return NextResponse.json({
-      balance,
-      lastTransactionAt,
+      balance, // 총 잔액
+      balanceByType, // 타입별 잔액 (FREE, EVENT, SUBSCRIPTION, PURCHASE)
+      firstTimeDeepResearchUsed: user.firstTimeDeepResearchUsed,
+      firstTimeQualityGenerationUsed: user.firstTimeQualityGenerationUsed,
+      expiringCredits, // 만료 예정 크레딧 목록
     })
   } catch (error) {
-    console.error('크레딧 잔액 조회 실패:', error)
+    console.error('[API] 크레딧 정보 조회 실패:', error)
     return NextResponse.json(
-      { error: '크레딧 잔액을 불러오지 못했어요.' },
-      { status: 500 }
-    )
-  }
-}
-
-// ============================================
-// POST /api/credits
-// ============================================
-
-/**
- * 크레딧 구매
- *
- * @auth Required
- * @body {
- *   amount: number  // 구매할 크레딧 수량
- *   paymentToken?: string  // 결제 토큰 (향후 결제 API 연동)
- * }
- */
-export async function POST(request: NextRequest) {
-  try {
-    // NextAuth 세션에서 userId 가져오기
-    const userId = await getCurrentUserId()
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: '로그인이 필요해요.' },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-    const { amount, paymentToken } = body
-
-    // 입력 검증
-    if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: '올바른 크레딧 수량을 입력해주세요.' },
-        { status: 400 }
-      )
-    }
-
-    // TODO: 결제 검증 (향후 토스페이먼츠 API 연동)
-    // if (paymentToken) {
-    //   const paymentValid = await verifyPayment(paymentToken, amount)
-    //   if (!paymentValid) {
-    //     return NextResponse.json(
-    //       { error: '결제 검증에 실패했어요.' },
-    //       { status: 400 }
-    //     )
-    //   }
-    // }
-
-    // 현재 잔액 조회
-    const latestTransaction = await prisma.creditTransaction.findFirst({
-      where: { userId },
-      select: { balance: true },
-      orderBy: { createdAt: 'desc' },
-    })
-    const currentBalance = latestTransaction?.balance ?? 0
-
-    // 크레딧 구매 거래 생성
-    const transaction = await prisma.creditTransaction.create({
-      data: {
-        userId,
-        type: 'PURCHASE',
-        amount,
-        balance: currentBalance + amount,
-        description: `${amount} 크레딧 구매`,
-      },
-      select: {
-        id: true,
-        type: true,
-        amount: true,
-        balance: true,
-        createdAt: true,
-      },
-    })
-
-    return NextResponse.json(
-      {
-        transaction,
-        message: `${amount} 크레딧을 구매했어요.`,
-      },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('크레딧 구매 실패:', error)
-    return NextResponse.json(
-      { error: '크레딧을 구매하지 못했어요.' },
+      { error: '크레딧 정보를 가져올 수 없어요' },
       { status: 500 }
     )
   }

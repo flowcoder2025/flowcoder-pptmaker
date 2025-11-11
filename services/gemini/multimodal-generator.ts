@@ -1,13 +1,17 @@
 /**
- * Gemini를 사용한 슬라이드 콘텐츠 생성
- * 사용자 입력 + 자료 조사 결과 → 구조화된 슬라이드 콘텐츠
+ * Gemini 멀티모달 API를 사용한 슬라이드 콘텐츠 생성
+ *
+ * content-generator.ts를 기반으로 작성
+ * 문서 파싱 결과를 "조사된 자료"처럼 추가하는 방식
  */
 
 import { geminiFlash, geminiPro } from './config';
-import type { ResearchResult } from '@/types/research';
+import type { ResearchResult, AttachmentFile } from '@/types/research';
+import { parseDocuments, mergeParsedDocuments } from './document-parser';
 
-export interface ContentGenerationOptions {
+export interface MultimodalGenerationOptions {
   userInput: string;
+  attachments: AttachmentFile[];
   research?: ResearchResult;
   useProModel: boolean; // true: Pro (고품질), false: Flash (빠른속도)
   maxSlides?: number; // 슬라이드 수 제한 (플랜별)
@@ -21,23 +25,46 @@ async function sleep(ms: number): Promise<void> {
 }
 
 /**
- * 사용자 입력과 자료 조사 결과를 바탕으로 슬라이드 콘텐츠 생성
+ * 사용자 입력, 첨부 파일, 자료 조사 결과를 바탕으로 슬라이드 콘텐츠 생성
  *
- * 재시도 정책:
- * - 최대 3회 재시도
- * - Exponential backoff: 2초, 4초, 8초
- * - 503 에러(서버 과부하)에 대해서만 재시도
- * - 모두 실패하면 명확한 에러 메시지 반환
+ * content-generator.ts와 동일한 구조 + 문서 파싱 전처리
  */
-export async function generateSlideContent(options: ContentGenerationOptions): Promise<string> {
-  const { userInput, research, useProModel, maxSlides = 25 } = options;
+export async function generateMultimodalSlideContent(
+  options: MultimodalGenerationOptions
+): Promise<string> {
+  const { userInput, attachments, research, useProModel, maxSlides = 25 } = options;
 
   const model = useProModel ? geminiPro : geminiFlash;
   const modelName = useProModel ? 'Pro' : 'Flash';
 
-  console.log(`📝 [Gemini ${modelName}] 슬라이드 콘텐츠 생성 시작`);
+  console.log(`📝 [Gemini ${modelName} Multimodal] 슬라이드 콘텐츠 생성 시작`);
+  console.log(`📎 첨부 파일: ${attachments.length}개`);
 
-  // 프롬프트 구성
+  // 🆕 1단계: 문서 파싱 (파일이 있을 경우만)
+  let parsedContent = '';
+  if (attachments.length > 0) {
+    console.log(`📄 [1단계] 문서 파싱 시작 (${attachments.length}개 파일)`);
+
+    // FileAttachment 타입으로 변환
+    const fileAttachments = attachments.map(att => ({
+      name: att.name,
+      mimeType: att.mimeType,
+      data: att.data,
+      size: att.size,
+    }));
+
+    const parsedDocs = await parseDocuments(fileAttachments);
+    parsedContent = mergeParsedDocuments(parsedDocs);
+
+    const successCount = parsedDocs.filter(d => d.success).length;
+    console.log(`✅ [1단계] 문서 파싱 완료: ${successCount}/${attachments.length}개 성공`);
+    console.log(`📊 추출된 텍스트: ${parsedContent.length}자`);
+  }
+
+  // 🆕 2단계: content-generator.ts와 완전히 동일한 프롬프트
+  console.log(`📝 [2단계] 슬라이드 생성 시작 (${modelName} 모델)`);
+
+  // 프롬프트 구성 - content-generator.ts와 100% 동일
   let prompt = `당신은 프리젠테이션 콘텐츠 전문가입니다. 주어진 정보를 바탕으로 UnifiedPPTJSON 형식의 슬라이드 데이터를 생성해주세요.
 
 🚨 **중요: 슬라이드 수 목표 = ${maxSlides}장 (±2-3장 오차 허용)**
@@ -49,8 +76,16 @@ export async function generateSlideContent(options: ContentGenerationOptions): P
 ${userInput}
 `;
 
+  // 📎 첨부 파일 내용 추가 (파싱된 내용이 있을 경우만)
+  if (parsedContent) {
+    prompt += `
+
+**첨부 파일 내용:**
+${parsedContent}
+`;
+  }
+
   // 자료 조사 결과가 있으면 포함
-  // Perplexity API에서 이미 3000자로 제한되어 있음 (app/api/research/route.ts)
   if (research && research.content) {
     prompt += `
 
@@ -632,7 +667,7 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
    - 능동적 표현: "제공됐어요" → "제공해요"
    - 긍정적 표현: "없어요" → 대안 제시와 함께 사용`;
 
-  // 재시도 로직
+  // 재시도 로직 - content-generator.ts와 100% 동일
   const MAX_RETRIES = 3;
   const RETRY_DELAYS = [2000, 4000, 8000]; // 2초, 4초, 8초
 
@@ -650,11 +685,11 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
       console.log(`✅ [Gemini ${modelName}] 슬라이드 콘텐츠 생성 완료`);
       console.log(`📏 생성된 콘텐츠 길이: ${content.length}자`);
 
-      // 🆕 디버깅: 응답 상세 로깅
+      // 디버깅: 응답 상세 로깅
       console.log(`📝 [Gemini ${modelName}] 응답 미리보기 (첫 500자):`, content.substring(0, 500));
       console.log(`📝 [Gemini ${modelName}] 응답 끝부분 (마지막 500자):`, content.substring(Math.max(0, content.length - 500)));
 
-      // 🆕 검증: 응답이 비어있거나 너무 짧으면 경고
+      // 검증: 응답이 비어있거나 너무 짧으면 경고
       if (content.length < 100) {
         console.warn(`⚠️ [Gemini ${modelName}] 응답이 너무 짧습니다 (${content.length}자). 재시도가 필요할 수 있습니다.`);
       }
@@ -667,7 +702,6 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
           출력_토큰: usage.candidatesTokenCount,
           캐시_토큰: usage.cachedContentTokenCount || 0,
           총_토큰: usage.totalTokenCount,
-          계산_검증: `${usage.promptTokenCount} + ${usage.candidatesTokenCount} + ${usage.cachedContentTokenCount || 0} = ${(usage.promptTokenCount || 0) + (usage.candidatesTokenCount || 0) + (usage.cachedContentTokenCount || 0)}`,
         });
       }
 

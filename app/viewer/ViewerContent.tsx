@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TOSS_COLORS } from '@/constants/design';
 import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -26,8 +27,9 @@ export default function ViewerContent() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 워터마크 표시 여부
-  const { hasWatermark } = useSubscriptionStore();
+  // 워터마크 표시 여부 및 광고 표시 여부
+  const { hasWatermark, plan } = useSubscriptionStore();
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   // 모바일 감지
   useEffect(() => {
@@ -453,18 +455,20 @@ export default function ViewerContent() {
         </div>
       </div>
 
-      {/* 광고 - 상단 */}
-      <div style={{
-        padding: isMobile ? '8px 12px' : '16px 20px',
-        background: '#FFFFFF',
-        borderBottom: '1px solid #E5E7EB',
-        display: 'flex',
-        justifyContent: 'center',
-        maxWidth: '100%',
-        overflow: 'hidden',
-      }}>
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만) */}
+      {showAds && (
+        <div style={{
+          padding: isMobile ? '8px 12px' : '16px 20px',
+          background: '#FFFFFF',
+          borderBottom: '1px solid #E5E7EB',
+          display: 'flex',
+          justifyContent: 'center',
+          maxWidth: '100%',
+          overflow: 'hidden',
+        }}>
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 슬라이드 뷰어 */}
       {isMobile ? (
@@ -613,18 +617,20 @@ export default function ViewerContent() {
         </div>
       )}
 
-      {/* 광고 - 하단 */}
-      <div style={{
-        padding: isMobile ? '12px' : '20px',
-        background: '#FFFFFF',
-        borderTop: '1px solid #E5E7EB',
-        display: 'flex',
-        justifyContent: 'center',
-        maxWidth: '100%',
-        overflow: 'hidden',
-      }}>
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 하단 (무료 플랜만) */}
+      {showAds && (
+        <div style={{
+          padding: isMobile ? '12px' : '20px',
+          background: '#FFFFFF',
+          borderTop: '1px solid #E5E7EB',
+          display: 'flex',
+          justifyContent: 'center',
+          maxWidth: '100%',
+          overflow: 'hidden',
+        }}>
+          <KakaoAdBanner />
+        </div>
+      )}
     </div>
   );
 }

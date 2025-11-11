@@ -35,6 +35,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: '홈', href: '/', icon: Home },
   { label: '만들기', href: '/input', icon: Sparkles },
+  { label: '히스토리', href: '/history', icon: FileText },
   { label: '구독', href: '/subscription', icon: Star },
   { label: '크레딧', href: '/credits', icon: Gem },
 ];
@@ -220,13 +221,27 @@ export default function NavigationBar() {
                     <FileText size={16} className="mr-2" />
                     내 프리젠테이션
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push('/subscription')}
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+                  >
+                    <Star size={16} className="mr-2" />
+                    구독
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push('/credits')}
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+                  >
+                    <Gem size={16} className="mr-2" />
+                    크레딧
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
                     className="cursor-pointer hover:bg-transparent hover:text-destructive focus:bg-transparent focus:text-destructive transition-colors"
                   >
                     <LogOut size={16} className="mr-2" />
-                    로그아웃
+                    로그아웃해요
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -239,14 +254,14 @@ export default function NavigationBar() {
                   onClick={() => router.push('/login')}
                   className="min-w-[80px]"
                 >
-                  로그인
+                  로그인해요
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => router.push('/signup')}
                   className="min-w-[100px]"
                 >
-                  회원가입
+                  회원가입해요
                 </Button>
               </div>
             )}

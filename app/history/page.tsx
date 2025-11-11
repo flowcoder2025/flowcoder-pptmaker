@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TOSS_COLORS } from '@/constants/design';
 import { Search, Plus, Calendar, Trash2, Eye, Edit, Download } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,6 +36,10 @@ interface Presentation {
 export default function HistoryPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { plan } = useSubscriptionStore();
+
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   const [presentations, setPresentations] = useState<Presentation[]>([]);
   const [filteredPresentations, setFilteredPresentations] = useState<Presentation[]>([]);
@@ -175,10 +181,12 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
       <MaxWidthContainer className="py-8 lg:py-12">
-        {/* 광고 - 상단 */}
-        <div className="mb-8">
-          <KakaoAdMobileThick />
-        </div>
+        {/* 광고 - 상단 (무료 플랜만) */}
+        {showAds && (
+          <div className="mb-8">
+            <KakaoAdMobileThick />
+          </div>
+        )}
 
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -210,10 +218,12 @@ export default function HistoryPage() {
           </Button>
         </div>
 
-        {/* 광고 - 검색 전 */}
-        <div className="mb-6">
-          <KakaoAdBanner />
-        </div>
+        {/* 광고 - 검색 전 (무료 플랜만) */}
+        {showAds && (
+          <div className="mb-6">
+            <KakaoAdBanner />
+          </div>
+        )}
 
         {/* 검색 */}
         <div className="mb-6">

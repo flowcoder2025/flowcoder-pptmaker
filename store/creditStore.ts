@@ -178,8 +178,15 @@ export const useCreditStore = create<CreditState>()(
 
           const data = await response.json();
 
-          set({ totalCredits: data.balance });
-          console.log(`✅ 크레딧 잔액 로드: ${data.balance} 크래딧`);
+          // 크레딧 잔액 + 최초 무료 사용 여부 함께 업데이트
+          set({
+            totalCredits: data.balance,
+            firstTimeFree: {
+              deepResearch: data.firstTimeDeepResearchUsed,
+              qualityGeneration: data.firstTimeQualityGenerationUsed,
+            },
+          });
+          console.log(`✅ 크레딧 정보 로드: ${data.balance} 크래딧`);
         } catch (error) {
           console.error('❌ 크레딧 잔액 조회 실패:', error);
           // 에러 시 로컬 상태 유지 (fallback)
