@@ -3,11 +3,17 @@
  *
  * GET /api/credits
  * 현재 로그인한 사용자의 크레딧 잔액과 최초 무료 사용 여부를 반환해요
+ *
+ * v2.0: 유효기간 관리 및 타입별 잔액 추가
  */
 
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import {
+  calculateBalance,
+  getExpiringCredits,
+} from '@/lib/credits'
 
 export async function GET() {
   try {
@@ -36,21 +42,19 @@ export async function GET() {
       )
     }
 
-    // 3. CreditTransaction 테이블에서 최신 잔액 조회
-    const latestTransaction = await prisma.creditTransaction.findFirst({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      select: { balance: true },
-    })
+    // 3. 크레딧 잔액 계산 (만료되지 않은 크레딧만, 타입별 분리)
+    const { balance, balanceByType } = await calculateBalance(session.user.id)
 
-    // 4. 잔액이 없으면 0으로 간주
-    const balance = latestTransaction?.balance ?? 0
+    // 4. 곧 만료될 크레딧 조회 (7일 이내)
+    const expiringCredits = await getExpiringCredits(session.user.id)
 
     // 5. 응답 반환
     return NextResponse.json({
-      balance,
+      balance, // 총 잔액
+      balanceByType, // 타입별 잔액 (FREE, EVENT, SUBSCRIPTION, PURCHASE)
       firstTimeDeepResearchUsed: user.firstTimeDeepResearchUsed,
       firstTimeQualityGenerationUsed: user.firstTimeQualityGenerationUsed,
+      expiringCredits, // 만료 예정 크레딧 목록
     })
   } catch (error) {
     console.error('[API] 크레딧 정보 조회 실패:', error)

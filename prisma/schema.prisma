@@ -143,19 +143,23 @@ model Subscription {
 }
 
 model CreditTransaction {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
-  type        String   // 'PURCHASE', 'USAGE', 'REFUND', 'BONUS'
-  amount      Int      // 증가(+) 또는 감소(-) 크레딧
-  balance     Int      // 거래 후 잔액
+  type        String    // 'FREE', 'EVENT', 'SUBSCRIPTION', 'PURCHASE', 'USAGE', 'REFUND', 'EXPIRED'
+  sourceType  String?   // 크레딧 원본 타입 ('FREE', 'EVENT', 'SUBSCRIPTION', 'PURCHASE') - USAGE/REFUND/EXPIRED는 null
+  amount      Int       // 증가(+) 또는 감소(-) 크레딧
+  balance     Int       // ⚠️ DEPRECATED - 더 이상 사용하지 않음 (호환성 유지, 항상 0)
   description String?
+  expiresAt   DateTime? // 유효기간 (null이면 영구 - FREE/PURCHASE)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([userId, createdAt])
   @@index([type])
+  @@index([userId, expiresAt])              // 만료 크레딧 조회용
+  @@index([userId, sourceType, expiresAt])  // 우선순위 정렬용
   @@map("credit_transactions")
 }
 

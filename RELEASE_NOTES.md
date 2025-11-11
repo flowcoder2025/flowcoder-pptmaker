@@ -34,6 +34,26 @@
 ### ✨ Features
 
 #### 2025-11-11
+- **크레딧 시스템 유효기간 관리 및 우선순위 기반 소모 로직 구현**
+  - 크레딧 타입별 유효기간 설정:
+    - FREE/PURCHASE: 영구 (expiresAt = null)
+    - SUBSCRIPTION: 30일 자동 설정
+    - EVENT: 설정 가능 (expiresInDays 파라미터)
+  - 우선순위 기반 크레딧 소모: FREE → EVENT → SUBSCRIPTION → PURCHASE
+  - 만료된 크레딧 실시간 필터링 (자동 제외)
+  - 타입별 크레딧 잔액 조회 (balanceByType)
+  - 7일 이내 만료 예정 크레딧 조회 (expiringCredits)
+  - 구독 생성 시 자동 크레딧 지급 (PRO 플랜: 490 크레딧, 30일 유효)
+  - 프리젠테이션 생성 시 크레딧 차감 (1 크레딧)
+  - Prisma 스키마 업데이트: sourceType, expiresAt 필드 추가
+  - TypeScript 타입 정의 (types/credits.ts)
+  - 크레딧 유틸리티 함수 (lib/credits.ts)
+  - API 엔드포인트:
+    - GET /api/credits: 타입별 잔액 및 만료 예정 크레딧 조회
+    - POST /api/credits/consume: 우선순위 기반 크레딧 사용
+    - POST /api/credits/grant: 크레딧 지급 (유효기간 설정)
+    - POST /api/subscriptions: 구독 생성 및 크레딧 자동 지급
+
 - **사용자 지정 슬라이드 분량 설정 기능**
   - 슬라이더로 원하는 슬라이드 수 조절 가능 (10-40장 범위)
   - Flash 모델: 예상 슬라이드 수 자동 표시 (~목표 * 1.2)

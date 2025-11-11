@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { grantPresentationOwnership } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { calculateBalance, consumeCredits } from '@/lib/credits'
 
 // ============================================
 // GET /api/presentations
@@ -92,6 +93,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 1. 크레딧 잔액 확인
+    const { balance } = await calculateBalance(userId)
+    if (balance < 1) {
+      return NextResponse.json(
+        {
+          error: '크레딧이 부족해요',
+          currentBalance: balance,
+          required: 1,
+        },
+        { status: 400 }
+      )
+    }
+
     const body = await request.json()
     const { title, description, slideData, slides, metadata } = body
 
@@ -113,7 +127,7 @@ export async function POST(request: NextRequest) {
       hasMetadata: !!metadata,
     })
 
-    // 프레젠테이션 생성
+    // 2. 프레젠테이션 생성
     const presentation = await prisma.presentation.create({
       data: {
         userId,
@@ -136,7 +150,18 @@ export async function POST(request: NextRequest) {
 
     console.log('[POST /api/presentations] Presentation created:', presentation.id)
 
-    // Zanzibar 권한 부여: 생성자를 owner로 설정
+    // 3. 크레딧 차감
+    try {
+      await consumeCredits(userId, 1, `프리젠테이션 생성: ${title}`)
+      console.log('[POST /api/presentations] Credit consumed (1 credit)')
+    } catch (creditError) {
+      console.error('❌ [POST /api/presentations] 크레딧 차감 실패:', creditError)
+      // 크레딧 차감 실패 시 프레젠테이션 삭제 (롤백)
+      await prisma.presentation.delete({ where: { id: presentation.id } })
+      throw creditError
+    }
+
+    // 4. Zanzibar 권한 부여: 생성자를 owner로 설정
     await grantPresentationOwnership(presentation.id, userId)
 
     console.log('[POST /api/presentations] Ownership granted')
@@ -144,7 +169,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         presentation,
-        message: '프레젠테이션을 생성했어요.',
+        message: '프리젠테이션을 생성했어요.',
       },
       { status: 201 }
     )
