@@ -383,7 +383,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       fetchSubscription: async () => {
         try {
-          const response = await fetch('/api/subscriptions');
+          const response = await fetch('/api/subscriptions/current');
 
           if (!response.ok) {
             // 401/403이면 로그인 필요, 404면 구독 없음 (free)
@@ -399,27 +399,20 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           }
 
           const data = await response.json();
-          const subscription = data.subscription;
 
-          if (subscription) {
-            const tierMap: Record<string, SubscriptionPlan> = {
-              FREE: 'free',
-              PRO: 'pro',
-              PREMIUM: 'premium',
-            };
-
-            const plan = tierMap[subscription.tier] || 'free';
-            const expiresAt = subscription.endDate ? new Date(subscription.endDate).getTime() : null;
+          // API 응답 형식에 맞춰 데이터 처리
+          if (data.plan) {
+            const plan = data.plan as SubscriptionPlan;
+            const expiresAt = data.endDate ? new Date(data.endDate).getTime() : null;
 
             set({
               plan,
               expiresAt,
-              status: subscription.status === 'ACTIVE' ? 'active' : 'expired',
-              subscriptionId: subscription.id,
-              subscriptionStartDate: new Date(subscription.startDate).getTime(),
+              status: data.status || 'active',
+              subscriptionStartDate: data.startDate ? new Date(data.startDate).getTime() : null,
             });
 
-            console.log(`✅ 구독 정보 로드 완료: ${plan} (만료: ${subscription.endDate || '없음'})`);
+            console.log(`✅ 구독 정보 로드 완료: ${plan} (만료: ${data.endDate || '없음'})`);
           }
         } catch (error) {
           console.error('❌ 구독 정보 조회 실패:', error);
