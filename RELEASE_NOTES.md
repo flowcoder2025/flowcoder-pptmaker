@@ -24,6 +24,28 @@
 ### ✨ Features
 
 #### 2025-11-11
+- **멀티모달 슬라이드 생성 기능 (PDF 및 이미지 첨부)**
+  - PDF와 이미지 파일을 첨부하여 슬라이드 생성 가능
+  - 플랜별 파일 개수 제한: Free(1개), Pro(3개), Premium(5개)
+  - 플랜별 파일 크기 제한: Free(5MB), Pro(10MB), Premium(20MB)
+  - 지원 파일 형식: PDF, JPG, PNG, GIF, WebP
+  - Base64 인코딩으로 파일 전송
+  - Gemini Multimodal API와 통합하여 첨부 파일 내용 분석
+  - FileUploader 컴포넌트: 파일 선택, 검증, 미리보기, 제거 기능
+  - 실시간 파일 크기 표시 (KB/MB 자동 변환)
+  - 에러 메시지: UX Writing 가이드 준수 (~해요체)
+  - API 엔드포인트: POST /api/generate (멀티모달 생성)
+
+- **Perplexity AI 비용 최적화 (3000자 제한)**
+  - System prompt에 구조화된 3000자 제한 추가
+  - 5가지 섹션 구조: 개요(300자), 트렌드(800자), 통계(800자), 사례(800자), 요약(300자)
+  - max_tokens 4000 → 2000으로 감소
+  - **Sonar 비용 27% 절감**: ₩4 → ₩3 (₩1 절감)
+  - **Reasoning 비용 44% 절감**: ₩28.6 → ₩15.9 (₩12.7 절감)
+  - 빠른 조사 조합: ₩4 → ₩3
+  - 깊은 조사 조합: ₩53 → ₩41
+  - services/gemini/content-generator.ts에서 5000자 축약 로직 제거
+
 - **텍스트 입력 임시저장 기능 (서버 기반)**
   - 사용자가 입력 페이지에서 작성 중인 텍스트가 페이지 이탈 시에도 보존돼요
   - Prisma Draft 모델 추가 (userId @unique, content @db.Text)
