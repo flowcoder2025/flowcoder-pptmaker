@@ -121,6 +121,36 @@ export default function FileUploader({
     fileInputRef.current?.click();
   };
 
+  // FREE 플랜: 파일 첨부 불가
+  if (limits.maxFiles === 0) {
+    return (
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">🔒</span>
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-yellow-800 mb-1">
+              파일 첨부는 Pro 플랜부터 가능해요
+            </h4>
+            <p className="text-xs text-yellow-700 mb-3">
+              PDF나 이미지를 첨부해서 더 풍부한 슬라이드를 만들고 싶다면 Pro 플랜으로 업그레이드해주세요.
+            </p>
+            <div className="text-xs text-yellow-600 space-y-1 mb-3">
+              <div>• <strong>Pro 플랜</strong>: 최대 3개 파일, 파일당 30MB</div>
+              <div>• <strong>Premium 플랜</strong>: 최대 5개 파일, 파일당 50MB</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/subscription'}
+              className="px-4 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition-colors"
+            >
+              플랜 업그레이드 →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {/* 파일 선택 버튼 */}

@@ -9,22 +9,22 @@
  */
 export const PLAN_LIMITS = {
   free: {
-    maxFiles: 1,        // 최대 파일 개수
-    maxPdfPages: 5,     // PDF 최대 페이지 수
-    maxImageCount: 1,   // 최대 이미지 개수
-    maxFileSize: 5 * 1024 * 1024,  // 5MB
+    maxFiles: 0,        // 최대 파일 개수 (FREE 플랜은 첨부 불가)
+    maxPdfPages: 0,     // PDF 최대 페이지 수
+    maxImageCount: 0,   // 최대 이미지 개수
+    maxFileSize: 0,     // 0MB (첨부 불가)
   },
   pro: {
     maxFiles: 3,
     maxPdfPages: 20,
     maxImageCount: 3,
-    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFileSize: 30 * 1024 * 1024, // 30MB
   },
   premium: {
     maxFiles: 5,
     maxPdfPages: 50,
     maxImageCount: 5,
-    maxFileSize: 20 * 1024 * 1024, // 20MB
+    maxFileSize: 50 * 1024 * 1024, // 50MB
   },
 } as const;
 
