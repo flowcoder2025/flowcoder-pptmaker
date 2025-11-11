@@ -36,8 +36,8 @@ export default function InputPage() {
     setUseProContentModel
   } = usePresentationStore();
 
-  const { plan, isActive } = useSubscriptionStore();
-  const { totalCredits, isFirstTimeFree, getCreditCost } = useCreditStore();
+  const { plan, isActive, fetchSubscription } = useSubscriptionStore();
+  const { totalCredits, isFirstTimeFree, getCreditCost, fetchBalance } = useCreditStore();
 
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
@@ -55,6 +55,14 @@ export default function InputPage() {
       router.push('/login?callbackUrl=/input');
     }
   }, [status, router]);
+
+  // 서버에서 구독 및 크레딧 데이터 가져오기
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchSubscription();
+      fetchBalance();
+    }
+  }, [status, session, fetchSubscription, fetchBalance]);
 
   // 페이지 로드 시 임시저장 복원
   useEffect(() => {

@@ -101,8 +101,16 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ [Multimodal Generate] 생성 완료`);
 
-    // 5. JSON 파싱 및 반환
-    const slideData = JSON.parse(slideDataJson);
+    // 5. 마크다운 코드 블록 제거 (```json ... ```)
+    let cleanedJson = slideDataJson.trim();
+    if (cleanedJson.startsWith('```json')) {
+      cleanedJson = cleanedJson.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (cleanedJson.startsWith('```')) {
+      cleanedJson = cleanedJson.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+
+    // 6. JSON 파싱 및 반환
+    const slideData = JSON.parse(cleanedJson);
 
     return NextResponse.json({
       success: true,

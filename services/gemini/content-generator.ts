@@ -81,6 +81,12 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
 
 **슬라이드 타입별 props 구조:**
 
+**⚠️ 전체 제약사항:**
+- **agenda** 타입: items 배열 최대 8개 (렌더링 제한)
+- **timeline** 타입: items 배열 최대 6개 (렌더링 제한)
+- **featureGrid** 타입: features 배열 최대 6개 (렌더링 제한)
+- **teamProfile** 타입: members 배열 최대 6개 (렌더링 제한)
+
 1. **title** (표지 슬라이드):
 \`\`\`json
 {
@@ -439,6 +445,7 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
 \`\`\`
 
 19. **agenda** (아젠다 - 번호 매긴 목록):
+**⚠️ 중요**: items 배열은 **최대 8개**까지만 포함하세요. 9개 이상이면 렌더링 오류가 발생해요.
 \`\`\`json
 {
   "type": "agenda",

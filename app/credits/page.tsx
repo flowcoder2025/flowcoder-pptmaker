@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
@@ -20,7 +22,36 @@ import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
  */
 export default function CreditsPage() {
   const router = useRouter();
-  const { totalCredits, isFirstTimeFree, useFirstTimeFree } = useCreditStore();
+  const { data: session, status } = useSession();
+  const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
+
+  // 로그인 체크
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/credits');
+    }
+  }, [status, router]);
+
+  // 서버에서 크레딧 데이터 가져오기
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchBalance();
+    }
+  }, [status, session, fetchBalance]);
+
+  // 로딩 상태
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-600">불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 미로그인 시 리다이렉트 중
+  if (!session) {
+    return null;
+  }
 
   // 크레딧 구매 처리
   const handlePurchase = async (bundleId: string, amount: number) => {

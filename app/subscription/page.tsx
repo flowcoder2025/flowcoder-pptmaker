@@ -1,6 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
@@ -21,10 +23,45 @@ import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
  */
 export default function SubscriptionPage() {
   const router = useRouter();
-  const { plan: currentPlan, expiresAt, getDaysRemaining, isActive } = useSubscriptionStore();
+  const { data: session, status } = useSession();
+  const {
+    plan: currentPlan,
+    expiresAt,
+    getDaysRemaining,
+    isActive,
+    fetchSubscription,
+  } = useSubscriptionStore();
 
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
+
+  // 로그인 체크
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login?callbackUrl=/subscription');
+    }
+  }, [status, router]);
+
+  // 사용자 데이터 로드
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchSubscription();
+    }
+  }, [status, session, fetchSubscription]);
+
+  // 로딩 상태
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-gray-600">불러오고 있어요...</p>
+      </div>
+    );
+  }
+
+  // 미로그인 상태면 빈 화면 (리다이렉트 중)
+  if (!session) {
+    return null;
+  }
 
   // 구독 처리
   const handleSubscribe = async (planId: SubscriptionPlan) => {
