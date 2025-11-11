@@ -21,6 +21,17 @@
 
 ## [Unreleased]
 
+### ✨ Features
+
+#### 2025-11-11
+- **히스토리 페이지에 슬라이드 썸네일 미리보기 추가**
+  - Intersection Observer로 lazy loading 구현
+  - iframe으로 첫 슬라이드 실시간 렌더링
+  - 0.237 scale로 카드 크기에 최적화
+  - sandbox 및 pointerEvents로 보안 강화
+  - 슬라이드 없으면 이모지 placeholder 표시
+  - 성능 최적화: 카드가 화면에 보일 때만 렌더링
+
 ### 🎨 UI/UX
 
 #### 2025-11-11

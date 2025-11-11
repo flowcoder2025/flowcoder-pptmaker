@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -428,17 +428,85 @@ function PresentationCard({
   onDownload,
 }: PresentationCardProps) {
   const slideCount = presentation.metadata?.slideCount || 0;
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer로 카드가 보이는지 감지
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // 한 번 보이면 계속 유지
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // 첫 슬라이드 HTML 생성
+  const createThumbnailDocument = () => {
+    const slides = presentation.slideData?.slides || [];
+    if (slides.length === 0) return '';
+
+    const firstSlide = slides[0];
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=1200, initial-scale=1.0">
+          <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            html, body {
+              width: 1200px;
+              height: 675px;
+              overflow: hidden;
+            }
+            ${firstSlide.css || ''}
+          </style>
+        </head>
+        <body>
+          ${firstSlide.html || ''}
+        </body>
+      </html>
+    `;
+  };
+
+  const thumbnailDoc = createThumbnailDocument();
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg">
+    <Card className="overflow-hidden transition-all hover:shadow-lg" ref={cardRef}>
       {/* 썸네일 영역 */}
       <div
-        className="h-40 flex items-center justify-center"
+        className="h-40 flex items-center justify-center relative overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
+          background: thumbnailDoc ? '#FFFFFF' : `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
         }}
       >
-        <div className="text-white text-6xl">📊</div>
+        {isVisible && thumbnailDoc ? (
+          <iframe
+            srcDoc={thumbnailDoc}
+            sandbox="allow-same-origin"
+            style={{
+              width: '1200px',
+              height: '675px',
+              border: 'none',
+              pointerEvents: 'none',
+              transform: 'scale(0.237)',
+              transformOrigin: 'center center',
+            }}
+          />
+        ) : (
+          <div className="text-white text-6xl">📊</div>
+        )}
       </div>
 
       {/* 콘텐츠 영역 */}
