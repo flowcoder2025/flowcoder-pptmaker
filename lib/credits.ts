@@ -246,9 +246,12 @@ export async function consumeCredits(
     })),
   })
 
+  // 6. 최신 잔액 다시 계산 (USAGE 거래 반영 후)
+  const { balance: currentBalance } = await calculateBalance(userId)
+
   return {
     consumed: amount,
-    remaining: totalBalance - amount,
+    remaining: currentBalance,
     usageBreakdown: usageRecords,
   }
 }

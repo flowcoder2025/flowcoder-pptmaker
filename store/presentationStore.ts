@@ -105,6 +105,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       console.log('✅ 슬라이드 생성 시작');
 
+      // 🔄 크레딧 잔액 동기화 (DB → 로컬 상태)
+      await creditStore.fetchBalance();
+      console.log('✅ 크레딧 정보 동기화 완료');
+
       const { selectedColorPresetId, researchMode, useProContentModel, targetSlideCount } = get();
 
       // 💳 크레딧 차감 로직

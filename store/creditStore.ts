@@ -123,8 +123,8 @@ export const useCreditStore = create<CreditState>()(
           const data = await response.json();
 
           // 서버에서 반환된 최신 잔액으로 업데이트
-          set({ totalCredits: data.balance });
-          console.log(`✅ 크래딧 사용: -${amount} (남은 크래딧: ${data.balance})`);
+          set({ totalCredits: data.remainingBalance });
+          console.log(`✅ 크래딧 사용: -${amount} (남은 크래딧: ${data.remainingBalance})`);
           return true;
         } catch (error) {
           console.error('❌ 크래딧 사용 실패:', error);
