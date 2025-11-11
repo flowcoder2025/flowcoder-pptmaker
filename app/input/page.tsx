@@ -451,7 +451,7 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ⚡ Flash 모델
+                      ⚡ 빠른 모델
                     </span>
                     <span className="text-xs font-semibold text-green-600">
                       무료
@@ -472,7 +472,7 @@ export default function InputPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      ✨ Pro 모델
+                      ✨ 추론 모델
                     </span>
                     <span className="text-xs font-semibold text-blue-600">
                       {(() => {

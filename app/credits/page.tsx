@@ -162,7 +162,7 @@ export default function CreditsPage() {
             className="text-sm mb-1"
             style={{ color: TOSS_COLORS.textSecondary }}
           >
-            Perplexity AI로 웹 자료를 조사해요
+            검색 전용 AI로 웹 자료를 조사해요
           </p>
           <p
             className="text-2xl font-bold"
@@ -192,7 +192,7 @@ export default function CreditsPage() {
             className="text-sm mb-1"
             style={{ color: TOSS_COLORS.textSecondary }}
           >
-            Gemini Pro로 더 나은 품질을 제공해요
+            추론 모델로 더 나은 품질을 제공해요
           </p>
           <p
             className="text-2xl font-bold"
