@@ -14,6 +14,7 @@ import { Search, Plus, Calendar, Trash2, Eye, Edit, Download } from 'lucide-reac
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import type { HTMLSlide } from '@/types/slide';
 
 /**
  * PPT 히스토리 페이지
@@ -27,7 +28,8 @@ interface Presentation {
   id: string;
   title: string;
   description?: string;
-  slideData: any;
+  slides: HTMLSlide[];      // 썸네일 렌더링용 (렌더링된 HTML)
+  slideData?: any;          // 편집용 (구조화된 데이터)
   metadata?: any;
   createdAt: string;
   updatedAt: string;
@@ -453,10 +455,16 @@ function PresentationCard({
 
   // 첫 슬라이드 HTML 생성
   const createThumbnailDocument = () => {
-    const slides = presentation.slideData?.slides || [];
-    if (slides.length === 0) return '';
+    // presentation.slides는 HTMLSlide[] 타입 (렌더링된 HTML)
+    // presentation.slideData.slides는 Slide[] 타입 (구조화된 데이터)
+    const slides = presentation.slides || [];
+
+    if (slides.length === 0) {
+      return '';
+    }
 
     const firstSlide = slides[0];
+
     return `
       <!DOCTYPE html>
       <html>
@@ -484,10 +492,11 @@ function PresentationCard({
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg" ref={cardRef}>
-      {/* 썸네일 영역 */}
+      {/* 썸네일 영역 - 16:9 비율 유지 */}
       <div
-        className="h-40 flex items-center justify-center relative overflow-hidden"
+        className="w-full flex items-center justify-center relative overflow-hidden bg-white"
         style={{
+          aspectRatio: '16/9',
           background: thumbnailDoc ? '#FFFFFF' : `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
         }}
       >
@@ -495,12 +504,13 @@ function PresentationCard({
           <iframe
             srcDoc={thumbnailDoc}
             sandbox="allow-same-origin"
+            className="absolute inset-0"
             style={{
               width: '1200px',
               height: '675px',
               border: 'none',
               pointerEvents: 'none',
-              transform: 'scale(0.237)',
+              transform: 'scale(0.28)',
               transformOrigin: 'center center',
             }}
           />

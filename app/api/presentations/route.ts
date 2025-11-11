@@ -3,6 +3,8 @@
  *
  * GET /api/presentations - 내 프레젠테이션 목록 조회
  * POST /api/presentations - 새 프레젠테이션 생성
+ *
+ * Updated: 2025-11-11 - Added slides field for thumbnail rendering
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -43,7 +45,8 @@ export async function GET(request: NextRequest) {
         id: true,
         title: true,
         description: true,
-        slideData: true,  // 썸네일 렌더링을 위해 필요
+        slides: true,      // 썸네일 렌더링용 (HTMLSlide[] - 렌더링된 HTML)
+        slideData: true,   // 편집용 (UnifiedPPTJSON - 구조화된 데이터)
         metadata: true,
         isPublic: true,
         createdAt: true,
