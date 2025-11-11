@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -36,6 +37,8 @@ model User {
   creditTransactions CreditTransaction[]
   generationHistory  GenerationHistory[]
   draft            Draft?
+  payments         Payment[]
+  billingKeys      BillingKey[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -133,6 +136,7 @@ model Subscription {
   endDate   DateTime?
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments  Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -153,6 +157,7 @@ model CreditTransaction {
   expiresAt   DateTime? // 유효기간 (null이면 영구 - FREE/PURCHASE)
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment     Payment?
 
   createdAt   DateTime  @default(now())
 
@@ -244,4 +249,83 @@ model RelationDefinition {
 
   @@unique([namespace, relation])
   @@map("relation_definitions")
+}
+
+// ============================================
+// Payment Models (PortOne V2)
+// ============================================
+
+model Payment {
+  id                    String    @id @default(cuid())
+
+  // PortOne 결제 ID (고유 식별자)
+  paymentId             String    @unique
+
+  // 사용자 정보
+  userId                String
+
+  // 결제 정보
+  amount                Int       // 결제 금액 (원)
+  currency              String    @default("KRW")
+  status                String    // 'PENDING', 'PAID', 'FAILED', 'CANCELED', 'REFUNDED'
+  method                String?   // 'CARD', 'TRANSFER', 'VIRTUAL_ACCOUNT', 'MOBILE', etc.
+
+  // 결제 목적
+  purpose               String    // 'SUBSCRIPTION_UPGRADE', 'CREDIT_PURCHASE'
+
+  // 관련 리소스 (nullable)
+  subscriptionId        String?
+  creditTransactionId   String?   @unique
+
+  // PortOne 응답 데이터 (전체 JSON)
+  portoneData           Json
+
+  // 영수증 및 실패 정보
+  receiptUrl            String?
+  failReason            String?   @db.Text
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  creditTransaction     CreditTransaction? @relation(fields: [creditTransactionId], references: [id], onDelete: SetNull)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([purpose])
+  @@map("payments")
+}
+
+model BillingKey {
+  id            String    @id @default(cuid())
+
+  // PortOne 빌링키 ID (고유 식별자)
+  billingKeyId  String    @unique
+
+  // 사용자 정보
+  userId        String
+
+  // 카드 정보 (마스킹)
+  cardInfo      Json      // { issuer: '신한카드', maskedNumber: '1234-****-****-5678', cardType: 'CREDIT' }
+
+  // 활성화 상태
+  isActive      Boolean   @default(true)
+
+  // 만료일
+  expiresAt     DateTime?
+
+  // PortOne 응답 데이터 (전체 JSON)
+  portoneData   Json
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("billing_keys")
 }

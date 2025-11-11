@@ -2,16 +2,25 @@
 
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useCreditStore } from '@/store/creditStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { TOSS_COLORS } from '@/constants/design';
-import { Coins, Sparkles, TrendingUp } from 'lucide-react';
+import { Coins, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
@@ -27,6 +36,10 @@ export default function CreditsPage() {
   const { data: session, status } = useSession();
   const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
   const { plan } = useSubscriptionStore();
+  const { requestPayment, isLoading, error, clearError } = usePortOnePayment();
+
+  const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
+  const [selectedBundle, setSelectedBundle] = useState<typeof CREDIT_BUNDLES[0] | null>(null);
 
   // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
@@ -60,9 +73,46 @@ export default function CreditsPage() {
   }
 
   // 크레딧 구매 처리
-  const handlePurchase = async (bundleId: string, amount: number) => {
-    // TODO: API 연동
-    alert(`${amount} 크레딧 구매 준비 중이에요!`);
+  const handlePurchase = (bundleId: string) => {
+    const bundle = CREDIT_BUNDLES.find((b) => b.id === bundleId);
+    if (!bundle) return;
+
+    // 결제 채널 선택 다이얼로그 열기
+    setSelectedBundle(bundle);
+    setIsChannelDialogOpen(true);
+  };
+
+  // 결제 채널 선택 후 결제 진행
+  const handlePaymentChannelSelect = async (channelKey: string) => {
+    if (!selectedBundle || !session) return;
+
+    try {
+      clearError();
+      setIsChannelDialogOpen(false);
+
+      const result = await requestPayment({
+        purpose: 'CREDIT_PURCHASE',
+        amount: selectedBundle.price,
+        orderName: `크레딧 ${selectedBundle.credits}개 구매`,
+        channelKey,
+        creditAmount: selectedBundle.credits,
+      });
+
+      if (result.success && result.payment) {
+        // 성공: 결제 결과 페이지로 이동
+        await fetchBalance();
+        router.push(`/payments/result?success=true&paymentId=${result.payment.id}`);
+      } else {
+        // 실패: 결제 결과 페이지로 이동 (에러 메시지 포함)
+        router.push(`/payments/result?success=false&error=${encodeURIComponent(result.error || '결제에 실패했어요')}`);
+      }
+    } catch (err) {
+      console.error('결제 중 오류:', err);
+      const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
+      router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+    } finally {
+      setSelectedBundle(null);
+    }
   };
 
   return (
@@ -248,6 +298,76 @@ export default function CreditsPage() {
           </p>
         </Card>
       </div>
+
+      {/* 결제 채널 선택 다이얼로그 */}
+      <Dialog open={isChannelDialogOpen} onOpenChange={setIsChannelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>결제 방법을 선택해주세요</DialogTitle>
+            <DialogDescription>
+              {selectedBundle && (
+                <span>
+                  크레딧 {selectedBundle.credits}개 (₩
+                  {selectedBundle.price.toLocaleString()})를 구매해요
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-4">
+            {Object.entries(PAYMENT_CHANNELS).map(([key, channel]) => (
+              <Button
+                key={key}
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-4"
+                onClick={() => handlePaymentChannelSelect(channel.key)}
+                disabled={isLoading}
+              >
+                <div>
+                  <div
+                    className="font-semibold mb-1"
+                    style={{ color: TOSS_COLORS.text }}
+                  >
+                    {channel.name}
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: TOSS_COLORS.textSecondary }}
+                  >
+                    {channel.pgProvider} • {channel.mid}
+                  </div>
+                </div>
+              </Button>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsChannelDialogOpen(false)}
+              disabled={isLoading}
+            >
+              취소
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 로딩 오버레이 */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="p-6 flex items-center gap-3">
+            <Loader2
+              className="animate-spin"
+              size={24}
+              style={{ color: TOSS_COLORS.primary }}
+            />
+            <span style={{ color: TOSS_COLORS.text }}>
+              결제를 진행하고 있어요...
+            </span>
+          </Card>
+        </div>
+      )}
     </MaxWidthContainer>
   );
 }
@@ -257,7 +377,7 @@ export default function CreditsPage() {
  */
 interface CreditBundleCardProps {
   bundle: typeof CREDIT_BUNDLES[0];
-  onPurchase: (bundleId: string, amount: number) => void;
+  onPurchase: (bundleId: string) => void;
 }
 
 function CreditBundleCard({ bundle, onPurchase }: CreditBundleCardProps) {
@@ -322,7 +442,7 @@ function CreditBundleCard({ bundle, onPurchase }: CreditBundleCardProps) {
         {/* 구매 버튼 */}
         <Button
           className="w-full"
-          onClick={() => onPurchase(bundle.id, bundle.credits)}
+          onClick={() => onPurchase(bundle.id)}
           style={{
             backgroundColor: isRecommended ? TOSS_COLORS.primary : undefined,
             color: isRecommended ? '#FFFFFF' : undefined,
