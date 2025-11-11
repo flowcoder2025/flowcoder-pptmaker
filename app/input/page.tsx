@@ -10,6 +10,8 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
 import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
+import type { AttachmentFile } from '@/types/research';
+import FileUploader from '@/components/input/FileUploader';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -38,6 +40,7 @@ export default function InputPage() {
   const { totalCredits, isFirstTimeFree, getCreditCost } = useCreditStore();
 
   const [text, setText] = useState('');
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentModalType, setPaymentModalType] = useState<'pro' | 'deep' | null>(null);
   const [showDraftModal, setShowDraftModal] = useState(false);
@@ -179,7 +182,7 @@ export default function InputPage() {
       return;
     }
 
-    await generatePresentation(text);
+    await generatePresentation(text, attachments);
 
     // 생성 완료 시 임시저장 삭제
     try {
@@ -499,6 +502,16 @@ export default function InputPage() {
                 placeholder={`프리젠테이션 내용을 입력하세요...\n\n예시:\n우리 회사 소개 프리젠테이션을 만들어주세요.\n\n제목: 혁신적인 핀테크 기업\n\n회사 미션:\n- 금융 서비스의 디지털 혁신\n- 모두를 위한 쉬운 금융\n\n주요 서비스:\n1. 간편 송금 서비스\n2. 자산 관리 플랫폼\n\n감사합니다.`}
                 className="w-full flex-1 p-4 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+
+              {/* 파일 첨부 */}
+              <div className="mt-4">
+                <FileUploader
+                  files={attachments}
+                  onChange={setAttachments}
+                  plan={plan}
+                  disabled={isGenerating}
+                />
+              </div>
 
               {/* 에러 메시지 */}
               {generationError && (

@@ -13,6 +13,7 @@ import { generateSlideContent } from '@/services/gemini/content-generator';
 import { TemplateEngine } from '@/services/template';
 import { RESEARCH_MODE_CONFIG } from '@/types/research';
 import type { UnifiedPPTJSON, Slide, SlideType } from '@/types/slide';
+import type { AttachmentFile } from '@/types/research';
 import { createDefaultSlide } from '@/utils/slideDefaults';
 
 interface PresentationState {
@@ -42,7 +43,7 @@ interface PresentationState {
   setResearchMode: (mode: ResearchMode) => void;
   setUseProContentModel: (usePro: boolean) => void;
   setUseProHtmlModel: (usePro: boolean) => void;
-  generatePresentation: (text: string) => Promise<void>;
+  generatePresentation: (text: string, attachments?: AttachmentFile[]) => Promise<void>;
   savePresentation: () => Promise<void>;
   fetchPresentations: () => Promise<Presentation[]>;
   fetchPresentation: (id: string) => Promise<void>;
@@ -80,7 +81,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
   setUseProHtmlModel: (usePro) => set({ useProHtmlModel: usePro }),
 
-  generatePresentation: async (text: string) => {
+  generatePresentation: async (text: string, attachments?: AttachmentFile[]) => {
     set({
       isGenerating: true,
       generationStep: 'parsing',
@@ -96,6 +97,81 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       const { selectedColorPresetId, researchMode, useProContentModel } = get();
 
+      // 멀티모달 분기: 파일 첨부가 있으면 /api/generate 엔드포인트 호출
+      if (attachments && attachments.length > 0) {
+        console.log(`📎 멀티모달 생성 모드 (파일 ${attachments.length}개)`);
+
+        set({ generationStep: 'parsing' });
+
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic: text,
+            attachments,
+            researchMode,
+            model: useProContentModel ? 'pro' : 'flash',
+            slideCount: maxSlides,
+            plan: subscriptionStore.plan,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`멀티모달 생성 실패: ${errorData.error || response.statusText}`);
+        }
+
+        const { slideData, metadata } = await response.json();
+        console.log('✅ 멀티모달 슬라이드 데이터 수신:', slideData.slides.length, '개');
+
+        set({ generationStep: 'generating' });
+
+        // HTML 생성 (TemplateEngine)
+        console.log(`🎨 HTML 슬라이드 생성 중... (템플릿: ${selectedColorPresetId})`);
+        const engine = new TemplateEngine();
+        const htmlSlides = engine.generateAll(slideData, selectedColorPresetId);
+        console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
+
+        // Presentation 객체 생성
+        const firstSlide = slideData.slides[0];
+        const presentationTitle =
+          firstSlide?.type === 'thankYou'
+            ? firstSlide.props.message
+            : ('title' in firstSlide.props ? firstSlide.props.title : '무제');
+
+        const presentation: Presentation = {
+          id: `temp_${Date.now()}`,
+          title: presentationTitle || '무제',
+          slides: htmlSlides,
+          slideData: slideData,
+          templateId: selectedColorPresetId,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          metadata: metadata || {},
+        };
+
+        set({
+          currentPresentation: presentation,
+          isGenerating: false,
+          generationStep: 'done',
+        });
+
+        console.log('🎉 멀티모달 프리젠테이션 생성 완료!');
+
+        // 데이터베이스 저장
+        try {
+          console.log('💾 데이터베이스에 저장 중...');
+          await get().savePresentation();
+          console.log('✅ 데이터베이스 저장 완료!');
+        } catch (saveError) {
+          console.error('❌ 데이터베이스 저장 실패:', saveError);
+          throw new Error(`프리젠테이션 저장에 실패했어요: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
+        }
+
+        return;
+      }
+
+      // 기존 로직 (파일 첨부 없는 경우)
       let enrichedContent = text;
 
       // 1단계 (선택): 자료 조사
