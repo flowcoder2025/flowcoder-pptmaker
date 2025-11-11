@@ -375,6 +375,20 @@
 
 ### 🔧 Technical
 
+#### 2025-11-12
+- **디자인 시스템 통합 및 멀티 배포 환경 지원**
+  - @toss/tds-colors 패키지 제거
+  - constants/design.ts에서 HSL 색상 값 직접 정의 (플랫폼 독립적)
+  - Tailwind CSS 4로 완전 통일 (19개 파일 영향)
+  - 340개 인라인 스타일 → Tailwind 클래스 변환 (14개 파일)
+  - lib/text-config.ts 추가: 배포 환경별 텍스트 분기 시스템
+  - NEXT_PUBLIC_DEPLOYMENT_ENV 환경 변수 지원 (standalone | apps-in-toss)
+  - 버튼 텍스트 23개 환경별 분기 적용 (8개 파일)
+  - 독립 서비스 환경: 비즈니스 용어 ("로그인", "회원가입", "크레딧 구매")
+  - 앱인토스 환경: 해요체 ("로그인해요", "회원가입해요", "크레딧 구매해요")
+  - TypeScript 타입 체크 및 환경별 빌드 검증 완료 (standalone, apps-in-toss)
+  - TASK.md, MIGRATION_QUEUE.md 업데이트: 9단계 Phase 완료 추적
+
 #### 2025-11-08
 - **Supabase Transaction pooler 설정 및 Prisma 최적화** (be1a329)
   - Transaction pooler (port 6543) + pgbouncer 모드 설정

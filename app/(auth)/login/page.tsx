@@ -10,9 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
-import { TOSS_COLORS } from '@/constants/design';
 import { Github } from 'lucide-react';
 import { toast } from 'sonner';
+import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
 
 /**
  * 로그인 페이지 컨텐츠 (Suspense 내부)
@@ -78,18 +78,15 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: TOSS_COLORS.background }}>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <MaxWidthContainer className="py-8 w-full">
         <Card className="max-w-md mx-auto p-6 sm:p-8 w-full">
           {/* 헤더 */}
           <div className="text-center mb-8">
-            <h1
-              className="text-3xl font-bold mb-2"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
               로그인해요
             </h1>
-            <p style={{ color: TOSS_COLORS.textSecondary }}>
+            <p className="text-muted-foreground">
               AI 프리젠테이션을 만들어보세요
             </p>
           </div>
@@ -97,7 +94,7 @@ function LoginPageContent() {
           {/* 이메일 로그인 폼 */}
           <form onSubmit={handleEmailLogin} className="space-y-4 mb-6">
             <div>
-              <Label htmlFor="email" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="email" className="text-foreground">
                 이메일
               </Label>
               <Input
@@ -113,7 +110,7 @@ function LoginPageContent() {
             </div>
 
             <div>
-              <Label htmlFor="password" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="password" className="text-foreground">
                 비밀번호
               </Label>
               <Input
@@ -130,28 +127,18 @@ function LoginPageContent() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-primary text-white"
               disabled={isLoading}
-              style={{
-                backgroundColor: TOSS_COLORS.primary,
-                color: '#FFFFFF',
-              }}
             >
-              {isLoading ? '로그인하고 있어요...' : '로그인해요'}
+              {isLoading ? '로그인하고 있어요...' : BUTTON_TEXT.login}
             </Button>
           </form>
 
           {/* 구분선 */}
           <div className="relative mb-6">
             <Separator />
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4"
-              style={{ backgroundColor: '#FFFFFF' }}
-            >
-              <span
-                className="text-sm"
-                style={{ color: TOSS_COLORS.textSecondary }}
-              >
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 bg-white">
+              <span className="text-sm text-muted-foreground">
                 또는
               </span>
             </div>
@@ -189,17 +176,13 @@ function LoginPageContent() {
 
           {/* 회원가입 링크 */}
           <div className="text-center">
-            <p
-              className="text-sm"
-              style={{ color: TOSS_COLORS.textSecondary }}
-            >
+            <p className="text-sm text-muted-foreground">
               계정이 없으신가요?{' '}
               <Link
                 href="/signup"
-                className="font-semibold hover:underline"
-                style={{ color: TOSS_COLORS.primary }}
+                className="font-semibold hover:underline text-primary"
               >
-                회원가입해요
+                {BUTTON_TEXT.signup}
               </Link>
             </p>
           </div>
@@ -219,10 +202,10 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p style={{ color: TOSS_COLORS.textSecondary }}>
-            불러오고 있어요...
+          <p className="text-muted-foreground">
+            {STATUS_TEXT.loading}
           </p>
         </div>
       </div>

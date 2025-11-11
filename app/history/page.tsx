@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { TOSS_COLORS } from '@/constants/design';
+import { BUTTON_TEXT } from '@/lib/text-config';
 import { Search, Plus, Calendar, Trash2, Eye, Edit, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -170,8 +170,8 @@ export default function HistoryPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
-        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">불러오고 있어요...</p>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
+    <div className="min-h-screen bg-background">
       <MaxWidthContainer className="py-8 lg:py-12">
         {/* 광고 - 상단 (무료 플랜만) */}
         {showAds && (
@@ -193,16 +193,10 @@ export default function HistoryPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div>
-            <h1
-              className="text-3xl lg:text-4xl font-bold mb-2"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h1 className="text-3xl lg:text-4xl font-bold mb-2 text-foreground">
               내 프리젠테이션
             </h1>
-            <p
-              className="text-base lg:text-lg"
-              style={{ color: TOSS_COLORS.textSecondary }}
-            >
+            <p className="text-base lg:text-lg text-muted-foreground">
               {presentations.length}개의 프리젠테이션을 만들었어요
             </p>
           </div>
@@ -210,10 +204,7 @@ export default function HistoryPage() {
           <Button
             onClick={() => router.push('/input')}
             size="lg"
-            style={{
-              backgroundColor: TOSS_COLORS.primary,
-              color: '#FFFFFF',
-            }}
+            className="bg-primary text-white"
           >
             <Plus className="mr-2" size={20} />
             새로 만들기
@@ -231,9 +222,8 @@ export default function HistoryPage() {
         <div className="mb-6">
           <div className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               size={20}
-              style={{ color: TOSS_COLORS.textSecondary }}
             />
             <Input
               type="text"
@@ -250,38 +240,26 @@ export default function HistoryPage() {
           <Card className="p-12 text-center">
             {searchQuery ? (
               <>
-                <p
-                  className="text-lg mb-2"
-                  style={{ color: TOSS_COLORS.text }}
-                >
+                <p className="text-lg mb-2 text-foreground">
                   "{searchQuery}"를 찾지 못했어요
                 </p>
-                <p style={{ color: TOSS_COLORS.textSecondary }}>
+                <p className="text-muted-foreground">
                   다른 검색어로 시도해보세요
                 </p>
               </>
             ) : (
               <>
                 <div className="text-6xl mb-4">📄</div>
-                <p
-                  className="text-lg mb-2"
-                  style={{ color: TOSS_COLORS.text }}
-                >
+                <p className="text-lg mb-2 text-foreground">
                   아직 생성한 프리젠테이션이 없어요
                 </p>
-                <p
-                  className="mb-6"
-                  style={{ color: TOSS_COLORS.textSecondary }}
-                >
+                <p className="mb-6 text-muted-foreground">
                   AI가 자동으로 슬라이드를 만들어줘요
                 </p>
                 <Button
                   onClick={() => router.push('/input')}
                   size="lg"
-                  style={{
-                    backgroundColor: TOSS_COLORS.primary,
-                    color: '#FFFFFF',
-                  }}
+                  className="bg-primary text-white"
                 >
                   ✨ 첫 프리젠테이션 만들기
                 </Button>
@@ -307,102 +285,37 @@ export default function HistoryPage() {
       {/* 다운로드 형식 선택 다이얼로그 */}
       {showDownloadDialog && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
           onClick={() => setShowDownloadDialog(false)}
         >
           <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '12px',
-              padding: '24px',
-              maxWidth: '400px',
-              width: '90%',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            }}
+            className="bg-white rounded-xl p-6 max-w-[400px] w-[90%] shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3
-              style={{
-                fontSize: '20px',
-                fontWeight: 'bold',
-                marginBottom: '16px',
-                color: TOSS_COLORS.text,
-              }}
-            >
+            <h3 className="text-xl font-bold mb-4 text-foreground">
               다운로드 형식 선택
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="flex flex-col gap-3">
               <button
                 onClick={() => handleDownload('pdf')}
                 disabled={isDownloading}
-                style={{
-                  padding: '16px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  color: TOSS_COLORS.text,
-                  backgroundColor: '#FFFFFF',
-                  border: `2px solid ${TOSS_COLORS.primary}`,
-                  borderRadius: '8px',
-                  cursor: isDownloading ? 'not-allowed' : 'pointer',
-                  opacity: isDownloading ? 0.5 : 1,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isDownloading) e.currentTarget.style.backgroundColor = `${TOSS_COLORS.primary}10`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#FFFFFF';
-                }}
+                className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
               >
                 📕 PDF 파일
               </button>
               <button
                 onClick={() => handleDownload('pptx')}
                 disabled={isDownloading}
-                style={{
-                  padding: '16px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  color: TOSS_COLORS.text,
-                  backgroundColor: '#FFFFFF',
-                  border: `2px solid ${TOSS_COLORS.primary}`,
-                  borderRadius: '8px',
-                  cursor: isDownloading ? 'not-allowed' : 'pointer',
-                  opacity: isDownloading ? 0.5 : 1,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isDownloading) e.currentTarget.style.backgroundColor = `${TOSS_COLORS.primary}10`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#FFFFFF';
-                }}
+                className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
               >
                 📊 PowerPoint 파일
               </button>
             </div>
             <button
               onClick={() => setShowDownloadDialog(false)}
-              style={{
-                marginTop: '16px',
-                width: '100%',
-                padding: '12px',
-                fontSize: '14px',
-                color: TOSS_COLORS.textSecondary,
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="mt-4 w-full p-3 text-sm text-muted-foreground bg-transparent border-none cursor-pointer"
             >
-              취소
+              {BUTTON_TEXT.cancel}
             </button>
           </div>
         </div>
@@ -497,7 +410,7 @@ function PresentationCard({
         className="relative overflow-hidden w-full"
         style={{
           aspectRatio: '16/9',
-          background: thumbnailDoc ? '#FFFFFF' : `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
+          background: thumbnailDoc ? '#FFFFFF' : 'linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(210 40% 96.1%) 100%)',
         }}
       >
         {isVisible && thumbnailDoc ? (
@@ -526,26 +439,17 @@ function PresentationCard({
 
       {/* 콘텐츠 영역 */}
       <div className="p-5">
-        <h3
-          className="text-lg font-bold mb-2 line-clamp-2"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h3 className="text-lg font-bold mb-2 line-clamp-2 text-foreground">
           {presentation.title}
         </h3>
 
         {presentation.description && (
-          <p
-            className="text-sm mb-3 line-clamp-2"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-sm mb-3 line-clamp-2 text-muted-foreground">
             {presentation.description}
           </p>
         )}
 
-        <div
-          className="flex items-center gap-4 text-sm mb-4"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <div className="flex items-center gap-4 text-sm mb-4 text-muted-foreground">
           <span>
             📄 {slideCount}슬라이드
           </span>
@@ -571,7 +475,7 @@ function PresentationCard({
             onClick={() => onEdit(presentation.id)}
           >
             <Edit size={16} className="mr-1" />
-            편집
+            {BUTTON_TEXT.edit}
           </Button>
         </div>
 
@@ -582,17 +486,16 @@ function PresentationCard({
             onClick={() => onDownload(presentation.id)}
           >
             <Download size={16} className="mr-1" />
-            다운로드
+            {BUTTON_TEXT.download}
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={() => onDelete(presentation.id)}
-            style={{ color: TOSS_COLORS.error }}
-            className="hover:border-current"
+            className="text-destructive hover:border-current"
           >
             <Trash2 size={16} className="mr-1" />
-            삭제
+            {BUTTON_TEXT.delete}
           </Button>
         </div>
       </div>

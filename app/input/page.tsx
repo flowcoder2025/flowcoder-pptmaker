@@ -12,6 +12,7 @@ import { useCreditStore } from '@/store/creditStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
+import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
 import type { AttachmentFile } from '@/types/research';
 import FileUploader from '@/components/input/FileUploader';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
@@ -315,7 +316,7 @@ export default function InputPage() {
                             variant="outline"
                             className="mt-2 h-7 text-xs"
                           >
-                            크레딧 구매 →
+                            {BUTTON_TEXT.purchaseCredits} →
                           </Button>
                         </div>
                       </div>
@@ -328,7 +329,7 @@ export default function InputPage() {
                     size="sm"
                     variant="default"
                   >
-                    업그레이드
+                    {BUTTON_TEXT.upgrade}
                   </Button>
                 )}
               </div>
@@ -596,7 +597,7 @@ export default function InputPage() {
                 disabled={isGenerating || !text.trim()}
                 className="w-full mt-4 h-14 text-lg font-bold"
               >
-                {isGenerating ? '생성하고 있어요' : '✨ 슬라이드 생성해요'}
+                {isGenerating ? STATUS_TEXT.generating : `✨ ${BUTTON_TEXT.generateSlide}`}
               </Button>
             </Card>
           </div>
@@ -730,14 +731,14 @@ export default function InputPage() {
                 onClick={() => router.push('/subscription')}
                 className="flex-1"
               >
-                구독하기
+                {BUTTON_TEXT.subscribe}
               </Button>
               <Button
                 onClick={() => router.push('/credits')}
                 variant="outline"
                 className="flex-1"
               >
-                크레딧 구매
+                {BUTTON_TEXT.purchaseCredits}
               </Button>
             </div>
 
@@ -745,7 +746,7 @@ export default function InputPage() {
               onClick={() => setShowPaymentModal(false)}
               className="w-full mt-2 py-2 text-sm text-gray-600 hover:text-gray-900"
             >
-              취소
+              {BUTTON_TEXT.cancel}
             </button>
           </Card>
         </div>

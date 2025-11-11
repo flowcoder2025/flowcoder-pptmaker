@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { NAV_HEIGHT } from '@/constants/layout';
-import { TOSS_COLORS } from '@/constants/design';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -23,7 +22,7 @@ import type { LucideIcon } from 'lucide-react';
  * @description
  * 웹 서비스 상단 내비게이션 바입니다.
  * 로그인 상태에 따라 다른 UI를 표시합니다.
- * TDS (Toss Design System) 스타일을 적용했습니다.
+ * Tailwind CSS 4 스타일을 적용했습니다.
  */
 
 interface NavItem {
@@ -69,12 +68,8 @@ export default function NavigationBar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 border-b shadow-sm"
-      style={{
-        height: NAV_HEIGHT.desktop,
-        backgroundColor: TOSS_COLORS.background,
-        borderColor: TOSS_COLORS.muted,
-      }}
+      className="sticky top-0 z-50 border-b shadow-sm bg-background border-border"
+      style={{ height: NAV_HEIGHT.desktop }}
     >
       <div
         className="mx-auto px-3 sm:px-8 lg:px-10 h-full flex items-center justify-between"
@@ -83,15 +78,7 @@ export default function NavigationBar() {
         {/* 로고 */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           {/* 모바일: 텍스트 2줄 로고 */}
-          <div
-            className="flex flex-col leading-none md:hidden"
-            style={{
-              background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
+          <div className="flex flex-col leading-none md:hidden bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
             <div className="text-sm font-bold">PPT</div>
             <div className="text-sm font-bold">Maker</div>
           </div>
@@ -102,15 +89,7 @@ export default function NavigationBar() {
             alt="PPT Maker Logo"
             className="h-12 w-12 object-contain hidden md:block"
           />
-          <div
-            className="text-lg font-bold hidden md:block"
-            style={{
-              background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
+          <div className="text-lg font-bold hidden md:block bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
             PPT Maker by FlowCoder
           </div>
         </Link>
@@ -150,11 +129,8 @@ export default function NavigationBar() {
           {/* 인증 버튼/메뉴 */}
           <div className="ml-2">
             {status === 'loading' ? (
-              <div
-                className="px-4 py-2 rounded-lg"
-                style={{ backgroundColor: TOSS_COLORS.surface }}
-              >
-                <span className="text-sm" style={{ color: TOSS_COLORS.textSecondary }}>
+              <div className="px-4 py-2 rounded-lg bg-secondary">
+                <span className="text-sm text-muted-foreground">
                   ...
                 </span>
               </div>
@@ -166,13 +142,7 @@ export default function NavigationBar() {
                     variant="ghost"
                     className="flex items-center gap-2"
                   >
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{
-                        backgroundColor: `${TOSS_COLORS.primary}20`,
-                        color: TOSS_COLORS.primary,
-                      }}
-                    >
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary">
                       {session.user?.image ? (
                         <img
                           src={session.user.image}
@@ -183,26 +153,21 @@ export default function NavigationBar() {
                         <User size={18} />
                       )}
                     </div>
-                    <span className="hidden sm:inline font-medium" style={{ color: TOSS_COLORS.text }}>
+                    <span className="hidden sm:inline font-medium text-foreground">
                       {session.user?.name || '사용자'}
                     </span>
-                    <ChevronDown size={16} style={{ color: TOSS_COLORS.textSecondary }} />
+                    <ChevronDown size={16} className="text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-48 bg-white border shadow-lg"
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: TOSS_COLORS.muted,
-                    zIndex: 100,
-                  }}
+                  className="w-48 bg-white border border-border shadow-lg z-[100]"
                 >
                   <div className="px-2 py-2">
-                    <p className="text-sm font-medium" style={{ color: TOSS_COLORS.text }}>
+                    <p className="text-sm font-medium text-foreground">
                       {session.user?.name || '사용자'}
                     </p>
-                    <p className="text-xs" style={{ color: TOSS_COLORS.textSecondary }}>
+                    <p className="text-xs text-muted-foreground">
                       {session.user?.email}
                     </p>
                   </div>
@@ -241,7 +206,7 @@ export default function NavigationBar() {
                     className="cursor-pointer hover:bg-transparent hover:text-destructive focus:bg-transparent focus:text-destructive transition-colors"
                   >
                     <LogOut size={16} className="mr-2" />
-                    로그아웃해요
+                    로그아웃
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -271,4 +236,3 @@ export default function NavigationBar() {
     </nav>
   );
 }
-

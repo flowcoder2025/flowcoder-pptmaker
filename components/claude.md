@@ -128,7 +128,7 @@ export function SignInButton() {
   if (session) {
     return (
       <Button onClick={() => signOut()}>
-        로그아웃해요
+        로그아웃
       </Button>
     )
   }
@@ -208,22 +208,48 @@ export default function MyStaticComponent() {
 }
 ```
 
-#### 2. UX Writing 규칙
-모든 사용자 대면 텍스트는 **~해요체** 사용:
+#### 2. UX Writing 규칙 및 환경별 텍스트 분기
+
+**기본 규칙**: 모든 사용자 대면 텍스트는 **~해요체** 사용 (단, 환경별 분기 필요)
+
+**환경별 텍스트 분기** (멀티 배포 환경 지원):
+
+모든 버튼 텍스트는 `lib/text-config.ts`의 `BUTTON_TEXT` 상수를 사용하여 배포 환경에 따라 자동으로 분기됩니다:
 
 ```typescript
-// ❌ 잘못된 예
-<Button>저장</Button>
-<p>완료됐습니다</p>
-<span>검색 중...</span>
+// ✅ 올바른 예: BUTTON_TEXT 사용
+import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config'
 
-// ✅ 올바른 예
-<Button>저장해요</Button>
-<p>완료했어요</p>
-<span>검색하고 있어요</span>
+export default function MyComponent() {
+  return (
+    <>
+      <Button>{BUTTON_TEXT.login}</Button>
+      <Button>{BUTTON_TEXT.signup}</Button>
+      <Button>{BUTTON_TEXT.purchaseCredits}</Button>
+      <span>{STATUS_TEXT.loading}</span>
+    </>
+  )
+}
+
+// 환경별 출력:
+// - standalone: "로그인", "회원가입", "크레딧 구매" (비즈니스 용어)
+// - apps-in-toss: "로그인해요", "회원가입해요", "크레딧 구매해요" (해요체)
 ```
 
-**참조**: [../../docs/03-design/03-ux-writing.md](../../docs/03-design/03-ux-writing.md)
+```typescript
+// ❌ 잘못된 예: 하드코딩 (환경 분기 없음)
+<Button>로그인해요</Button>
+<Button>회원가입해요</Button>
+```
+
+**특수 케이스**: 일부 버튼은 context-specific하므로 하드코딩이 허용됩니다:
+- 프로필 수정, 전체 보기 등의 기능 버튼
+- 특정 페이지나 섹션 내부의 네비게이션 버튼
+- "첫 프리젠테이션 만들기" 같은 특수한 CTA 버튼
+
+**참조**:
+- UX Writing 가이드: [../../docs/03-design/03-ux-writing.md](../../docs/03-design/03-ux-writing.md)
+- 텍스트 설정 파일: [../lib/text-config.ts](../lib/text-config.ts)
 
 #### 3. TypeScript 타입 정의
 ```typescript

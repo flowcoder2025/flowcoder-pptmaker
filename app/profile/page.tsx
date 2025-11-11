@@ -8,13 +8,13 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
-import { TOSS_COLORS } from '@/constants/design';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { User, Mail, Calendar, CreditCard, FileText, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import { BUTTON_TEXT } from '@/lib/text-config';
 
 /**
  * 유저 프로필 페이지
@@ -79,8 +79,8 @@ export default function ProfilePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
-        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">불러오고 있어요...</p>
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
+    <div className="min-h-screen bg-background">
       <MaxWidthContainer className="py-8 lg:py-12">
         {/* 광고 - 상단 (무료 플랜만) */}
         {showAds && (
@@ -101,16 +101,10 @@ export default function ProfilePage() {
 
         {/* 페이지 헤더 */}
         <div className="mb-8">
-          <h1
-            className="text-3xl lg:text-4xl font-bold mb-2"
-            style={{ color: TOSS_COLORS.text }}
-          >
+          <h1 className="text-3xl lg:text-4xl font-bold mb-2 text-foreground">
             프로필
           </h1>
-          <p
-            className="text-base lg:text-lg"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-base lg:text-lg text-muted-foreground">
             계정 정보와 사용 현황을 확인해요
           </p>
         </div>
@@ -120,17 +114,14 @@ export default function ProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {/* 기본 정보 */}
             <Card className="p-6">
-              <h2
-                className="text-xl font-bold mb-4"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <h2 className="text-xl font-bold mb-4 text-foreground">
                 <User className="inline mr-2" size={24} />
                 기본 정보
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name" style={{ color: TOSS_COLORS.text }}>
+                  <Label htmlFor="name" className="text-foreground">
                     이름
                   </Label>
                   <Input
@@ -143,7 +134,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email" style={{ color: TOSS_COLORS.text }}>
+                  <Label htmlFor="email" className="text-foreground">
                     <Mail className="inline mr-1" size={16} />
                     이메일
                   </Label>
@@ -157,7 +148,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="createdAt" style={{ color: TOSS_COLORS.text }}>
+                  <Label htmlFor="createdAt" className="text-foreground">
                     <Calendar className="inline mr-1" size={16} />
                     가입일
                   </Label>
@@ -171,7 +162,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t" style={{ borderColor: TOSS_COLORS.muted }}>
+              <div className="mt-6 pt-6 border-t border-border">
                 <Button
                   variant="outline"
                   onClick={() => toast.info('프로필 수정 기능 준비 중이에요')}
@@ -184,10 +175,7 @@ export default function ProfilePage() {
             {/* 최근 프리젠테이션 */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2
-                  className="text-xl font-bold"
-                  style={{ color: TOSS_COLORS.text }}
-                >
+                <h2 className="text-xl font-bold text-foreground">
                   <FileText className="inline mr-2" size={24} />
                   최근 프리젠테이션
                 </h2>
@@ -195,24 +183,18 @@ export default function ProfilePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => router.push('/history')}
-                  style={{ color: TOSS_COLORS.primary }}
+                  className="text-primary"
                 >
                   전체 보기 →
                 </Button>
               </div>
 
               {stats.recentPresentations.length === 0 ? (
-                <div
-                  className="text-center py-8"
-                  style={{ color: TOSS_COLORS.textSecondary }}
-                >
+                <div className="text-center py-8 text-muted-foreground">
                   <p className="mb-4">아직 생성한 프리젠테이션이 없어요</p>
                   <Button
                     onClick={() => router.push('/input')}
-                    style={{
-                      backgroundColor: TOSS_COLORS.primary,
-                      color: '#FFFFFF',
-                    }}
+                    className="bg-primary text-white"
                   >
                     ✨ 첫 프리젠테이션 만들기
                   </Button>
@@ -222,36 +204,23 @@ export default function ProfilePage() {
                   {stats.recentPresentations.map((presentation: any) => (
                     <div
                       key={presentation.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-gray-50 cursor-pointer transition-colors"
                       onClick={() => router.push(`/viewer?id=${presentation.id}`)}
-                      style={{ borderColor: TOSS_COLORS.muted }}
                     >
                       <div className="flex-1">
-                        <h4
-                          className="font-semibold mb-1"
-                          style={{ color: TOSS_COLORS.text }}
-                        >
+                        <h4 className="font-semibold mb-1 text-foreground">
                           {presentation.title}
                         </h4>
                         {presentation.description && (
-                          <p
-                            className="text-sm line-clamp-1"
-                            style={{ color: TOSS_COLORS.textSecondary }}
-                          >
+                          <p className="text-sm line-clamp-1 text-muted-foreground">
                             {presentation.description}
                           </p>
                         )}
-                        <p
-                          className="text-xs mt-1"
-                          style={{ color: TOSS_COLORS.textSecondary }}
-                        >
+                        <p className="text-xs mt-1 text-muted-foreground">
                           {new Date(presentation.updatedAt).toLocaleDateString('ko-KR')}
                         </p>
                       </div>
-                      <div
-                        className="text-sm font-medium"
-                        style={{ color: TOSS_COLORS.primary }}
-                      >
+                      <div className="text-sm font-medium text-primary">
                         {presentation.metadata?.slideCount || 0}슬라이드
                       </div>
                     </div>
@@ -265,31 +234,17 @@ export default function ProfilePage() {
           <div className="space-y-6">
             {/* 구독 플랜 */}
             <Card className="p-6">
-              <h3
-                className="text-lg font-bold mb-4"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <h3 className="text-lg font-bold mb-4 text-foreground">
                 <Star className="inline mr-2" size={20} />
                 구독 플랜
               </h3>
 
-              <div
-                className="text-center p-4 rounded-lg mb-4"
-                style={{
-                  backgroundColor: `${TOSS_COLORS.primary}15`,
-                }}
-              >
-                <p
-                  className="text-2xl font-bold"
-                  style={{ color: TOSS_COLORS.primary }}
-                >
+              <div className="text-center p-4 rounded-lg mb-4 bg-primary/[0.15]">
+                <p className="text-2xl font-bold text-primary">
                   {stats.subscriptionTier === 'FREE' ? '무료' :
                    stats.subscriptionTier === 'PRO' ? 'Pro' : 'Premium'}
                 </p>
-                <p
-                  className="text-sm mt-1"
-                  style={{ color: TOSS_COLORS.textSecondary }}
-                >
+                <p className="text-sm mt-1 text-muted-foreground">
                   {stats.subscriptionTier === 'FREE' ? '현재 플랜' : '활성 구독'}
                 </p>
               </div>
@@ -305,15 +260,12 @@ export default function ProfilePage() {
 
             {/* 크레딧 잔액 */}
             <Card className="p-6">
-              <h3
-                className="text-lg font-bold mb-4"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <h3 className="text-lg font-bold mb-4 text-foreground">
                 <CreditCard className="inline mr-2" size={20} />
                 크레딧
               </h3>
 
-              <div className="text-center p-4 rounded-lg mb-4" style={{ background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, #2563EB 100%)` }}>
+              <div className="text-center p-4 rounded-lg mb-4 bg-gradient-to-br from-primary to-blue-600">
                 <p className="text-3xl font-bold text-white">
                   {stats.creditsBalance.toLocaleString()}
                 </p>
@@ -327,52 +279,40 @@ export default function ProfilePage() {
                 variant="outline"
                 onClick={() => router.push('/credits')}
               >
-                크레딧 충전해요
+                {BUTTON_TEXT.purchaseCredits}
               </Button>
             </Card>
 
             {/* 통계 */}
             <Card className="p-6">
-              <h3
-                className="text-lg font-bold mb-4"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <h3 className="text-lg font-bold mb-4 text-foreground">
                 📊 사용 통계
               </h3>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span style={{ color: TOSS_COLORS.textSecondary }}>
+                  <span className="text-muted-foreground">
                     생성한 프리젠테이션
                   </span>
-                  <span
-                    className="font-bold"
-                    style={{ color: TOSS_COLORS.text }}
-                  >
+                  <span className="font-bold text-foreground">
                     {stats.presentationsCount}개
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span style={{ color: TOSS_COLORS.textSecondary }}>
+                  <span className="text-muted-foreground">
                     총 슬라이드
                   </span>
-                  <span
-                    className="font-bold"
-                    style={{ color: TOSS_COLORS.text }}
-                  >
+                  <span className="font-bold text-foreground">
                     {stats.totalSlides}개
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span style={{ color: TOSS_COLORS.textSecondary }}>
+                  <span className="text-muted-foreground">
                     사용한 크레딧
                   </span>
-                  <span
-                    className="font-bold"
-                    style={{ color: TOSS_COLORS.text }}
-                  >
+                  <span className="font-bold text-foreground">
                     {stats.creditsUsed.toLocaleString()}
                   </span>
                 </div>

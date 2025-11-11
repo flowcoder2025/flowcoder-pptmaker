@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
-import { TOSS_COLORS } from '@/constants/design';
 import { toast } from 'sonner';
+import { BUTTON_TEXT } from '@/lib/text-config';
 
 /**
  * 회원가입 페이지
@@ -81,18 +81,15 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: TOSS_COLORS.background }}>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <MaxWidthContainer className="py-8 w-full">
         <Card className="max-w-md mx-auto p-6 sm:p-8 w-full">
           {/* 헤더 */}
           <div className="text-center mb-8">
-            <h1
-              className="text-3xl font-bold mb-2"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
               회원가입해요
             </h1>
-            <p style={{ color: TOSS_COLORS.textSecondary }}>
+            <p className="text-muted-foreground">
               AI 프리젠테이션을 무료로 시작해보세요
             </p>
           </div>
@@ -100,7 +97,7 @@ export default function SignupPage() {
           {/* 회원가입 폼 */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="name" className="text-foreground">
                 이름 (선택)
               </Label>
               <Input
@@ -113,13 +110,13 @@ export default function SignupPage() {
                 disabled={isLoading}
                 className="mt-1"
               />
-              <p className="text-xs mt-1" style={{ color: TOSS_COLORS.textSecondary }}>
+              <p className="text-xs mt-1 text-muted-foreground">
                 이름을 입력하지 않으면 이메일 앞부분을 사용해요
               </p>
             </div>
 
             <div>
-              <Label htmlFor="email" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="email" className="text-foreground">
                 이메일
               </Label>
               <Input
@@ -136,7 +133,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <Label htmlFor="password" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="password" className="text-foreground">
                 비밀번호
               </Label>
               <Input
@@ -153,7 +150,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword" style={{ color: TOSS_COLORS.text }}>
+              <Label htmlFor="confirmPassword" className="text-foreground">
                 비밀번호 확인
               </Label>
               <Input
@@ -171,53 +168,40 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-primary text-white"
               disabled={isLoading}
-              style={{
-                backgroundColor: TOSS_COLORS.primary,
-                color: '#FFFFFF',
-              }}
             >
-              {isLoading ? '가입하고 있어요...' : '회원가입해요'}
+              {isLoading ? '가입하고 있어요...' : BUTTON_TEXT.signup}
             </Button>
           </form>
 
           {/* 로그인 링크 */}
           <div className="text-center mt-6">
-            <p
-              className="text-sm"
-              style={{ color: TOSS_COLORS.textSecondary }}
-            >
+            <p className="text-sm text-muted-foreground">
               이미 계정이 있으신가요?{' '}
               <Link
                 href="/login"
-                className="font-semibold hover:underline"
-                style={{ color: TOSS_COLORS.primary }}
+                className="font-semibold hover:underline text-primary"
               >
-                로그인해요
+                {BUTTON_TEXT.login}
               </Link>
             </p>
           </div>
 
           {/* 이용약관 및 개인정보처리방침 */}
           <div className="text-center mt-6">
-            <p
-              className="text-xs"
-              style={{ color: TOSS_COLORS.textSecondary }}
-            >
+            <p className="text-xs text-muted-foreground">
               회원가입 시{' '}
               <button
-                className="underline"
+                className="underline text-muted-foreground"
                 onClick={() => toast.info('이용약관 페이지 준비 중이에요')}
-                style={{ color: TOSS_COLORS.textSecondary }}
               >
                 이용약관
               </button>
               {' '}및{' '}
               <button
-                className="underline"
+                className="underline text-muted-foreground"
                 onClick={() => toast.info('개인정보처리방침 페이지 준비 중이에요')}
-                style={{ color: TOSS_COLORS.textSecondary }}
               >
                 개인정보처리방침
               </button>

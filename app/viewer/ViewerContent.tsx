@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { TOSS_COLORS } from '@/constants/design';
 import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -99,8 +98,8 @@ export default function ViewerContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
-        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">불러오고 있어요...</p>
       </div>
     );
   }
@@ -316,23 +315,14 @@ export default function ViewerContent() {
         </button>
 
         {!isMobile ? (
-          <div style={{
-            fontSize: '14px',
-            color: TOSS_COLORS.textSecondary,
-            textAlign: 'center',
-          }}>
+          <div className="text-sm text-muted-foreground text-center">
             <div>{currentIndex + 1} / {slides.length}</div>
             <div style={{ fontSize: '11px', marginTop: '4px', opacity: 0.7 }}>
               ← → 이동 | ESC 나가기
             </div>
           </div>
         ) : (
-          <div style={{
-            fontSize: '14px',
-            color: TOSS_COLORS.textSecondary,
-            textAlign: 'center',
-            flex: 1,
-          }}>
+          <div className="text-sm text-muted-foreground text-center flex-1">
             {currentIndex + 1} / {slides.length}
           </div>
         )}
@@ -380,55 +370,20 @@ export default function ViewerContent() {
                 {process.env.NODE_ENV === 'development' && (
                   <button
                     onClick={() => handleDownload('html')}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      fontSize: '14px',
-                      color: TOSS_COLORS.text,
-                      background: 'transparent',
-                      border: 'none',
-                      borderBottom: '1px solid #E5E7EB',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50"
                   >
                     📄 HTML 파일
                   </button>
                 )}
                 <button
                   onClick={() => handleDownload('pdf')}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: TOSS_COLORS.text,
-                    background: 'transparent',
-                    border: 'none',
-                    borderBottom: '1px solid #E5E7EB',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50"
                 >
                   📕 PDF 파일
                 </button>
                 <button
                   onClick={() => handleDownload('pptx')}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: TOSS_COLORS.text,
-                    background: 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none text-left cursor-pointer hover:bg-gray-50"
                 >
                   📊 PowerPoint 파일
                 </button>
@@ -587,16 +542,7 @@ export default function ViewerContent() {
               ← 이전
             </Button>
 
-            <div style={{
-              flex: 1,
-              minWidth: 0,
-              fontSize: '14px',
-              color: TOSS_COLORS.textSecondary,
-              textAlign: 'center',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}>
+            <div className="flex-1 min-w-0 text-sm text-muted-foreground text-center overflow-hidden overflow-ellipsis whitespace-nowrap">
               {currentPresentation.title}
             </div>
 
