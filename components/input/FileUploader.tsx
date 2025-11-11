@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import type { AttachmentFile } from '@/types/research';
 import {
   PLAN_LIMITS,
@@ -155,14 +156,14 @@ export default function FileUploader({
     <div className="space-y-3">
       {/* 파일 선택 버튼 */}
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="button"
           onClick={handleButtonClick}
           disabled={disabled || files.length >= limits.maxFiles}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          variant="outline"
         >
-          📎 파일 첨부하기
-        </button>
+          📎 파일 첨부
+        </Button>
 
         <input
           ref={fileInputRef}

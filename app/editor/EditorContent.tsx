@@ -8,7 +8,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePresentationStore } from '@/store/presentationStore';
-import { TOSS_COLORS } from '@/constants/design';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
 import SlidePreview from '@/components/editor/SlidePreview';
@@ -78,8 +77,8 @@ export default function EditorContent() {
   // 로딩 상태
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: TOSS_COLORS.background }}>
-        <p style={{ color: TOSS_COLORS.textSecondary }}>불러오고 있어요...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">불러오고 있어요...</p>
       </div>
     );
   }

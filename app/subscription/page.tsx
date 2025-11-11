@@ -17,7 +17,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { TOSS_COLORS } from '@/constants/design';
+import { BUTTON_TEXT } from '@/lib/text-config';
 import { Check, X, Star, Sparkles, Loader2 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -137,57 +137,33 @@ export default function SubscriptionPage() {
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
-        <h1
-          className="text-3xl lg:text-4xl font-bold mb-3"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-foreground">
           플랜을 선택해주세요
         </h1>
-        <p
-          className="text-base lg:text-lg"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <p className="text-base lg:text-lg text-muted-foreground">
           필요한 기능에 맞는 플랜을 골라보세요
         </p>
       </div>
 
       {/* 현재 플랜 섹션 */}
-      <div
-        className="rounded-xl p-6 mb-10"
-        style={{ backgroundColor: TOSS_COLORS.surface }}
-      >
+      <div className="rounded-xl p-6 mb-10 bg-secondary">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2
-              className="text-lg font-bold mb-1"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h2 className="text-lg font-bold mb-1 text-foreground">
               현재 플랜
             </h2>
             <div className="flex items-center gap-2">
-              <span
-                className="text-2xl font-bold"
-                style={{ color: TOSS_COLORS.primary }}
-              >
+              <span className="text-2xl font-bold text-primary">
                 {PLAN_BENEFITS[currentPlan].name}
               </span>
               {currentPlan !== 'free' && isSubscriptionActive && (
-                <span
-                  className="text-sm px-2 py-1 rounded"
-                  style={{
-                    backgroundColor: `${TOSS_COLORS.success}20`,
-                    color: TOSS_COLORS.success,
-                  }}
-                >
+                <span className="text-sm px-2 py-1 rounded bg-green-500/20 text-green-600">
                   활성
                 </span>
               )}
             </div>
             {currentPlan !== 'free' && expiresAt && (
-              <p
-                className="text-sm mt-1"
-                style={{ color: TOSS_COLORS.textSecondary }}
-              >
+              <p className="text-sm mt-1 text-muted-foreground">
                 {daysRemaining > 0
                   ? `${daysRemaining}일 남았어요`
                   : '만료됐어요'}
@@ -205,7 +181,7 @@ export default function SubscriptionPage() {
                 }
               }}
             >
-              구독 취소해요
+              구독 취소
             </Button>
           )}
         </div>
@@ -249,15 +225,11 @@ export default function SubscriptionPage() {
 
       {/* FAQ 또는 추가 정보 */}
       <div className="text-center mt-10">
-        <p
-          className="text-sm"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <p className="text-sm text-muted-foreground">
           결제 및 구독 관련 문의는{' '}
           <button
-            className="underline"
+            className="underline text-primary"
             onClick={() => alert('문의 기능 준비 중이에요!')}
-            style={{ color: TOSS_COLORS.primary }}
           >
             고객센터
           </button>
@@ -375,11 +347,10 @@ export default function SubscriptionPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="p-6 flex items-center gap-3">
             <Loader2
-              className="animate-spin"
+              className="animate-spin text-primary"
               size={24}
-              style={{ color: TOSS_COLORS.primary }}
             />
-            <span style={{ color: TOSS_COLORS.text }}>
+            <span className="text-foreground">
               결제를 진행하고 있어요...
             </span>
           </Card>
@@ -425,49 +396,27 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
 
   return (
     <Card
-      className="relative overflow-hidden transition-all hover:shadow-lg"
-      style={{
-        borderColor: current
-          ? TOSS_COLORS.primary
-          : TOSS_COLORS.muted,
-        borderWidth: current ? '2px' : '1px',
-      }}
+      className={`relative overflow-hidden transition-all hover:shadow-lg ${
+        current ? 'border-primary border-2' : 'border-border'
+      }`}
     >
       {/* 추천 배지 */}
       {recommended && !comingSoon && (
-        <div
-          className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg"
-          style={{
-            backgroundColor: TOSS_COLORS.primary,
-            color: '#FFFFFF',
-          }}
-        >
+        <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg bg-primary text-white">
           추천
         </div>
       )}
 
       {/* 출시 예정 배지 */}
       {comingSoon && (
-        <div
-          className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg"
-          style={{
-            backgroundColor: TOSS_COLORS.textSecondary,
-            color: '#FFFFFF',
-          }}
-        >
+        <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg bg-muted-foreground text-white">
           출시 예정
         </div>
       )}
 
       {/* 현재 플랜 배지 */}
       {current && !comingSoon && (
-        <div
-          className="absolute top-0 left-0 px-3 py-1 text-xs font-bold rounded-br-lg"
-          style={{
-            backgroundColor: TOSS_COLORS.success,
-            color: '#FFFFFF',
-          }}
-        >
+        <div className="absolute top-0 left-0 px-3 py-1 text-xs font-bold rounded-br-lg bg-green-600 text-white">
           현재 플랜
         </div>
       )}
@@ -476,37 +425,24 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
         {/* 아이콘 및 플랜명 */}
         <div className="mb-4">
           <Icon
-            className="mb-2"
+            className={`mb-2 ${plan === 'free' ? 'text-muted-foreground' : 'text-primary'}`}
             size={32}
-            style={{ color: plan === 'free' ? TOSS_COLORS.textSecondary : TOSS_COLORS.primary }}
           />
-          <h3
-            className="text-2xl font-bold mb-1"
-            style={{ color: TOSS_COLORS.text }}
-          >
+          <h3 className="text-2xl font-bold mb-1 text-foreground">
             {info.name}
           </h3>
           <div className="flex items-baseline gap-1">
             {comingSoon ? (
-              <span
-                className="text-xl font-semibold"
-                style={{ color: TOSS_COLORS.textSecondary }}
-              >
+              <span className="text-xl font-semibold text-muted-foreground">
                 출시 예정
               </span>
             ) : (
               <>
-                <span
-                  className="text-3xl font-bold"
-                  style={{ color: TOSS_COLORS.primary }}
-                >
+                <span className="text-3xl font-bold text-primary">
                   {info.price === 0 ? '무료' : `₩${info.price.toLocaleString()}`}
                 </span>
                 {info.price > 0 && (
-                  <span
-                    className="text-sm"
-                    style={{ color: TOSS_COLORS.textSecondary }}
-                  >
+                  <span className="text-sm text-muted-foreground">
                     / 월
                   </span>
                 )}
@@ -516,10 +452,7 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
         </div>
 
         {/* 구분선 */}
-        <div
-          className="h-px mb-4"
-          style={{ backgroundColor: TOSS_COLORS.muted }}
-        />
+        <div className="h-px mb-4 bg-border" />
 
         {/* 특징 목록 */}
         <ul className="space-y-3 mb-6">
@@ -527,13 +460,9 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
             <li key={index} className="flex items-start gap-2">
               <Check
                 size={20}
-                className="flex-shrink-0 mt-0.5"
-                style={{ color: TOSS_COLORS.primary }}
+                className="flex-shrink-0 mt-0.5 text-primary"
               />
-              <span
-                className="text-sm"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <span className="text-sm text-foreground">
                 {feature}
               </span>
             </li>
@@ -542,26 +471,18 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
 
         {/* 구독 버튼 */}
         <Button
-          className="w-full"
-          variant={current || comingSoon ? 'outline' : 'default'}
+          className={`w-full ${recommended && !current && !comingSoon ? 'bg-primary text-white' : ''}`}
+          variant={current || comingSoon || !recommended ? 'outline' : 'default'}
           disabled={current || comingSoon}
           onClick={() => onSubscribe(plan)}
-          style={
-            current || comingSoon
-              ? {}
-              : {
-                  backgroundColor: TOSS_COLORS.primary,
-                  color: '#FFFFFF',
-                }
-          }
         >
           {comingSoon
             ? '출시 알림 받기'
             : current
             ? '사용하고 있어요'
             : plan === 'free'
-            ? '무료로 시작해요'
-            : '구독해요'}
+            ? BUTTON_TEXT.startFree
+            : BUTTON_TEXT.subscribe}
         </Button>
       </div>
     </Card>
@@ -620,10 +541,7 @@ function PlanComparisonTable() {
 
   return (
     <div className="mb-10">
-      <h2
-        className="text-2xl font-bold text-center mb-6"
-        style={{ color: TOSS_COLORS.text }}
-      >
+      <h2 className="text-2xl font-bold text-center mb-6 text-foreground">
         플랜 비교표
       </h2>
 
@@ -631,29 +549,17 @@ function PlanComparisonTable() {
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr style={{ backgroundColor: TOSS_COLORS.surface }}>
-              <th
-                className="p-4 text-left font-semibold"
-                style={{ color: TOSS_COLORS.text }}
-              >
+            <tr className="bg-secondary">
+              <th className="p-4 text-left font-semibold text-foreground">
                 기능
               </th>
-              <th
-                className="p-4 text-center font-semibold"
-                style={{ color: TOSS_COLORS.text }}
-              >
+              <th className="p-4 text-center font-semibold text-foreground">
                 무료
               </th>
-              <th
-                className="p-4 text-center font-semibold"
-                style={{ color: TOSS_COLORS.primary }}
-              >
+              <th className="p-4 text-center font-semibold text-primary">
                 Pro
               </th>
-              <th
-                className="p-4 text-center font-semibold"
-                style={{ color: TOSS_COLORS.textSecondary }}
-              >
+              <th className="p-4 text-center font-semibold text-muted-foreground">
                 Premium
               </th>
             </tr>
@@ -662,15 +568,9 @@ function PlanComparisonTable() {
             {comparisonFeatures.map((feature, index) => (
               <tr
                 key={feature.name}
-                style={{
-                  backgroundColor: index % 2 === 0 ? '#FFFFFF' : TOSS_COLORS.surface,
-                  borderBottom: `1px solid ${TOSS_COLORS.muted}`,
-                }}
+                className={`${index % 2 === 0 ? 'bg-white' : 'bg-secondary'} border-b border-border`}
               >
-                <td
-                  className="p-4 font-medium"
-                  style={{ color: TOSS_COLORS.text }}
-                >
+                <td className="p-4 font-medium text-foreground">
                   {feature.name}
                 </td>
                 <td className="p-4 text-center">
@@ -693,17 +593,13 @@ function PlanComparisonTable() {
         {(['free', 'pro', 'premium'] as const).map((plan) => (
           <Card key={plan} className="p-4">
             <h3
-              className="text-lg font-bold mb-3"
-              style={{
-                color: plan === 'pro' ? TOSS_COLORS.primary : TOSS_COLORS.text,
-              }}
+              className={`text-lg font-bold mb-3 ${
+                plan === 'pro' ? 'text-primary' : 'text-foreground'
+              }`}
             >
               {plan === 'free' ? '무료' : plan === 'pro' ? 'Pro' : 'Premium'}
               {plan === 'premium' && (
-                <span
-                  className="ml-2 text-xs font-normal"
-                  style={{ color: TOSS_COLORS.textSecondary }}
-                >
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
                   (출시 예정)
                 </span>
               )}
@@ -714,10 +610,7 @@ function PlanComparisonTable() {
                   key={feature.name}
                   className="flex items-center justify-between"
                 >
-                  <span
-                    className="text-sm"
-                    style={{ color: TOSS_COLORS.textSecondary }}
-                  >
+                  <span className="text-sm text-muted-foreground">
                     {feature.name}
                   </span>
                   <span className="text-sm font-medium">
@@ -736,26 +629,20 @@ function PlanComparisonTable() {
   function renderFeatureValue(value: string | boolean) {
     if (typeof value === 'boolean') {
       return value ? (
-        <Check size={20} style={{ color: TOSS_COLORS.primary, margin: '0 auto' }} />
+        <Check size={20} className="text-primary mx-auto" />
       ) : (
-        <X size={20} style={{ color: TOSS_COLORS.textSecondary, margin: '0 auto' }} />
+        <X size={20} className="text-muted-foreground mx-auto" />
       );
     }
 
     if (value === 'show') {
-      return (
-        <span style={{ color: TOSS_COLORS.textSecondary }}>표시</span>
-      );
+      return <span className="text-muted-foreground">표시</span>;
     }
 
     if (value === 'hide') {
-      return (
-        <span style={{ color: TOSS_COLORS.primary }}>제거</span>
-      );
+      return <span className="text-primary">제거</span>;
     }
 
-    return (
-      <span style={{ color: TOSS_COLORS.text }}>{value}</span>
-    );
+    return <span className="text-foreground">{value}</span>;
   }
 }

@@ -49,7 +49,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🌟 프로젝트 개요
 
-FlowCoder PPT Maker는 텍스트 입력으로 AI 기반 프리젠테이션을 생성하는 독립 웹 서비스입니다.
+FlowCoder PPT Maker는 텍스트 입력으로 AI 기반 프리젠테이션을 생성하는 **멀티 배포 환경 지원** 웹 서비스입니다.
+
+### 배포 환경
+
+**독립 서비스 (Standalone)**:
+- 플랫폼: Vercel 독립 배포
+- UI 텍스트: 비즈니스 용어 ("로그인", "회원가입", "저장")
+- 환경 변수: `NEXT_PUBLIC_DEPLOYMENT_ENV=standalone`
+
+**앱인토스 (Apps in Toss)**:
+- 플랫폼: Apps in Toss 플랫폼 배포
+- UI 텍스트: 해요체 ("로그인해요", "회원가입해요", "저장해요")
+- 환경 변수: `NEXT_PUBLIC_DEPLOYMENT_ENV=apps-in-toss`
+
+**공통 사항**:
+- 디자인 시스템: Tailwind CSS 4 기반 (동일)
+- 비즈니스 로직: 플랫폼 독립적 (constants, services, types)
+- 데이터베이스: Supabase PostgreSQL (동일)
 
 ### 핵심 기술 스택
 
@@ -173,16 +190,31 @@ PERPLEXITY_API_KEY=your_perplexity_key  # 서버 전용
 - 기술 용어는 필요시 영문 병기 (예: "상태 관리(State Management)")
 - 커밋 메시지는 한국어로 작성
 
-### 2. UX Writing Guidelines
+### 2. UX Writing Guidelines (배포 환경별)
 
-**모든 사용자 대면 텍스트는 UX Writing 가이드를 준수해야 합니다.**
+**모든 사용자 대면 텍스트는 배포 환경에 따라 분기합니다.**
 
-**필수 규칙**:
-1. **~해요체 사용**: 모든 문구에 "~해요" 어미 사용 (상황/맥락 불문)
-   - ❌ ~습니다, ~했습니다, ~없습니다 → ✅ ~해요, ~했어요, ~없어요
-   - ❌ 검색 중..., 로딩 중... → ✅ 검색하고 있어요, 불러오고 있어요
+**환경별 텍스트 규칙**:
+- **독립 서비스 (standalone)**: 비즈니스 용어 (간결하고 전문적)
+  - 예: "로그인", "회원가입", "저장", "로딩 중", "생성 중"
+- **앱인토스 (apps-in-toss)**: 해요체 (친근하고 대화형)
+  - 예: "로그인해요", "회원가입해요", "저장해요", "불러오고 있어요", "생성하고 있어요"
 
-2. **능동적 말하기**: 최대한 능동형 문장 사용
+**구현 방법**:
+```typescript
+// lib/text-config.ts에서 환경별 텍스트 관리
+import { BUTTON_TEXT } from '@/lib/text-config';
+
+// 사용 예시
+<Button>{BUTTON_TEXT.login}</Button>  // standalone: "로그인", apps-in-toss: "로그인해요"
+<Button>{BUTTON_TEXT.save}</Button>   // standalone: "저장", apps-in-toss: "저장해요"
+```
+
+**앱인토스 환경 추가 규칙** (NEXT_PUBLIC_DEPLOYMENT_ENV=apps-in-toss인 경우):
+1. **~해요체 사용**: 모든 문구에 "~해요" 어미 사용
+   - "로그인해요", "저장했어요", "불러오고 있어요"
+
+2. **능동적 말하기**: 능동형 문장 사용
    - ❌ 됐어요 → ✅ 했어요
    - ❌ 완료됐어요 → ✅ 완료했어요
 
@@ -216,13 +248,39 @@ const canEdit = await check(userId, 'presentation', id, 'editor')
 if (!canEdit) return 403
 ```
 
-### 4. UI 라이브러리
+### 4. UI 라이브러리 및 디자인 시스템
 
-**shadcn/ui 우선 사용**:
-- TDS Mobile 제거됨
-- shadcn/ui + Radix UI 사용
-- Tailwind CSS 4로 스타일링
-- `components/ui/` 디렉토리
+**Tailwind CSS 4 우선 사용** (필수):
+- ✅ Tailwind CSS 클래스 사용 (최우선 권장)
+- ✅ shadcn/ui + Radix UI 컴포넌트 사용
+- ✅ `app/globals.css`에 정의된 CSS 변수 사용
+- ❌ 인라인 스타일 지양 (특수한 경우만)
+- ❌ @toss/tds-colors 사용 금지 (제거됨)
+
+**색상 시스템**:
+```typescript
+// ✅ 권장: Tailwind CSS 클래스
+<Button className="bg-primary text-primary-foreground">버튼</Button>
+
+// ✅ 권장: shadcn/ui variant
+<Button variant="default">버튼</Button>
+
+// ⚠️ 특수한 경우만: Arbitrary values
+<div className="bg-[hsl(217_91%_60%)]">...</div>
+
+// ❌ 지양: 인라인 스타일
+<div style={{ backgroundColor: '#3182F6' }}>...</div>
+```
+
+**디자인 토큰** (app/globals.css):
+- `--color-primary`: hsl(217 91% 60%) - Toss Blue #3182F6
+- `--color-secondary`: hsl(210 40% 96.1%)
+- `--color-background`: hsl(0 0% 100%)
+- `--color-text`: hsl(222.2 84% 4.9%)
+
+**플랫폼 독립성**:
+- 색상 시스템은 독립 서비스와 앱인토스 모두 동일
+- UI 텍스트만 환경별로 분기 (`lib/text-config.ts`)
 
 ### 5. 릴리즈 노트 업데이트 규칙 (필수)
 

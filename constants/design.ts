@@ -1,9 +1,14 @@
 /**
- * 앱인토스 디자인 시스템 상수
- * TDS Mobile 및 토스 브랜드 색상
+ * 디자인 시스템 상수
+ *
+ * ⚠️ 이 파일은 독립 서비스와 앱인토스 모두에서 사용됩니다.
+ * 플랫폼 독립적으로 작성해주세요.
+ *
+ * @description
+ * Tailwind CSS 4 기반 디자인 토큰을 사용합니다.
+ * 모든 색상은 HSL 형식으로 정의되어 있으며,
+ * app/globals.css에 정의된 CSS 변수와 일치합니다.
  */
-
-import { colors } from '@toss/tds-colors';
 
 // 색상 프리셋 타입
 export interface ColorPreset {
@@ -23,145 +28,157 @@ export interface ColorPreset {
   info: string;
 }
 
-// 기본 색상 (TDS Mobile 색상 토큰 기반)
+/**
+ * 기본 색상 (Tailwind CSS 4 기반)
+ *
+ * app/globals.css의 @theme 섹션과 일치합니다.
+ */
 export const TOSS_COLORS = {
-  // 토스 브랜드 색상 (TDS colors 사용)
-  primary: colors.blue500,      // 토스 블루
-  secondary: colors.grey800,    // 토스 그레이
+  // 토스 브랜드 색상
+  primary: 'hsl(217 91% 60%)',      // Toss Blue #3182F6
+  secondary: 'hsl(210 40% 96.1%)',  // #F2F4F6
 
-  // 배경 색상 (TDS semantic colors)
-  background: colors.background,
-  surface: colors.greyBackground,
+  // 배경 색상
+  background: 'hsl(0 0% 100%)',     // #FFFFFF (화이트)
+  surface: 'hsl(210 40% 96.1%)',    // #F2F4F6 (연한 그레이)
 
-  // 텍스트 색상 (TDS grey scale)
-  text: colors.grey900,
-  textSecondary: colors.grey600,
-  muted: colors.grey300,
+  // 텍스트 색상
+  text: 'hsl(222.2 84% 4.9%)',          // #191F28 (진한 그레이)
+  textSecondary: 'hsl(215.4 16.3% 46.9%)', // #8B95A1 (중간 그레이)
+  muted: 'hsl(214.3 31.8% 91.4%)',      // #D1D6DB (연한 그레이)
 
-  // 상태 색상 (TDS state colors)
-  error: colors.red500,
-  success: colors.green500,
-  warning: colors.yellow500,
-  info: colors.blue500,
+  // 상태 색상
+  error: 'hsl(0 84.2% 60.2%)',      // #F04452 (빨강)
+  success: 'hsl(142.1 76.2% 36.3%)', // #03B26C (녹색)
+  warning: 'hsl(37.7 92.1% 50.2%)',  // #FE9800 (주황)
+  info: 'hsl(217 91% 60%)',         // #3182F6 (토스 블루)
 } as const;
 
-// 색상 프리셋 컬렉션 (TDS colors 기반)
+/**
+ * 색상 프리셋 컬렉션 (HSL 기반)
+ *
+ * 슬라이드 템플릿에서 선택할 수 있는 다양한 색상 테마입니다.
+ */
 export const COLOR_PRESETS: ColorPreset[] = [
   {
     id: 'toss',
     name: '토스 (Toss)',
-    description: '토스 브랜드 색상 - TDS 블루 & 그레이',
-    primary: colors.blue500,
-    secondary: colors.grey800,
-    background: colors.background,
-    surface: colors.greyBackground,
-    text: colors.grey900,
-    textSecondary: colors.grey600,
-    muted: colors.grey300,
-    error: colors.red500,
-    success: colors.green500,
-    warning: colors.yellow500,
-    info: colors.blue500,
+    description: '토스 브랜드 색상 - 블루 & 그레이',
+    primary: 'hsl(217 91% 60%)',      // Toss Blue #3182F6
+    secondary: 'hsl(220 13% 20%)',    // Dark Grey #2F3438
+    background: 'hsl(0 0% 100%)',     // White #FFFFFF
+    surface: 'hsl(210 40% 96.1%)',    // Light Grey #F2F4F6
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark #191F28
+    textSecondary: 'hsl(215.4 16.3% 46.9%)', // Text Secondary #8B95A1
+    muted: 'hsl(214.3 31.8% 91.4%)',  // Muted #D1D6DB
+    error: 'hsl(0 84.2% 60.2%)',      // Red #F04452
+    success: 'hsl(142.1 76.2% 36.3%)', // Green #03B26C
+    warning: 'hsl(37.7 92.1% 50.2%)', // Orange #FE9800
+    info: 'hsl(217 91% 60%)',         // Blue #3182F6
   },
   {
     id: 'teal-navy',
     name: '틸 네이비',
     description: '세련된 틸(청록색)과 차분한 네이비',
-    primary: colors.teal300,
-    secondary: colors.blue900,
-    background: colors.background,
-    surface: colors.greyBackground,
-    text: colors.grey900,
-    textSecondary: colors.grey600,
-    muted: colors.grey300,
-    error: colors.red500,
-    success: colors.green500,
-    warning: colors.yellow500,
-    info: colors.teal300,
+    primary: 'hsl(175 60% 51%)',      // Teal #4DBEAA
+    secondary: 'hsl(215 25% 27%)',    // Navy #3A4E5A
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(210 40% 96.1%)',    // Light Grey
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(215.4 16.3% 46.9%)', // Text Secondary
+    muted: 'hsl(214.3 31.8% 91.4%)',  // Muted
+    error: 'hsl(0 84.2% 60.2%)',      // Red
+    success: 'hsl(142.1 76.2% 36.3%)', // Green
+    warning: 'hsl(37.7 92.1% 50.2%)', // Orange
+    info: 'hsl(175 60% 51%)',         // Teal
   },
   {
     id: 'professional-blue',
     name: '프로페셔널 블루',
     description: '비즈니스에 적합한 신뢰감 있는 블루',
-    primary: colors.blue600,
-    secondary: colors.blue900,
-    background: colors.background,
-    surface: colors.blue50,
-    text: colors.grey900,
-    textSecondary: colors.grey700,
-    muted: colors.grey400,
-    error: colors.red600,
-    success: colors.green600,
-    warning: colors.orange600,
-    info: colors.blue600,
+    primary: 'hsl(213 90% 51%)',      // Professional Blue #1465E0
+    secondary: 'hsl(213 45% 20%)',    // Dark Blue #1C3556
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(213 100% 97%)',     // Light Blue #EBF4FF
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(213 25% 40%)', // Text Blue Secondary
+    muted: 'hsl(213 30% 85%)',        // Muted Blue
+    error: 'hsl(0 70% 50%)',          // Red
+    success: 'hsl(142 60% 40%)',      // Green
+    warning: 'hsl(30 100% 50%)',      // Orange
+    info: 'hsl(213 90% 51%)',         // Blue
   },
   {
     id: 'modern-purple',
     name: '모던 퍼플',
     description: '창의적이고 트렌디한 퍼플 톤',
-    primary: colors.purple500,
-    secondary: colors.purple900,
-    background: colors.background,
-    surface: colors.purple50,
-    text: colors.grey900,
-    textSecondary: colors.purple700,
-    muted: colors.purple200,
-    error: colors.red600,
-    success: colors.green600,
-    warning: colors.orange600,
-    info: colors.purple600,
+    primary: 'hsl(271 76% 53%)',      // Purple #8B5CF6
+    secondary: 'hsl(271 30% 25%)',    // Dark Purple #3E2F5B
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(271 100% 97%)',     // Light Purple #F5F3FF
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(271 25% 40%)', // Text Purple Secondary
+    muted: 'hsl(271 30% 85%)',        // Muted Purple
+    error: 'hsl(0 70% 50%)',          // Red
+    success: 'hsl(142 60% 40%)',      // Green
+    warning: 'hsl(30 100% 50%)',      // Orange
+    info: 'hsl(271 76% 53%)',         // Purple
   },
   {
     id: 'warm-orange',
     name: '웜 오렌지',
     description: '따뜻하고 친근한 오렌지와 브라운',
-    primary: colors.orange600,
-    secondary: colors.orange900,
-    background: colors.background,
-    surface: colors.orange50,
-    text: colors.grey900,
-    textSecondary: colors.grey700,
-    muted: colors.orange200,
-    error: colors.red700,
-    success: colors.green700,
-    warning: colors.orange700,
-    info: colors.orange600,
+    primary: 'hsl(24 95% 53%)',       // Orange #F97316
+    secondary: 'hsl(24 35% 25%)',     // Brown #5C3D2E
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(24 100% 97%)',      // Light Orange #FFF7ED
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(24 25% 40%)', // Text Brown Secondary
+    muted: 'hsl(24 30% 85%)',         // Muted Orange
+    error: 'hsl(0 70% 50%)',          // Red
+    success: 'hsl(142 60% 40%)',      // Green
+    warning: 'hsl(30 100% 50%)',      // Orange
+    info: 'hsl(24 95% 53%)',          // Orange
   },
   {
     id: 'fresh-green',
     name: '프레시 그린',
     description: '생동감 넘치는 그린과 블랙',
-    primary: colors.green500,
-    secondary: colors.green900,
-    background: colors.background,
-    surface: colors.green50,
-    text: colors.grey900,
-    textSecondary: colors.grey700,
-    muted: colors.green200,
-    error: colors.red600,
-    success: colors.green600,
-    warning: colors.yellow600,
-    info: colors.green500,
+    primary: 'hsl(142 71% 45%)',      // Green #22C55E
+    secondary: 'hsl(142 30% 25%)',    // Dark Green #2E5940
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(142 76% 96%)',      // Light Green #F0FDF4
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(142 25% 40%)', // Text Green Secondary
+    muted: 'hsl(142 30% 85%)',        // Muted Green
+    error: 'hsl(0 70% 50%)',          // Red
+    success: 'hsl(142 71% 45%)',      // Green
+    warning: 'hsl(30 100% 50%)',      // Orange
+    info: 'hsl(142 71% 45%)',         // Green
   },
   {
     id: 'elegant-pink',
     name: '엘레강트 핑크',
     description: '세련되고 우아한 핑크와 그레이',
-    primary: colors.red400,
-    secondary: colors.red900,
-    background: colors.background,
-    surface: colors.red50,
-    text: colors.grey900,
-    textSecondary: colors.grey700,
-    muted: colors.red200,
-    error: colors.red700,
-    success: colors.green600,
-    warning: colors.orange600,
-    info: colors.red400,
+    primary: 'hsl(330 81% 60%)',      // Pink #F472B6
+    secondary: 'hsl(330 30% 25%)',    // Dark Pink #5A2E48
+    background: 'hsl(0 0% 100%)',     // White
+    surface: 'hsl(330 100% 97%)',     // Light Pink #FDF2F8
+    text: 'hsl(222.2 84% 4.9%)',      // Text Dark
+    textSecondary: 'hsl(330 25% 40%)', // Text Pink Secondary
+    muted: 'hsl(330 30% 85%)',        // Muted Pink
+    error: 'hsl(0 70% 50%)',          // Red
+    success: 'hsl(142 60% 40%)',      // Green
+    warning: 'hsl(30 100% 50%)',      // Orange
+    info: 'hsl(330 81% 60%)',         // Pink
   },
 ];
 
-// unified-ppt 슬라이드 타입별 기본 스타일
+/**
+ * unified-ppt 슬라이드 타입별 기본 스타일
+ *
+ * 각 슬라이드 타입의 기본 색상, 폰트, 레이아웃 설정입니다.
+ */
 export const SLIDE_STYLES = {
   title: {
     background: TOSS_COLORS.primary,
@@ -181,7 +198,7 @@ export const SLIDE_STYLES = {
   section: {
     background: TOSS_COLORS.secondary,
     title: {
-      color: '#FFFFFF',
+      color: TOSS_COLORS.text,
       fontSize: 44,
       fontFamily: 'Arial',
       align: 'center' as const,
@@ -263,14 +280,22 @@ export const SLIDE_STYLES = {
   },
 } as const;
 
-// 슬라이드 크기 (16:9 비율)
+/**
+ * 슬라이드 크기 (16:9 비율)
+ *
+ * 모든 슬라이드는 이 크기를 기준으로 생성됩니다.
+ */
 export const SLIDE_DIMENSIONS = {
   width: 1600,
   height: 900,
   aspectRatio: '16:9',
 } as const;
 
-// 템플릿 예시
+/**
+ * 템플릿 예시
+ *
+ * 사용자가 입력할 수 있는 프롬프트 예시입니다.
+ */
 export const TEMPLATE_EXAMPLES = [
   {
     id: 'company-intro',

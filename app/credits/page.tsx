@@ -19,7 +19,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
-import { TOSS_COLORS } from '@/constants/design';
+import { BUTTON_TEXT } from '@/lib/text-config';
 import { Coins, Sparkles, TrendingUp, Loader2 } from 'lucide-react';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -126,30 +126,19 @@ export default function CreditsPage() {
 
       {/* 페이지 헤더 */}
       <div className="text-center mb-10">
-        <h1
-          className="text-3xl lg:text-4xl font-bold mb-3"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-foreground">
           크레딧 관리
         </h1>
-        <p
-          className="text-base lg:text-lg"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <p className="text-base lg:text-lg text-muted-foreground">
           크레딧으로 고품질 생성과 심층 검색을 이용해보세요
         </p>
       </div>
 
       {/* 잔액 카드 (대형) */}
-      <div
-        className="rounded-2xl p-8 mb-10 relative overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, #2563EB 100%)`,
-        }}
-      >
+      <div className="rounded-2xl p-8 mb-10 relative overflow-hidden bg-gradient-to-br from-primary to-blue-600">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <Coins size={24} color="#FFFFFF" />
+            <Coins size={24} className="text-white" />
             <span className="text-white text-lg font-semibold">
               보유 크레딧
             </span>
@@ -165,89 +154,46 @@ export default function CreditsPage() {
 
           {/* 최초 무료 안내 */}
           {(isFirstTimeFree('deepResearch') || isFirstTimeFree('qualityGeneration')) && (
-            <div
-              className="inline-block px-4 py-2 rounded-lg text-sm font-semibold"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                color: '#FFFFFF',
-              }}
-            >
+            <div className="inline-block px-4 py-2 rounded-lg text-sm font-semibold bg-white/20 text-white">
               🎁 최초 1회 무료로 사용해보세요!
             </div>
           )}
         </div>
 
         {/* 배경 장식 */}
-        <div
-          className="absolute top-0 right-0 opacity-10"
-          style={{
-            fontSize: '200px',
-            lineHeight: 1,
-            color: '#FFFFFF',
-          }}
-        >
+        <div className="absolute top-0 right-0 opacity-10 text-[200px] leading-none text-white">
           💎
         </div>
       </div>
 
       {/* 크레딧 사용량 안내 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-        <div
-          className="rounded-xl p-5"
-          style={{ backgroundColor: TOSS_COLORS.surface }}
-        >
+        <div className="rounded-xl p-5 bg-secondary">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles
-              size={20}
-              style={{ color: TOSS_COLORS.primary }}
-            />
-            <h3
-              className="font-bold"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <Sparkles size={20} className="text-primary" />
+            <h3 className="font-bold text-foreground">
               심층 검색
             </h3>
           </div>
-          <p
-            className="text-sm mb-1"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-sm mb-1 text-muted-foreground">
             검색 전용 AI로 웹 자료를 조사해요
           </p>
-          <p
-            className="text-2xl font-bold"
-            style={{ color: TOSS_COLORS.primary }}
-          >
+          <p className="text-2xl font-bold text-primary">
             {CREDIT_COST.DEEP_RESEARCH} 크레딧
           </p>
         </div>
 
-        <div
-          className="rounded-xl p-5"
-          style={{ backgroundColor: TOSS_COLORS.surface }}
-        >
+        <div className="rounded-xl p-5 bg-secondary">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp
-              size={20}
-              style={{ color: TOSS_COLORS.primary }}
-            />
-            <h3
-              className="font-bold"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <TrendingUp size={20} className="text-primary" />
+            <h3 className="font-bold text-foreground">
               고품질 생성
             </h3>
           </div>
-          <p
-            className="text-sm mb-1"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-sm mb-1 text-muted-foreground">
             추론 모델로 더 나은 품질을 제공해요
           </p>
-          <p
-            className="text-2xl font-bold"
-            style={{ color: TOSS_COLORS.primary }}
-          >
+          <p className="text-2xl font-bold text-primary">
             {CREDIT_COST.QUALITY_GENERATION} 크레딧
           </p>
         </div>
@@ -255,10 +201,7 @@ export default function CreditsPage() {
 
       {/* 크레딧 묶음 구매 */}
       <div className="mb-10">
-        <h2
-          className="text-2xl font-bold mb-6"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h2 className="text-2xl font-bold mb-6 text-foreground">
           크레딧 구매
         </h2>
 
@@ -282,18 +225,12 @@ export default function CreditsPage() {
 
       {/* 사용 내역 */}
       <div>
-        <h2
-          className="text-2xl font-bold mb-6"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h2 className="text-2xl font-bold mb-6 text-foreground">
           사용 내역
         </h2>
 
         <Card className="p-6">
-          <p
-            className="text-center text-sm"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-center text-sm text-muted-foreground">
             아직 사용 내역이 없어요
           </p>
         </Card>
@@ -414,11 +351,10 @@ export default function CreditsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="p-6 flex items-center gap-3">
             <Loader2
-              className="animate-spin"
+              className="animate-spin text-primary"
               size={24}
-              style={{ color: TOSS_COLORS.primary }}
             />
-            <span style={{ color: TOSS_COLORS.text }}>
+            <span className="text-foreground">
               결제를 진행하고 있어요...
             </span>
           </Card>
@@ -441,71 +377,45 @@ function CreditBundleCard({ bundle, onPurchase }: CreditBundleCardProps) {
 
   return (
     <Card
-      className="relative overflow-hidden transition-all hover:shadow-lg"
-      style={{
-        borderColor: isRecommended ? TOSS_COLORS.primary : TOSS_COLORS.muted,
-        borderWidth: isRecommended ? '2px' : '1px',
-      }}
+      className={`relative overflow-hidden transition-all hover:shadow-lg ${
+        isRecommended ? 'border-primary border-2' : 'border-border'
+      }`}
     >
       {/* 추천 배지 */}
       {isRecommended && (
-        <div
-          className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg"
-          style={{
-            backgroundColor: TOSS_COLORS.primary,
-            color: '#FFFFFF',
-          }}
-        >
+        <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-lg bg-primary text-white">
           {bundle.badge}
         </div>
       )}
 
       <div className="p-5">
         {/* 크레딧 아이콘 */}
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-          style={{
-            backgroundColor: `${TOSS_COLORS.primary}15`,
-          }}
-        >
+        <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3 bg-primary/[0.15]">
           <span className="text-2xl">💎</span>
         </div>
 
         {/* 크레딧 수 */}
-        <h3
-          className="text-2xl font-bold mb-1"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h3 className="text-2xl font-bold mb-1 text-foreground">
           {bundle.credits.toLocaleString()}
         </h3>
-        <p
-          className="text-sm mb-4"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <p className="text-sm mb-4 text-muted-foreground">
           크레딧
         </p>
 
         {/* 가격 */}
         <div className="mb-4">
-          <span
-            className="text-2xl font-bold"
-            style={{ color: TOSS_COLORS.primary }}
-          >
+          <span className="text-2xl font-bold text-primary">
             ₩{bundle.price.toLocaleString()}
           </span>
         </div>
 
         {/* 구매 버튼 */}
         <Button
-          className="w-full"
+          className={`w-full ${isRecommended ? 'bg-primary text-white' : ''}`}
           onClick={() => onPurchase(bundle.id)}
-          style={{
-            backgroundColor: isRecommended ? TOSS_COLORS.primary : undefined,
-            color: isRecommended ? '#FFFFFF' : undefined,
-          }}
           variant={isRecommended ? 'default' : 'outline'}
         >
-          구매해요
+          {BUTTON_TEXT.purchaseCredits}
         </Button>
       </div>
     </Card>

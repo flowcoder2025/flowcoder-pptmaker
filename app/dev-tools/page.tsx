@@ -3,8 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
-import { TOSS_COLORS } from '@/constants/design';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
@@ -20,23 +19,20 @@ export default function DevToolsPage() {
   const subscription = useSubscriptionStore();
   const credit = useCreditStore();
   const [message, setMessage] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  // Hydration 에러 방지: 클라이언트에서만 스토어 값 렌더링
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 개발 환경 체크
   const isDev = process.env.NODE_ENV === 'development';
 
   if (!isDev) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-      }}>
-        <div style={{
-          textAlign: 'center',
-          color: TOSS_COLORS.error,
-        }}>
+      <div className="min-h-screen flex items-center justify-center p-5">
+        <div className="text-center text-red-600">
           <h1>접근 불가</h1>
           <p>이 페이지는 개발 환경에서만 사용할 수 있어요.</p>
         </div>
@@ -116,31 +112,13 @@ export default function DevToolsPage() {
       padding: '20px',
     }}>
       {/* 헤더 */}
-      <div style={{
-        marginBottom: '20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <h1 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          margin: 0,
-        }}>
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground m-0">
           🛠️ 개발자 도구 (크래딧 시스템 v4.0)
         </h1>
         <button
           onClick={() => router.push('/')}
-          style={{
-            padding: '8px 16px',
-            fontSize: '14px',
-            color: TOSS_COLORS.text,
-            background: '#FFFFFF',
-            border: '1px solid #E5E7EB',
-            borderRadius: '8px',
-            cursor: 'pointer',
-          }}
+          className="py-2 px-4 text-sm text-foreground bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
         >
           홈으로
         </button>
@@ -173,150 +151,100 @@ export default function DevToolsPage() {
       )}
 
       {/* 현재 상태 */}
-      <div style={{
-        marginBottom: '30px',
-        padding: '20px',
-        background: '#F9FAFB',
-        borderRadius: '12px',
-        border: '1px solid #E5E7EB',
-      }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          marginBottom: '16px',
-        }}>
+      <div className="mb-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
+        <h2 className="text-lg font-bold text-foreground mb-4">
           📊 현재 상태
         </h2>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '12px',
-        }}>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              구독 플랜
+        {!mounted ? (
+          <div className="text-center text-muted-foreground py-8">
+            불러오고 있어요...
+          </div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                구독 플랜
+              </div>
+              <div className="text-base font-bold text-foreground">
+                {subscription.plan === 'premium' ? 'Premium' : subscription.plan === 'pro' ? 'Pro' : '무료'}
+                {(subscription.plan === 'pro' || subscription.plan === 'premium') && subscription.isActive() && (
+                  <span className="text-xs font-normal ml-2">
+                    ({subscription.getDaysRemaining()}일 남음)
+                  </span>
+                )}
+              </div>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: TOSS_COLORS.text }}>
-              {subscription.plan === 'premium' ? 'Premium' : subscription.plan === 'pro' ? 'Pro' : '무료'}
-              {(subscription.plan === 'pro' || subscription.plan === 'premium') && subscription.isActive() && (
-                <span style={{ fontSize: '12px', fontWeight: 'normal', marginLeft: '8px' }}>
-                  ({subscription.getDaysRemaining()}일 남음)
-                </span>
-              )}
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                슬라이드 수 제한
+              </div>
+              <div className="text-base font-bold text-foreground">
+                {subscription.getMaxSlides()}페이지
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                총 크래딧 잔액
+              </div>
+              <div className="text-xl font-bold text-primary">
+                {credit.totalCredits} 크래딧
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                최초 무료: 심층 검색
+              </div>
+              <div className="text-base font-bold text-foreground">
+                {credit.isFirstTimeFree('deepResearch') ? '✅ 사용 가능' : '❌ 사용함'}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                최초 무료: 고품질 생성
+              </div>
+              <div className="text-base font-bold text-foreground">
+                {credit.isFirstTimeFree('qualityGeneration') ? '✅ 사용 가능' : '❌ 사용함'}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">
+                월간 크래딧 제공 여부
+              </div>
+              <div className="text-base font-bold text-foreground">
+                {subscription.monthlyCreditsProvided ? '✅ 제공됨' : '❌ 미제공'}
+              </div>
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              슬라이드 수 제한
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: TOSS_COLORS.text }}>
-              {subscription.getMaxSlides()}페이지
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              총 크래딧 잔액
-            </div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: TOSS_COLORS.primary }}>
-              {credit.totalCredits} 크래딧
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              최초 무료: 심층 검색
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: TOSS_COLORS.text }}>
-              {credit.isFirstTimeFree('deepResearch') ? '✅ 사용 가능' : '❌ 사용함'}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              최초 무료: 고품질 생성
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: TOSS_COLORS.text }}>
-              {credit.isFirstTimeFree('qualityGeneration') ? '✅ 사용 가능' : '❌ 사용함'}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: '12px', color: TOSS_COLORS.textSecondary, marginBottom: '4px' }}>
-              월간 크래딧 제공 여부
-            </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: TOSS_COLORS.text }}>
-              {subscription.monthlyCreditsProvided ? '✅ 제공됨' : '❌ 미제공'}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* 구독 관리 */}
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          marginBottom: '12px',
-        }}>
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-foreground mb-3">
           🎯 구독 관리
         </h2>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleActivatePro}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: '#FFFFFF',
-              background: TOSS_COLORS.primary,
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-white bg-primary border-none rounded-lg cursor-pointer hover:opacity-90"
           >
             Pro 구독 활성화 (30일 + 490 크래딧)
           </button>
           <button
             onClick={handleActivatePremium}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: '#FFFFFF',
-              background: TOSS_COLORS.secondary,
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-white bg-secondary border-none rounded-lg cursor-pointer hover:opacity-90"
           >
             Premium 구독 활성화 (30일 + 490 크래딧)
           </button>
           <button
             onClick={handleSetFree}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: TOSS_COLORS.text,
-              background: '#FFFFFF',
-              border: '1px solid #E5E7EB',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-foreground bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
           >
             무료 플랜으로 변경
           </button>
           <button
             onClick={handleProvideMonthlyCredits}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: TOSS_COLORS.primary,
-              background: '#FFFFFF',
-              border: `1px solid ${TOSS_COLORS.primary}`,
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-primary bg-white border border-primary rounded-lg cursor-pointer hover:bg-blue-50"
           >
             월간 크래딧 제공 (490개)
           </button>
@@ -324,33 +252,20 @@ export default function DevToolsPage() {
       </div>
 
       {/* 크레딧 관리 */}
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          marginBottom: '12px',
-        }}>
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-foreground mb-3">
           💳 크래딧 관리
         </h2>
-        <div style={{ marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '14px', color: TOSS_COLORS.textSecondary, marginBottom: '8px' }}>
+        <div className="mb-4">
+          <h3 className="text-sm text-muted-foreground mb-2">
             크래딧 추가
           </h3>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="flex gap-2 flex-wrap">
             {[10, 50, 100, 490, 1000].map((amount) => (
               <button
                 key={amount}
                 onClick={() => handleAddCredits(amount)}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '14px',
-                  color: TOSS_COLORS.primary,
-                  background: '#FFFFFF',
-                  border: `1px solid ${TOSS_COLORS.primary}`,
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                }}
+                className="py-2 px-4 text-sm text-primary bg-white border border-primary rounded-md cursor-pointer hover:bg-blue-50"
               >
                 +{amount}개
               </button>
@@ -359,58 +274,27 @@ export default function DevToolsPage() {
         </div>
         <button
           onClick={handleResetCredits}
-          style={{
-            padding: '8px 16px',
-            fontSize: '14px',
-            color: TOSS_COLORS.error,
-            background: '#FFFFFF',
-            border: `1px solid ${TOSS_COLORS.error}`,
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
+          className="py-2 px-4 text-sm text-red-600 bg-white border border-red-600 rounded-md cursor-pointer hover:bg-red-50"
         >
           크레딧 초기화
         </button>
       </div>
 
       {/* 최초 무료 사용 관리 */}
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          marginBottom: '12px',
-        }}>
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-foreground mb-3">
           🎁 최초 무료 사용 관리
         </h2>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="flex gap-3 flex-wrap">
           <button
             onClick={handleResetFirstTimeFree}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: TOSS_COLORS.primary,
-              background: '#FFFFFF',
-              border: `1px solid ${TOSS_COLORS.primary}`,
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-primary bg-white border border-primary rounded-lg cursor-pointer hover:bg-blue-50"
           >
             최초 무료 권한 복구
           </button>
           <button
             onClick={handleExhaustFirstTimeFree}
-            style={{
-              padding: '12px 20px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: TOSS_COLORS.error,
-              background: '#FFFFFF',
-              border: `1px solid ${TOSS_COLORS.error}`,
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
+            className="py-3 px-5 text-sm font-bold text-red-600 bg-white border border-red-600 rounded-lg cursor-pointer hover:bg-red-50"
           >
             최초 무료 권한 소진
           </button>
@@ -418,13 +302,8 @@ export default function DevToolsPage() {
       </div>
 
       {/* 전체 초기화 */}
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: TOSS_COLORS.text,
-          marginBottom: '12px',
-        }}>
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-foreground mb-3">
           🔄 전체 초기화
         </h2>
         <button
@@ -433,16 +312,7 @@ export default function DevToolsPage() {
               handleResetAll();
             }
           }}
-          style={{
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: '#FFFFFF',
-            background: TOSS_COLORS.error,
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-          }}
+          className="py-3 px-5 text-sm font-bold text-white bg-red-600 border-none rounded-lg cursor-pointer hover:bg-red-700"
         >
           모든 데이터 초기화
         </button>

@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { TOSS_COLORS } from '@/constants/design';
+import { BUTTON_TEXT } from '@/lib/text-config';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
@@ -20,29 +20,18 @@ export default function HomePage() {
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: TOSS_COLORS.background }}>
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <MaxWidthContainer className="pt-12 sm:pt-24 lg:pt-32">
         <div className="text-center space-y-4 px-4">
-          <h1
-            className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
-            style={{ color: TOSS_COLORS.text }}
-          >
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
             한줄로 만드는{' '}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage: `linear-gradient(135deg, ${TOSS_COLORS.primary} 0%, ${TOSS_COLORS.secondary} 100%)`,
-              }}
-            >
+            <span className="bg-gradient-to-br from-blue-500 to-gray-800 bg-clip-text text-transparent">
               간편한 프리젠테이션
             </span>
           </h1>
 
-          <p
-            className="text-base sm:text-xl max-w-2xl mx-auto"
-            style={{ color: TOSS_COLORS.textSecondary }}
-          >
+          <p className="text-base sm:text-xl max-w-2xl mx-auto text-muted-foreground">
             텍스트만 입력하면 AI가 자동으로 슬라이드를 생성해요.<br />
             98% 비용 절감, 무제한 편집, 21개 슬라이드 타입 지원
           </p>
@@ -53,7 +42,7 @@ export default function HomePage() {
               size="lg"
               className="min-w-[200px]"
             >
-              ✨ 무료로 시작해요
+              ✨ {BUTTON_TEXT.startFree}
             </Button>
             <Button
               onClick={() => router.push('/subscription')}
@@ -61,7 +50,7 @@ export default function HomePage() {
               variant="outline"
               className="min-w-[200px]"
             >
-              요금제 보기
+              {BUTTON_TEXT.viewPricing}
             </Button>
           </div>
         </div>
@@ -69,27 +58,18 @@ export default function HomePage() {
 
       {/* Features Section */}
       <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 px-4">
-        <h2
-          className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h2 className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 text-foreground">
           FlowCoder가 만든 PPT Maker
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Feature 1 */}
-          <Card
-            className="p-8 text-center hover:shadow-lg transition-shadow"
-            style={{ borderColor: TOSS_COLORS.muted }}
-          >
+          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
             <div className="text-5xl mb-4">🤖</div>
-            <h3
-              className="text-xl font-semibold mb-3"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h3 className="text-xl font-semibold mb-3 text-foreground">
               AI 자동 생성
             </h3>
-            <p style={{ color: TOSS_COLORS.textSecondary }}>
+            <p className="text-muted-foreground">
               최적의 Gen AI로<br />
               비용 없이 고품질 슬라이드를<br />
               생성해요
@@ -97,18 +77,12 @@ export default function HomePage() {
           </Card>
 
           {/* Feature 2 */}
-          <Card
-            className="p-8 text-center hover:shadow-lg transition-shadow"
-            style={{ borderColor: TOSS_COLORS.muted }}
-          >
+          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
             <div className="text-5xl mb-4">✏️</div>
-            <h3
-              className="text-xl font-semibold mb-3"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h3 className="text-xl font-semibold mb-3 text-foreground">
               무제한 편집
             </h3>
-            <p style={{ color: TOSS_COLORS.textSecondary }}>
+            <p className="text-muted-foreground">
               클라이언트 템플릿 엔진으로<br />
               추가 비용 없이<br />
               무한 편집해요
@@ -116,18 +90,12 @@ export default function HomePage() {
           </Card>
 
           {/* Feature 3 */}
-          <Card
-            className="p-8 text-center hover:shadow-lg transition-shadow"
-            style={{ borderColor: TOSS_COLORS.muted }}
-          >
+          <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
             <div className="text-5xl mb-4">🎨</div>
-            <h3
-              className="text-xl font-semibold mb-3"
-              style={{ color: TOSS_COLORS.text }}
-            >
+            <h3 className="text-xl font-semibold mb-3 text-foreground">
               다양한 템플릿
             </h3>
-            <p style={{ color: TOSS_COLORS.textSecondary }}>
+            <p className="text-muted-foreground">
               21개 슬라이드 타입과<br />
               7개 색상 프리셋으로<br />
               원하는 스타일을 선택해요
@@ -144,12 +112,9 @@ export default function HomePage() {
       )}
 
       {/* How It Works Section */}
-      <div style={{ backgroundColor: TOSS_COLORS.surface }}>
+      <div className="bg-secondary">
         <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 px-4">
-          <h2
-            className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12"
-            style={{ color: TOSS_COLORS.text }}
-          >
+          <h2 className="text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 text-foreground">
             사용 방법
           </h2>
 
@@ -162,19 +127,13 @@ export default function HomePage() {
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="text-6xl mb-4">{item.icon}</div>
-                <div
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-bold mb-3"
-                  style={{ backgroundColor: TOSS_COLORS.primary }}
-                >
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
                   {item.step}
                 </div>
-                <h3
-                  className="text-lg font-semibold mb-2"
-                  style={{ color: TOSS_COLORS.text }}
-                >
+                <h3 className="text-lg font-semibold mb-2 text-foreground">
                   {item.title}
                 </h3>
-                <p className="text-sm" style={{ color: TOSS_COLORS.textSecondary }}>
+                <p className="text-sm text-muted-foreground">
                   {item.desc}
                 </p>
               </div>
@@ -185,16 +144,10 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 text-center relative px-4">
-        <h2
-          className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6"
-          style={{ color: TOSS_COLORS.text }}
-        >
+        <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-foreground">
           지금 바로 시작해보세요
         </h2>
-        <p
-          className="text-base sm:text-lg mb-6 sm:mb-8"
-          style={{ color: TOSS_COLORS.textSecondary }}
-        >
+        <p className="text-base sm:text-lg mb-6 sm:mb-8 text-muted-foreground">
           무료 플랜으로 시작해서 원하는 프리젠테이션을 만들어요
         </p>
         <Button
@@ -202,7 +155,7 @@ export default function HomePage() {
           size="lg"
           className="min-w-[200px]"
         >
-          무료로 시작하기 →
+          ✨ {BUTTON_TEXT.startFree}
         </Button>
 
         {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}
