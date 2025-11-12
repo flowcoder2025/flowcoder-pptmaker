@@ -5,6 +5,10 @@
 
 'use client';
 
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -28,35 +32,74 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
 
-  const confirmButtonClass =
-    confirmButtonColor === 'red'
-      ? 'px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors font-medium'
-      : 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium';
-
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={onCancel}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
     >
-      <div
-        className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+      <Card
         onClick={(e) => e.stopPropagation()}
+        className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
       >
-        <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
-        <p className="text-gray-600 mb-6 whitespace-pre-line">{message}</p>
+        {/* 닫기 버튼 */}
+        <button
+          onClick={onCancel}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="닫기"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
 
-        <div className="flex justify-end gap-2">
-          <button
+        {/* 아이콘 */}
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 flex items-center justify-center">
+            <Trash2 size={48} className="text-red-500" strokeWidth={1.5} />
+          </div>
+        </div>
+
+        <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+          {title}
+        </h3>
+
+        <p className="text-gray-600 mb-6 text-center whitespace-pre-line">
+          {message}
+        </p>
+
+        <div className="flex gap-3 justify-end">
+          <Button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            variant="outline"
+            size="lg"
+            className="px-8"
           >
             {cancelLabel}
-          </button>
-          <button onClick={onConfirm} className={confirmButtonClass}>
+          </Button>
+          <Button
+            onClick={onConfirm}
+            size="lg"
+            className={`px-8 ${
+              confirmButtonColor === 'red'
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+          >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

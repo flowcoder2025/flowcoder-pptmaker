@@ -70,6 +70,16 @@
 ### 🎨 UI/UX
 
 #### 2025-11-12
+- **Editor 삭제 모달을 History 패턴과 동일하게 적용**
+  - ConfirmDialog 컴포넌트를 History 삭제 모달 패턴으로 완전 재작성
+  - Card 컴포넌트 사용 (border-4 border-primary rounded-2xl)
+  - Trash2 아이콘 추가 (48px, 빨간색, 중앙 정렬)
+  - X 닫기 버튼 우측 상단에 배치
+  - 제목 및 메시지 중앙 정렬 (text-2xl, text-center)
+  - Button 컴포넌트 사용 (size="lg", px-8)
+  - 세미 투명 배경 오버레이 (bg-black/50)
+  - 모든 페이지에서 일관된 모달 경험 제공
+
 - **Editor 페이지 모달 UI 개선** (013550d)
   - AddSlideDialog 및 TemplateSelector 모달 스타일 개선
   - 배경 오버레이 제거 (검은색 반투명 배경 삭제)
