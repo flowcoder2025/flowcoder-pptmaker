@@ -70,6 +70,13 @@
 ### 🎨 UI/UX
 
 #### 2025-11-12
+- **Editor 페이지 모달 UI 개선** (013550d)
+  - AddSlideDialog 및 TemplateSelector 모달 스타일 개선
+  - 배경 오버레이 제거 (검은색 반투명 배경 삭제)
+  - 모달 테두리에 프라이머리 색상 적용 (border-4 border-primary)
+  - 기존 화면이 보이는 상태에서 모달만 강조되는 UX로 변경
+  - 삭제 모달과 일관된 시각적 경험 제공
+
 - **결제 채널 선택 UI를 modern grid card 레이아웃으로 개선** (2ea8b51)
   - 구독/크레딧 페이지 Dialog 디자인 전면 개선
   - 레이아웃: 세로 Button 리스트 → 2-column responsive grid
