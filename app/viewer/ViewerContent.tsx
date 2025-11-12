@@ -8,6 +8,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Save, Download, Share2, Edit, X, Loader2, FileCode, FileText, Presentation } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -15,6 +21,7 @@ import { PLAN_BENEFITS } from '@/constants/subscription';
 import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import DownloadProgressModal from '@/components/DownloadProgressModal';
 
 export default function ViewerContent() {
   const router = useRouter();
@@ -23,9 +30,14 @@ export default function ViewerContent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // 다운로드 진행 상태 관리
+  const [showDownloadProgress, setShowDownloadProgress] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState<'downloading' | 'success' | 'error'>('downloading');
+  const [downloadFormat, setDownloadFormat] = useState<'html' | 'pdf' | 'pptx'>('html');
+  const [downloadError, setDownloadError] = useState<string>('');
 
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'input'; // 기본값: input
@@ -91,18 +103,6 @@ export default function ViewerContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
-  // 다운로드 메뉴 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = () => {
-      if (showDownloadMenu) {
-        setShowDownloadMenu(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showDownloadMenu]);
 
   // 키보드 단축키 지원
   useEffect(() => {
@@ -271,7 +271,11 @@ export default function ViewerContent() {
     if (!currentPresentation || isDownloading) return;
 
     setIsDownloading(true);
-    setShowDownloadMenu(false);
+
+    // 모달 표시 - 다운로드 시작
+    setDownloadFormat(format);
+    setDownloadStatus('downloading');
+    setShowDownloadProgress(true);
 
     try {
       // 웹 서비스에서는 광고 없이 다운로드 (향후 구독 모델로 제한 가능)
@@ -289,10 +293,14 @@ export default function ViewerContent() {
           await downloadPPTX(currentPresentation);
           break;
       }
-      alert(`${format.toUpperCase()} 파일을 다운로드했어요!`);
+
+      // 성공 상태로 업데이트
+      setDownloadStatus('success');
     } catch (error) {
       console.error('다운로드 실패:', error);
-      alert(`다운로드하지 못했어요: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      // 에러 상태로 업데이트
+      setDownloadStatus('error');
+      setDownloadError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
     } finally {
       setIsDownloading(false);
     }
@@ -311,26 +319,14 @@ export default function ViewerContent() {
         background: '#FFFFFF',
         borderBottom: '1px solid #E5E7EB',
         display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
+        gridTemplateColumns: 'auto 1fr auto',
         alignItems: 'center',
         gap: '8px',
       }}>
         {/* 뒤로가기 버튼 */}
         <button
           onClick={handleClose}
-          style={{
-            padding: '8px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '8px',
-            transition: 'background 0.2s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          className="p-2 flex items-center gap-1 rounded-lg text-gray-700 hover:text-primary hover:scale-[1.02] transition-all duration-200"
           title="이전 페이지로 돌아가기"
           aria-label="뒤로가기"
         >
@@ -339,13 +335,14 @@ export default function ViewerContent() {
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#374151"
+            stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
             <path d="M15 19l-7-7 7-7" />
           </svg>
+          <span className="text-sm font-medium">뒤로</span>
         </button>
 
         {!isMobile ? (
@@ -373,62 +370,48 @@ export default function ViewerContent() {
           </Button>
 
           {/* 다운로드 버튼 (드롭다운) */}
-          <div style={{ position: 'relative' }}>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDownloadMenu(!showDownloadMenu);
-              }}
-              disabled={isDownloading}
-              size="default"
-              variant="outline"
-              className="flex items-center gap-2"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={isDownloading}
+                size="default"
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Download size={18} strokeWidth={2} />
+                {!isMobile && (isDownloading ? '변환하고 있어요' : '다운로드')}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-white border border-border shadow-lg z-100"
             >
-              <Download size={18} strokeWidth={2} />
-              {!isMobile && (isDownloading ? '변환하고 있어요' : '다운로드')}
-            </Button>
-
-            {/* 다운로드 메뉴 */}
-            {showDownloadMenu && !isDownloading && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '4px',
-                background: '#FFFFFF',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                zIndex: 1000,
-                minWidth: '180px',
-              }}>
-                {/* HTML 다운로드 (개발 모드 전용) */}
-                {process.env.NODE_ENV === 'development' && (
-                  <button
-                    onClick={() => handleDownload('html')}
-                    className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
-                  >
-                    <FileCode size={18} className="text-[#E44D26]" strokeWidth={2} />
-                    <span>HTML 파일</span>
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDownload('pdf')}
-                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
+              {/* HTML 다운로드 (개발 모드 전용) */}
+              {process.env.NODE_ENV === 'development' && (
+                <DropdownMenuItem
+                  onClick={() => handleDownload('html')}
+                  className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
                 >
-                  <FileText size={18} className="text-[#DC143C]" strokeWidth={2} />
-                  <span>PDF 파일</span>
-                </button>
-                <button
-                  onClick={() => handleDownload('pptx')}
-                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <Presentation size={18} className="text-[#D24726]" strokeWidth={2} />
-                  <span>PowerPoint 파일</span>
-                </button>
-              </div>
-            )}
-          </div>
+                  <FileCode size={18} className="mr-2 text-[#E44D26]" strokeWidth={2} />
+                  HTML 파일
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                onClick={() => handleDownload('pdf')}
+                className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+              >
+                <FileText size={18} className="mr-2 text-[#DC143C]" strokeWidth={2} />
+                PDF 파일
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDownload('pptx')}
+                className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+              >
+                <Presentation size={18} className="mr-2 text-[#D24726]" strokeWidth={2} />
+                PowerPoint 파일
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             onClick={handleShare}
@@ -455,11 +438,12 @@ export default function ViewerContent() {
             onClick={handleClose}
             size="default"
             variant="ghost"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 hover:text-primary hover:bg-transparent hover:scale-[1.02] transition-all duration-200"
             title="닫기"
             aria-label="닫기"
           >
             <X size={18} strokeWidth={2} />
+            <span className="text-sm font-medium">닫기</span>
           </Button>
         </div>
       </div>
@@ -593,7 +577,7 @@ export default function ViewerContent() {
                 whiteSpace: 'nowrap',
               }}
             >
-              ← 이전
+              ← 이전 페이지
             </Button>
 
             <div className="flex-1 min-w-0 text-sm text-muted-foreground text-center overflow-hidden overflow-ellipsis whitespace-nowrap">
@@ -611,7 +595,7 @@ export default function ViewerContent() {
                 whiteSpace: 'nowrap',
               }}
             >
-              다음 →
+              다음 페이지 →
             </Button>
           </div>
         </div>
@@ -631,6 +615,15 @@ export default function ViewerContent() {
           <KakaoAdBanner />
         </div>
       )}
+
+      {/* 다운로드 진행 상태 모달 */}
+      <DownloadProgressModal
+        isOpen={showDownloadProgress}
+        onClose={() => setShowDownloadProgress(false)}
+        status={downloadStatus}
+        format={downloadFormat}
+        errorMessage={downloadError}
+      />
     </div>
   );
 }

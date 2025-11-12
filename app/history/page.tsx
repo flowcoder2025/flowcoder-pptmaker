@@ -14,6 +14,7 @@ import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2, FileCode,
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import DownloadProgressModal from '@/components/DownloadProgressModal';
 import type { HTMLSlide } from '@/types/slide';
 
 /**
@@ -52,6 +53,12 @@ export default function HistoryPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [presentationToDelete, setPresentationToDelete] = useState<string | null>(null);
+
+  // 다운로드 진행 상태 관리
+  const [showDownloadProgress, setShowDownloadProgress] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState<'downloading' | 'success' | 'error'>('downloading');
+  const [downloadFormat, setDownloadFormat] = useState<'html' | 'pdf' | 'pptx'>('html');
+  const [downloadError, setDownloadError] = useState<string>('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -142,6 +149,11 @@ export default function HistoryPage() {
     setIsDownloading(true);
     setShowDownloadDialog(false);
 
+    // 모달 표시 - 다운로드 시작
+    setDownloadFormat(format);
+    setDownloadStatus('downloading');
+    setShowDownloadProgress(true);
+
     try {
       // 1. 프리젠테이션 데이터 로드
       const res = await fetch(`/api/presentations/${selectedPresentationId}`);
@@ -157,8 +169,6 @@ export default function HistoryPage() {
       }
 
       // 2. 다운로드 실행 (동적 import)
-      toast.info('다운로드를 준비하고 있어요');
-
       if (format === 'html') {
         const { downloadHTML } = await import('@/utils/download');
         await downloadHTML(presentation);
@@ -170,10 +180,13 @@ export default function HistoryPage() {
         await downloadPPTX(presentation);
       }
 
-      toast.success(`${format === 'html' ? 'HTML' : format === 'pdf' ? 'PDF' : 'PowerPoint'} 파일을 다운로드했어요!`);
+      // 성공 상태로 업데이트
+      setDownloadStatus('success');
     } catch (error) {
       console.error('다운로드 실패:', error);
-      toast.error('다운로드하지 못했어요');
+      // 에러 상태로 업데이트
+      setDownloadStatus('error');
+      setDownloadError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
     } finally {
       setIsDownloading(false);
       setSelectedPresentationId(null);
@@ -448,6 +461,15 @@ export default function HistoryPage() {
           </Card>
         </div>
       )}
+
+      {/* 다운로드 진행 상태 모달 */}
+      <DownloadProgressModal
+        isOpen={showDownloadProgress}
+        onClose={() => setShowDownloadProgress(false)}
+        status={downloadStatus}
+        format={downloadFormat}
+        errorMessage={downloadError}
+      />
     </div>
   );
 }
@@ -473,6 +495,12 @@ function PresentationCard({
   const slideCount = presentation.metadata?.slideCount || 0;
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // 타이틀 글자수 제한 함수 (2줄을 넘지 않도록)
+  const truncateTitle = (title: string, maxLength: number = 45) => {
+    if (title.length <= maxLength) return title;
+    return title.slice(0, maxLength) + '...';
+  };
 
   // Intersection Observer로 카드가 보이는지 감지
   useEffect(() => {
@@ -532,33 +560,37 @@ function PresentationCard({
   const thumbnailDoc = createThumbnailDocument();
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg" ref={cardRef}>
+    <Card className="overflow-hidden transition-all hover:shadow-lg max-w-[350px] mx-auto" ref={cardRef}>
       {/* 썸네일 영역 */}
       <div
-        className="relative overflow-hidden w-full"
+        className="relative overflow-hidden"
         style={{
-          aspectRatio: '16/9',
+          width: '350px',
+          height: '196.875px',
           background: thumbnailDoc ? '#FFFFFF' : 'linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(210 40% 96.1%) 100%)',
         }}
       >
         {isVisible && thumbnailDoc ? (
-          <div
-            className="absolute inset-0"
-            style={{
-              transform: 'scale(0.29167)',
-              transformOrigin: 'top left',
-            }}
-          >
-            <iframe
-              srcDoc={thumbnailDoc}
-              sandbox="allow-same-origin"
+          <div className="absolute top-0 left-0 overflow-hidden">
+            <div
               style={{
                 width: '1200px',
                 height: '675px',
-                border: 'none',
-                pointerEvents: 'none',
+                transform: 'scale(0.29167)',
+                transformOrigin: 'top left',
               }}
-            />
+            >
+              <iframe
+                srcDoc={thumbnailDoc}
+                sandbox="allow-same-origin"
+                style={{
+                  width: '1200px',
+                  height: '675px',
+                  border: 'none',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-white text-6xl">📊</div>
@@ -567,17 +599,13 @@ function PresentationCard({
 
       {/* 콘텐츠 영역 */}
       <div className="p-5">
-        <h3 className="text-lg font-bold mb-2 line-clamp-2 text-foreground">
-          {presentation.title}
+        {/* 타이틀 (2줄 제한, 최소 높이로 하단 요소 위치 고정) */}
+        <h3 className="text-lg font-bold mb-3 line-clamp-2 min-h-16 text-foreground">
+          {truncateTitle(presentation.title)}
         </h3>
 
-        {presentation.description && (
-          <p className="text-sm mb-3 line-clamp-2 text-muted-foreground">
-            {presentation.description}
-          </p>
-        )}
-
-        <div className="flex items-center gap-4 text-sm mb-4 text-muted-foreground">
+        {/* 슬라이드 수 + 날짜 정보 */}
+        <div className="flex items-center gap-4 text-sm mb-3 text-muted-foreground">
           <span>
             📄 {slideCount}슬라이드
           </span>

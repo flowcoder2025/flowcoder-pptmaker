@@ -329,10 +329,9 @@ export default function ProfilePage() {
                   최근 프리젠테이션
                 </h2>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => router.push('/history')}
-                  className="text-primary"
                 >
                   전체 보기 →
                 </Button>
@@ -353,7 +352,7 @@ export default function ProfilePage() {
                   {stats.recentPresentations.map((presentation: any) => (
                     <div
                       key={presentation.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-primary/5 hover:border-primary/30 cursor-pointer transition-all duration-200"
                       onClick={() => router.push(`/viewer?id=${presentation.id}`)}
                     >
                       <div className="flex-1">

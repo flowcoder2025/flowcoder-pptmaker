@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { BUTTON_TEXT } from '@/lib/text-config';
 
 /**
  * NavigationBar 컴포넌트
@@ -205,19 +206,19 @@ export default function NavigationBar() {
               // 미로그인 시: 로그인/회원가입 버튼
               <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => router.push('/login')}
                   className="min-w-[80px]"
                 >
-                  로그인해요
+                  {BUTTON_TEXT.login}
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => router.push('/signup')}
                   className="min-w-[100px]"
                 >
-                  회원가입해요
+                  {BUTTON_TEXT.signup}
                 </Button>
               </div>
             )}

@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
@@ -36,6 +36,10 @@ export default function EditorContent() {
   const [showSaveErrorDialog, setShowSaveErrorDialog] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
   const [showDeleteWarningDialog, setShowDeleteWarningDialog] = useState(false);
+
+  // 변경사항 추적 및 종료 확인 모달
+  const [isDirty, setIsDirty] = useState(false);
+  const [showExitConfirmDialog, setShowExitConfirmDialog] = useState(false);
 
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'viewer'; // 기본값: viewer
@@ -124,6 +128,7 @@ export default function EditorContent() {
   const handleSave = async () => {
     try {
       await savePresentation();
+      setIsDirty(false); // 저장 성공 시 변경사항 초기화
       setShowSaveSuccessDialog(true);
     } catch (error) {
       console.error('저장 실패:', error);
@@ -147,8 +152,8 @@ export default function EditorContent() {
     }
   };
 
-  // 뒤로가기/닫기: origin 우선, 없으면 from 파라미터에 따라 이전 페이지로 이동
-  const handleClose = () => {
+  // 저장하지 않고 나가기 (실제 종료 로직)
+  const handleCloseWithoutSaving = () => {
     // origin이 있으면 최초 진입점으로 직접 이동
     if (origin === 'history') {
       router.push('/history');
@@ -171,10 +176,28 @@ export default function EditorContent() {
     }
   };
 
+  // 저장하고 나가기
+  const handleSaveAndClose = async () => {
+    await handleSave();
+    setIsDirty(false);
+    setShowExitConfirmDialog(false);
+    handleCloseWithoutSaving();
+  };
+
+  // 뒤로가기/닫기: 변경사항이 있으면 확인 모달 표시
+  const handleClose = () => {
+    if (isDirty) {
+      setShowExitConfirmDialog(true);
+      return;
+    }
+    handleCloseWithoutSaving();
+  };
+
   const currentSlide = currentPresentation.slideData.slides[selectedSlideIndex];
 
   const handleSlideChange = (updatedSlide: typeof currentSlide) => {
     updateSlide(selectedSlideIndex, updatedSlide);
+    setIsDirty(true); // 변경사항 표시
   };
 
   const handleAddSlide = (slideType: SlideType) => {
@@ -243,23 +266,23 @@ export default function EditorContent() {
           {/* 좌측: 뒤로가기 버튼 */}
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+            className="p-2 flex items-center gap-1 rounded-lg text-gray-700 hover:text-primary hover:scale-[1.02] transition-all duration-200"
             title="이전 페이지로 돌아가기"
             aria-label="뒤로가기"
           >
             <svg
-              className="w-6 h-6 text-gray-700"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
+              <path d="M15 19l-7-7 7-7" />
             </svg>
+            <span className="text-sm font-medium">뒤로</span>
           </button>
 
           {/* 중앙: 제목 */}
@@ -376,12 +399,12 @@ export default function EditorContent() {
             {/* 닫기(X) 버튼 - 항상 표시 */}
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+              className="p-2 rounded-lg shrink-0 flex items-center gap-1 text-gray-700 hover:text-primary hover:scale-[1.02] transition-all duration-200"
               title="닫기"
               aria-label="닫기"
             >
               <svg
-                className="w-6 h-6 text-gray-700"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -393,6 +416,7 @@ export default function EditorContent() {
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
+              <span className="text-sm font-medium">닫기</span>
             </button>
           </div>
         </div>
@@ -618,6 +642,77 @@ export default function EditorContent() {
                 className="px-8 bg-yellow-500 hover:bg-yellow-600 text-white"
               >
                 확인
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 종료 확인 모달 */}
+      {showExitConfirmDialog && (
+        <div
+          onClick={() => setShowExitConfirmDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowExitConfirmDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 경고 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <AlertCircle size={48} className="text-orange-500" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              편집 내용이 사라져요
+            </h3>
+
+            <p className="text-gray-600 mb-6 text-center">
+              저장하지 않은 변경사항이 사라져요.<br />
+              계속하시겠어요?
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={handleSaveAndClose}
+                size="lg"
+                className="w-full bg-primary text-white hover:scale-[1.02] transition-transform duration-200"
+              >
+                저장하고 나가기
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsDirty(false);
+                  setShowExitConfirmDialog(false);
+                  handleCloseWithoutSaving();
+                }}
+                size="lg"
+                variant="destructive"
+                className="w-full hover:bg-destructive hover:scale-[1.02] transition-transform duration-200"
+              >
+                저장하지 않고 나가기
+              </Button>
+              <Button
+                onClick={() => setShowExitConfirmDialog(false)}
+                size="lg"
+                variant="outline"
+                className="w-full"
+              >
+                취소
               </Button>
             </div>
           </Card>
