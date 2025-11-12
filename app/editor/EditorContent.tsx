@@ -8,7 +8,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
@@ -31,6 +32,10 @@ export default function EditorContent() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSaveSuccessDialog, setShowSaveSuccessDialog] = useState(false);
+  const [showSaveErrorDialog, setShowSaveErrorDialog] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState('');
+  const [showDeleteWarningDialog, setShowDeleteWarningDialog] = useState(false);
 
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'viewer'; // 기본값: viewer
@@ -116,10 +121,11 @@ export default function EditorContent() {
   const handleSave = async () => {
     try {
       await savePresentation();
-      alert('저장했어요');
+      setShowSaveSuccessDialog(true);
     } catch (error) {
       console.error('저장 실패:', error);
-      alert('저장에 실패했어요. 다시 시도해주세요.');
+      setSaveErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
+      setShowSaveErrorDialog(true);
     }
   };
 
@@ -129,7 +135,8 @@ export default function EditorContent() {
       router.push('/viewer');
     } catch (error) {
       console.error('저장 실패:', error);
-      alert('저장에 실패했어요. 다시 시도해주세요.');
+      setSaveErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
+      setShowSaveErrorDialog(true);
     }
   };
 
@@ -174,8 +181,8 @@ export default function EditorContent() {
       setIsDeleteDialogOpen(false);
     } else {
       // 마지막 슬라이드 삭제 시도 시
-      alert('마지막 슬라이드는 삭제할 수 없어요');
       setIsDeleteDialogOpen(false);
+      setShowDeleteWarningDialog(true);
     }
   };
 
@@ -451,6 +458,159 @@ export default function EditorContent() {
         onSelect={changeTemplate}
         onClose={() => setIsTemplateSelectorOpen(false)}
       />
+
+      {/* 저장 성공 모달 */}
+      {showSaveSuccessDialog && (
+        <div
+          onClick={() => setShowSaveSuccessDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowSaveSuccessDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 성공 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <CheckCircle size={48} className="text-green-500" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              저장했어요
+            </h3>
+
+            <p className="text-gray-600 mb-6 text-center">
+              프리젠테이션이 성공적으로 저장됐어요
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setShowSaveSuccessDialog(false)}
+                size="lg"
+                className="px-8 bg-green-500 hover:bg-green-600 text-white"
+              >
+                확인
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 저장 실패 모달 */}
+      {showSaveErrorDialog && (
+        <div
+          onClick={() => setShowSaveErrorDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowSaveErrorDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 에러 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <XCircle size={48} className="text-red-500" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              저장에 실패했어요
+            </h3>
+
+            <p className="text-gray-600 mb-2 text-center">
+              {saveErrorMessage || '알 수 없는 오류가 발생했어요'}
+            </p>
+            <p className="text-gray-600 mb-6 text-center text-sm">
+              다시 시도해주세요
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setShowSaveErrorDialog(false)}
+                size="lg"
+                className="px-8 bg-red-500 hover:bg-red-600 text-white"
+              >
+                확인
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 마지막 슬라이드 삭제 경고 모달 */}
+      {showDeleteWarningDialog && (
+        <div
+          onClick={() => setShowDeleteWarningDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowDeleteWarningDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 경고 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <XCircle size={48} className="text-yellow-500" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              삭제할 수 없어요
+            </h3>
+
+            <p className="text-gray-600 mb-6 text-center">
+              마지막 슬라이드는 삭제할 수 없어요
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setShowDeleteWarningDialog(false)}
+                size="lg"
+                className="px-8 bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                확인
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
