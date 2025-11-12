@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 요청 본문 파싱 및 검증
     const body = (await request.json()) as CreatePaymentRequestBody;
-    const { purpose, amount, orderName, subscriptionId, creditAmount, payMethod } = body;
+    const { purpose, amount, orderName, channelKey, subscriptionId, creditAmount, payMethod } = body;
 
     if (!purpose || !amount || !orderName) {
       return NextResponse.json(
@@ -66,13 +66,35 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. PortOne 결제 요청 객체 생성
+    // channelKey가 없으면 기본값으로 토스페이 사용
+    const defaultChannelKey = 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742';
+    const finalChannelKey = channelKey || defaultChannelKey;
+
+    // payMethod가 없으면 channelKey에 따라 자동 설정
+    let finalPayMethod = payMethod;
+    if (!finalPayMethod) {
+      // 토스페이, 카카오페이는 EASY_PAY
+      if (finalChannelKey.includes('ac45bcb3') || finalChannelKey.includes('b67c5e30') || finalChannelKey.includes('5bf9403e')) {
+        finalPayMethod = 'EASY_PAY';
+      }
+      // 이니시스는 CARD (기본값)
+      else if (finalChannelKey.includes('7b85a467') || finalChannelKey.includes('2d471aaa')) {
+        finalPayMethod = 'CARD';
+      }
+      // 기타는 CARD
+      else {
+        finalPayMethod = 'CARD';
+      }
+    }
+
     const paymentRequest: PortOnePaymentRequest = {
       storeId,
       paymentId,
       orderName,
       totalAmount: amount,
       currency: 'KRW',
-      payMethod,
+      channelKey: finalChannelKey,
+      payMethod: finalPayMethod,  // 필수 파라미터
       customer: {
         customerId: session.user.id,
         fullName: session.user.name || undefined,
@@ -96,7 +118,7 @@ export async function POST(request: NextRequest) {
         amount,
         currency: 'KRW',
         status: 'PENDING',
-        method: payMethod || null,
+        method: finalPayMethod,  // 결정된 payMethod 저장
         purpose,
         subscriptionId: subscriptionId || null,
         creditTransactionId: null,

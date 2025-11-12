@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
@@ -19,21 +19,12 @@ import {
 import type { VerifyPaymentResponse } from '@/types/payment';
 
 /**
- * 결제 결과 페이지
+ * 결제 결과 페이지 내부 컴포넌트
  *
  * @description
- * 포트원 결제 완료 후 결과를 표시하는 페이지입니다.
- * - 성공/실패 상태 표시
- * - 결제 정보 (금액, 결제 수단, 날짜)
- * - 영수증 URL 링크
- * - 구독/크레딧 상태
- * - 다음 액션 버튼
- *
- * @example
- * - 성공: /payments/result?success=true&paymentId=pay_xxx
- * - 실패: /payments/result?success=false&error=결제_취소
+ * useSearchParams를 사용하는 실제 결제 결과 컴포넌트
  */
-export default function PaymentResultPage() {
+function PaymentResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -437,5 +428,34 @@ export default function PaymentResultPage() {
         </div>
       </div>
     </MaxWidthContainer>
+  );
+}
+
+/**
+ * 결제 결과 페이지
+ *
+ * @description
+ * 포트원 결제 완료 후 결과를 표시하는 페이지입니다.
+ * - 성공/실패 상태 표시
+ * - 결제 정보 (금액, 결제 수단, 날짜)
+ * - 영수증 URL 링크
+ * - 구독/크레딧 상태
+ * - 다음 액션 버튼
+ *
+ * @example
+ * - 성공: /payments/result?success=true&paymentId=pay_xxx
+ * - 실패: /payments/result?success=false&error=결제_취소
+ */
+export default function PaymentResultPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <p className="text-gray-600">불러오고 있어요...</p>
+        </div>
+      }
+    >
+      <PaymentResultContent />
+    </Suspense>
   );
 }
