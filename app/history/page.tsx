@@ -136,7 +136,7 @@ export default function HistoryPage() {
     setShowDownloadDialog(true);
   };
 
-  const handleDownload = async (format: 'pdf' | 'pptx') => {
+  const handleDownload = async (format: 'html' | 'pdf' | 'pptx') => {
     if (!selectedPresentationId || isDownloading) return;
 
     setIsDownloading(true);
@@ -159,7 +159,10 @@ export default function HistoryPage() {
       // 2. 다운로드 실행 (동적 import)
       toast.info('다운로드를 준비하고 있어요');
 
-      if (format === 'pdf') {
+      if (format === 'html') {
+        const { downloadHTML } = await import('@/utils/download');
+        await downloadHTML(presentation);
+      } else if (format === 'pdf') {
         const { downloadPDF } = await import('@/utils/download');
         await downloadPDF(presentation);
       } else {
@@ -167,7 +170,7 @@ export default function HistoryPage() {
         await downloadPPTX(presentation);
       }
 
-      toast.success(`${format === 'pdf' ? 'PDF' : 'PowerPoint'} 파일을 다운로드했어요!`);
+      toast.success(`${format === 'html' ? 'HTML' : format === 'pdf' ? 'PDF' : 'PowerPoint'} 파일을 다운로드했어요!`);
     } catch (error) {
       console.error('다운로드 실패:', error);
       toast.error('다운로드하지 못했어요');
@@ -306,6 +309,16 @@ export default function HistoryPage() {
               다운로드 형식 선택
             </h3>
             <div className="flex flex-col gap-3">
+              {/* HTML 다운로드 (개발 모드 전용) */}
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  onClick={() => handleDownload('html')}
+                  disabled={isDownloading}
+                  className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
+                >
+                  📄 HTML 파일
+                </button>
+              )}
               <button
                 onClick={() => handleDownload('pdf')}
                 disabled={isDownloading}
