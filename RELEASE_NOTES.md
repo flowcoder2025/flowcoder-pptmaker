@@ -43,6 +43,13 @@
     - 구독/크레딧 정보 표시
     - 영수증 링크 제공
 
+- **구독 취소 기능에 커스텀 모달 적용** (3774360)
+  - browser confirm() 팝업을 자체 모달로 교체
+  - AlertTriangle 아이콘으로 경고 표시 (노란색 테마)
+  - 구독 취소 정책 안내 문구 추가 (현재 기간까지 사용 가능)
+  - 히스토리 페이지 삭제 모달 패턴 참조
+  - 일관된 UX: 백드롭 클릭 닫기, X 버튼, 2-button 레이아웃
+
 #### 2025-11-11
 - **히스토리 페이지에 슬라이드 썸네일 미리보기 추가**
   - Intersection Observer로 lazy loading 구현
@@ -87,6 +94,15 @@
   - 프로필 페이지 /api/user/stats의 6개 병렬 쿼리 에러 해결
   - H1 브랜치 머지 후 데이터베이스 스키마 동기화 완료
   - "Server has closed the connection" 에러 완전히 해결
+
+- **Profile 페이지 stats API 쿼리 최적화** (a632c88)
+  - 병렬 쿼리 수 6개 → 4개로 감소 (33% 연결 풀 부담 감소)
+  - Promise.all → Promise.allSettled로 변경 (부분 실패 허용)
+  - 제거된 쿼리: allPresentations (전체 프리젠테이션), creditTransactions (전체 크레딧 거래)
+  - totalSlides 계산 변경: 최근 3개 프리젠테이션 슬라이드 수만 집계
+  - creditsUsed 반환값: 0 (placeholder, 향후 구현 예정)
+  - 실패한 쿼리 로깅 추가 (디버깅 용이성 개선)
+  - 안정성 개선: 부분 실패 시에도 페이지 표시 가능
 
 #### 2025-11-11
 - **Geist 폰트 로딩 에러 해결**
