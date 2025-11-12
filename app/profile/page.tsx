@@ -167,7 +167,7 @@ export default function ProfilePage() {
                   variant="outline"
                   onClick={() => toast.info('프로필 수정 기능 준비 중이에요')}
                 >
-                  프로필 수정해요
+                  {BUTTON_TEXT.editProfile}
                 </Button>
               </div>
             </Card>
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                 variant="outline"
                 onClick={() => router.push('/subscription')}
               >
-                플랜 변경해요
+                {BUTTON_TEXT.changePlan}
               </Button>
             </Card>
 

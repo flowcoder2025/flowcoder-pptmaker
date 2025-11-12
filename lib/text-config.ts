@@ -94,6 +94,12 @@ export const BUTTON_TEXT = {
   credits: isAppsInToss ? '크레딧' : '크레딧',
 
   // ========================================
+  // 프로필 관련 (Profile)
+  // ========================================
+  editProfile: isAppsInToss ? '프로필 수정해요' : '프로필 수정',
+  changePlan: isAppsInToss ? '플랜 변경해요' : '플랜 변경',
+
+  // ========================================
   // 파일 작업 (File Operations)
   // ========================================
   upload: isAppsInToss ? '업로드해요' : '업로드',
