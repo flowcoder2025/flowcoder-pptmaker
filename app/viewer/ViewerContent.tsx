@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Save, Download, Share2, Edit, X, Loader2 } from 'lucide-react';
+import { Save, Download, Share2, Edit, X, Loader2, FileCode, FileText, Presentation } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
@@ -400,28 +400,31 @@ export default function ViewerContent() {
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 zIndex: 1000,
-                minWidth: '160px',
+                minWidth: '180px',
               }}>
                 {/* HTML 다운로드 (개발 모드 전용) */}
                 {process.env.NODE_ENV === 'development' && (
                   <button
                     onClick={() => handleDownload('html')}
-                    className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50"
+                    className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
                   >
-                    📄 HTML 파일
+                    <FileCode size={18} className="text-[#E44D26]" strokeWidth={2} />
+                    <span>HTML 파일</span>
                   </button>
                 )}
                 <button
                   onClick={() => handleDownload('pdf')}
-                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50"
+                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none border-b border-gray-200 text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
                 >
-                  📕 PDF 파일
+                  <FileText size={18} className="text-[#DC143C]" strokeWidth={2} />
+                  <span>PDF 파일</span>
                 </button>
                 <button
                   onClick={() => handleDownload('pptx')}
-                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none text-left cursor-pointer hover:bg-gray-50"
+                  className="w-full py-3 px-4 text-sm text-foreground bg-transparent border-none text-left cursor-pointer hover:bg-gray-50 flex items-center gap-2"
                 >
-                  📊 PowerPoint 파일
+                  <Presentation size={18} className="text-[#D24726]" strokeWidth={2} />
+                  <span>PowerPoint 파일</span>
                 </button>
               </div>
             )}

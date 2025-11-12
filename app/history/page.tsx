@@ -10,7 +10,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2 } from 'lucide-react';
+import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2, FileCode, FileText, Presentation } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -350,9 +350,10 @@ export default function HistoryPage() {
                   disabled={isDownloading}
                   variant="outline"
                   size="lg"
-                  className="w-full text-base font-medium"
+                  className="w-full text-base font-medium flex items-center justify-center gap-3"
                 >
-                  📄 HTML 파일
+                  <FileCode size={24} className="text-[#E44D26]" strokeWidth={2} />
+                  <span>HTML 파일</span>
                 </Button>
               )}
               <Button
@@ -360,18 +361,20 @@ export default function HistoryPage() {
                 disabled={isDownloading}
                 variant="outline"
                 size="lg"
-                className="w-full text-base font-medium"
+                className="w-full text-base font-medium flex items-center justify-center gap-3"
               >
-                📕 PDF 파일
+                <FileText size={24} className="text-[#DC143C]" strokeWidth={2} />
+                <span>PDF 파일</span>
               </Button>
               <Button
                 onClick={() => handleDownload('pptx')}
                 disabled={isDownloading}
                 variant="outline"
                 size="lg"
-                className="w-full text-base font-medium"
+                className="w-full text-base font-medium flex items-center justify-center gap-3"
               >
-                📊 PowerPoint 파일
+                <Presentation size={24} className="text-[#D24726]" strokeWidth={2} />
+                <span>PowerPoint 파일</span>
               </Button>
             </div>
           </Card>
