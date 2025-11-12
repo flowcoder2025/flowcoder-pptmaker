@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { User, Mail, Calendar, CreditCard, FileText, Star, Phone } from 'lucide-react';
+import { User, Mail, Calendar, CreditCard, FileText, Star, Phone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -185,8 +185,9 @@ export default function ProfilePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">불러오고 있어요...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-muted-foreground text-lg">불러오고 있어요...</p>
       </div>
     );
   }

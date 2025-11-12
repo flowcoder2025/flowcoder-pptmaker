@@ -15,6 +15,7 @@ import {
   Home,
   CreditCard,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import type { VerifyPaymentResponse } from '@/types/payment';
 
@@ -74,8 +75,9 @@ function PaymentResultContent() {
   // 로딩 상태
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-600">불러오고 있어요...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-muted-foreground text-lg">불러오고 있어요...</p>
       </div>
     );
   }
