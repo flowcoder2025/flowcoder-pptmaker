@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { label: '대시보드', href: '/admin', icon: '📊' },
   { label: '사용자 관리', href: '/admin/users', icon: '👥' },
   { label: '크래딧 관리', href: '/admin/credits', icon: '💳' },
+  { label: '결제 관리', href: '/admin/payments', icon: '💰' },
   { label: '구독 관리', href: '/admin/subscriptions', icon: '📋' },
   { label: '모니터링', href: '/admin/monitoring', icon: '📈' },
 ]
