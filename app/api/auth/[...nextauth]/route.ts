@@ -92,6 +92,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           image: user.image,
+          phoneNumber: user.phoneNumber,
         }
       },
     }),
@@ -161,8 +162,9 @@ export const authOptions: NextAuthOptions = {
               console.log('✅ New account linked to existing user')
             }
 
-            // user.id를 기존 사용자 ID로 설정
+            // user 객체에 기존 사용자 정보 설정 (phoneNumber 포함)
             user.id = existingUser.id
+            user.phoneNumber = existingUser.phoneNumber
           } else {
             // 새 사용자 생성
             console.log('📝 Creating new user...')
@@ -222,6 +224,7 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email
         token.name = user.name
         token.picture = user.image
+        token.phoneNumber = user.phoneNumber
       }
       return token
     },
@@ -232,6 +235,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string
         session.user.name = token.name as string
         session.user.image = token.picture as string
+        session.user.phoneNumber = token.phoneNumber as string | null
       }
       return session
     },

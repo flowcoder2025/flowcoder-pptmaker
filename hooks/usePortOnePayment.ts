@@ -36,25 +36,28 @@ import type {
 
 /**
  * 사용 가능한 결제 채널 (포트원 콘솔에서 설정된 채널)
+ *
+ * @description
+ * 포트원 테스트 환경 채널키 (2025-11-12 확인)
  */
 export const PAYMENT_CHANNELS = {
-  // 토스페이 일반결제
+  // 토스페이 일반/정기결제
   TOSSPAY: {
-    key: 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d207',
+    key: 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742',
     name: '토스페이',
     pgProvider: 'tosspay_v2',
     mid: 'tosstest',
   },
   // 카카오페이 일반결제
   KAKAOPAY_ONETIME: {
-    key: 'channel-key-b67c5e30-67da-4b6d-bb60-abdcea65ab',
+    key: 'channel-key-b67c5e30-67da-4b6d-bb60-abdcea65ab96',
     name: '카카오페이',
     pgProvider: 'kakaopay',
     mid: 'TC0ONETIME',
   },
   // 카카오페이 정기결제
   KAKAOPAY_SUBSCRIPTION: {
-    key: 'channel-key-5bf9403e-6158-4a41-b756-0785c9dbbc',
+    key: 'channel-key-5bf9403e-6158-4a41-b756-0785c9dbbc32',
     name: '카카오페이 (정기)',
     pgProvider: 'kakaopay',
     mid: 'TCSUBSCRIP',

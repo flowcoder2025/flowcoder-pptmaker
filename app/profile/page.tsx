@@ -10,11 +10,11 @@ import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { User, Mail, Calendar, CreditCard, FileText, Star } from 'lucide-react';
+import { User, Mail, Calendar, CreditCard, FileText, Star, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
-import { BUTTON_TEXT } from '@/lib/text-config';
+import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
 
 /**
  * 유저 프로필 페이지
@@ -24,7 +24,7 @@ import { BUTTON_TEXT } from '@/lib/text-config';
  * TDS 스타일 디자인을 적용했습니다.
  */
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const { plan } = useSubscriptionStore();
 
@@ -41,6 +41,20 @@ export default function ProfilePage() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // 프로필 수정 상태
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phoneNumber: '',
+  });
+
+  // 최신 프로필 정보 (DB 동기화용)
+  const [currentProfile, setCurrentProfile] = useState({
+    name: '',
+    phoneNumber: '',
+  });
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -48,9 +62,38 @@ export default function ProfilePage() {
     }
 
     if (status === 'authenticated' && session?.user) {
+      fetchUserProfile();
       fetchUserStats();
     }
   }, [status, session, router]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const res = await fetch('/api/profile');
+      if (!res.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+
+      const data = await res.json();
+      if (data.success && data.user) {
+        const profile = {
+          name: data.user.name || '',
+          phoneNumber: data.user.phoneNumber || '',
+        };
+        setCurrentProfile(profile);
+        setEditForm(profile);
+      }
+    } catch (error) {
+      console.error('프로필 조회 실패:', error);
+      // Fallback: 세션 정보 사용
+      const fallbackProfile = {
+        name: session?.user.name || '',
+        phoneNumber: session?.user.phoneNumber || '',
+      };
+      setCurrentProfile(fallbackProfile);
+      setEditForm(fallbackProfile);
+    }
+  };
 
   const fetchUserStats = async () => {
     try {
@@ -74,6 +117,69 @@ export default function ProfilePage() {
       toast.error('정보를 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 프로필 수정 핸들러
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    // 최신 저장된 정보로 복원
+    setEditForm(currentProfile);
+    setIsEditing(false);
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+
+      // 전화번호 유효성 검증 (선택사항, 입력된 경우만)
+      if (editForm.phoneNumber) {
+        const phoneRegex = /^010-?\d{4}-?\d{4}$/;
+        if (!phoneRegex.test(editForm.phoneNumber.replace(/-/g, ''))) {
+          toast.error('올바른 전화번호 형식이 아니에요 (예: 010-1234-5678)');
+          return;
+        }
+      }
+
+      // API 호출
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || '프로필 업데이트 실패');
+      }
+
+      const data = await res.json();
+
+      // 최신 프로필 정보로 업데이트
+      if (data.success && data.user) {
+        const updatedProfile = {
+          name: data.user.name || '',
+          phoneNumber: data.user.phoneNumber || '',
+        };
+        setCurrentProfile(updatedProfile);
+        setEditForm(updatedProfile);
+      }
+
+      toast.success('프로필이 업데이트됐어요');
+      setIsEditing(false);
+
+      // NextAuth 세션 새로고침 (다음 로그인 시 반영)
+      await update();
+    } catch (error) {
+      console.error('프로필 저장 실패:', error);
+      toast.error(error instanceof Error ? error.message : '프로필 저장 중 문제가 발생했어요');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -127,9 +233,11 @@ export default function ProfilePage() {
                   <Input
                     id="name"
                     type="text"
-                    value={session.user.name || ''}
-                    disabled
+                    value={isEditing ? editForm.name : (currentProfile.name || session.user.name || '')}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                    disabled={!isEditing}
                     className="mt-1"
+                    placeholder="이름을 입력해주세요"
                   />
                 </div>
 
@@ -145,6 +253,30 @@ export default function ProfilePage() {
                     disabled
                     className="mt-1"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    이메일은 변경할 수 없어요
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="phoneNumber" className="text-foreground">
+                    <Phone className="inline mr-1" size={16} />
+                    휴대전화
+                  </Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    value={isEditing ? editForm.phoneNumber : (currentProfile.phoneNumber || session.user.phoneNumber || '')}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    disabled={!isEditing}
+                    className="mt-1"
+                    placeholder="010-1234-5678"
+                  />
+                  {!(currentProfile.phoneNumber || session.user.phoneNumber) && !isEditing && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      ⚠️ 이니시스 결제를 이용하려면 전화번호가 필요해요
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -162,13 +294,29 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-border">
-                <Button
-                  variant="outline"
-                  onClick={() => toast.info('프로필 수정 기능 준비 중이에요')}
-                >
-                  {BUTTON_TEXT.editProfile}
-                </Button>
+              <div className="mt-6 pt-6 border-t border-border flex gap-2">
+                {!isEditing ? (
+                  <Button variant="outline" onClick={handleEdit}>
+                    {BUTTON_TEXT.editProfile}
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="flex-1"
+                    >
+                      {isSaving ? STATUS_TEXT.saving : BUTTON_TEXT.save}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                    >
+                      {BUTTON_TEXT.cancel}
+                    </Button>
+                  </>
+                )}
               </div>
             </Card>
 

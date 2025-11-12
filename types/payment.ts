@@ -265,6 +265,7 @@ export interface CreatePaymentRequestBody {
   purpose: PortOnePaymentPurpose;
   amount: number;
   orderName: string;
+  channelKey?: string;       // PG 채널 키 (토스페이, 카카오페이 등)
   subscriptionId?: string;   // 구독 업그레이드 시
   creditAmount?: number;     // 크레딧 충전 시
   payMethod?: PortOnePaymentMethod;

@@ -25,6 +25,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?   // Nullable - OAuth 사용자는 null, 이메일 로그인은 해시된 패스워드
+  phoneNumber   String?   // 휴대전화 번호 (이니시스 결제 시 필수)
 
   // 무료 카운트 (Supabase에서 제어 가능)
   firstTimeDeepResearchUsed      Boolean @default(false)

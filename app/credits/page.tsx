@@ -40,6 +40,7 @@ export default function CreditsPage() {
 
   const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedBundle, setSelectedBundle] = useState<typeof CREDIT_BUNDLES[0] | null>(null);
+  const [isPhoneRequiredDialogOpen, setIsPhoneRequiredDialogOpen] = useState(false);
 
   // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
@@ -85,6 +86,22 @@ export default function CreditsPage() {
   // 결제 채널 선택 후 결제 진행
   const handlePaymentChannelSelect = async (channelKey: string) => {
     if (!selectedBundle || !session) return;
+
+    // 이니시스 채널인 경우 전화번호 확인
+    const isInicis = channelKey === PAYMENT_CHANNELS.INICIS_ONETIME.key ||
+                     channelKey === PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key;
+
+    if (isInicis) {
+      // @ts-ignore - session.user에 phoneNumber가 없을 수 있음
+      const phoneNumber = session.user?.phoneNumber;
+
+      if (!phoneNumber) {
+        // 전화번호 없음 -> 안내 모달 표시
+        setIsChannelDialogOpen(false);
+        setIsPhoneRequiredDialogOpen(true);
+        return;
+      }
+    }
 
     try {
       clearError();
@@ -341,6 +358,55 @@ export default function CreditsPage() {
               disabled={isLoading}
             >
               취소
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 전화번호 필수 안내 다이얼로그 */}
+      <Dialog open={isPhoneRequiredDialogOpen} onOpenChange={setIsPhoneRequiredDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>📞 전화번호가 필요해요</DialogTitle>
+            <DialogDescription>
+              이니시스 결제를 이용하려면 프로필에 전화번호를 입력해주세요
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-6 space-y-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>왜 전화번호가 필요한가요?</strong>
+                <br />
+                이니시스 V2 결제 시스템은 본인 확인을 위해 구매자 휴대폰 번호를 필수로 요구해요.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>💡 다른 결제 방법도 있어요</strong>
+                <br />
+                토스페이나 카카오페이는 전화번호 없이도 결제할 수 있어요.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsPhoneRequiredDialogOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              취소
+            </Button>
+            <Button
+              onClick={() => {
+                setIsPhoneRequiredDialogOpen(false);
+                router.push('/profile');
+              }}
+              className="w-full sm:w-auto"
+            >
+              프로필에서 전화번호 입력하기
             </Button>
           </DialogFooter>
         </DialogContent>
