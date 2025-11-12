@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Save, Download, Share2, Edit, X, Loader2 } from 'lucide-react';
@@ -44,6 +44,21 @@ export default function ViewerContent() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
+  const handleClose = useCallback(() => {
+    if (from === 'history') {
+      router.push('/history');
+    } else if (from === 'editor') {
+      // Editor로 돌아가기: id 파라미터 유지
+      const id = currentPresentation?.id;
+      const url = id ? `/editor?id=${id}&from=viewer` : '/editor?from=viewer';
+      router.push(url);
+    } else {
+      // from === 'input' 또는 기본값
+      router.push('/input');
+    }
+  }, [from, currentPresentation, router]);
 
   // URL 파라미터로부터 프리젠테이션 로드
   useEffect(() => {
@@ -92,18 +107,14 @@ export default function ViewerContent() {
       } else if (e.key === 'ArrowRight' && currentIndex < slides.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else if (e.key === 'Escape') {
-        // ESC 키: from 파라미터에 따라 이전 페이지로 이동
-        if (from === 'history') {
-          router.push('/history');
-        } else {
-          router.push('/input');
-        }
+        // ESC 키: handleClose와 동일한 로직 사용
+        handleClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, currentPresentation, router, from]);
+  }, [currentIndex, currentPresentation, router, from, handleClose]);
 
   if (isLoading) {
     return (
@@ -245,16 +256,6 @@ export default function ViewerContent() {
       router.push(url);
     } else {
       alert('편집할 수 없는 프리젠테이션이에요 (구 버전)');
-    }
-  };
-
-  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
-  const handleClose = () => {
-    if (from === 'history') {
-      router.push('/history');
-    } else {
-      // from === 'input' 또는 기본값
-      router.push('/input');
     }
   };
 

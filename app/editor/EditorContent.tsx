@@ -132,7 +132,9 @@ export default function EditorContent() {
   const handleSaveAndView = async () => {
     try {
       await savePresentation();
-      router.push('/viewer');
+      const id = currentPresentation?.id;
+      const url = id ? `/viewer?id=${id}&from=editor` : '/viewer?from=editor';
+      router.push(url);
     } catch (error) {
       console.error('저장 실패:', error);
       setSaveErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');

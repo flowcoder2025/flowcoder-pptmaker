@@ -70,6 +70,13 @@
 ### 🎨 UI/UX
 
 #### 2025-11-12
+- **네비게이션 흐름 개선: Viewer 뒤로가기 동작 최적화**
+  - history → editor → viewer 경로에서 viewer 닫기 시 바로 이전 페이지로 이동
+  - Editor에서 "저장 후 보기" 시 `from=editor` 파라미터 추가
+  - Viewer에서 `from=editor` 케이스 처리하여 Editor로 정확히 복귀
+  - ESC 키도 동일한 로직 적용 (handleClose 통합)
+  - useCallback으로 handleClose 최적화하여 불필요한 재렌더링 방지
+
 - **Editor 모든 모달 배경 처리 통일**
   - AddSlideDialog 및 TemplateSelector에 세미 투명 배경 오버레이 추가 (bg-black/50)
   - 삭제 모달과 동일한 배경 처리로 일관성 확보
