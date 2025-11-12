@@ -30,6 +30,9 @@ export default function ViewerContent() {
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'input'; // 기본값: input
 
+  // 최초 진입점 추출 (history, input 등)
+  const origin = searchParams.get('origin') || 'input';
+
   // 워터마크 표시 여부 및 광고 표시 여부
   const { hasWatermark, plan } = useSubscriptionStore();
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
@@ -45,9 +48,14 @@ export default function ViewerContent() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
+  // 뒤로가기/닫기: origin 우선, 없으면 from 파라미터에 따라 이전 페이지로 이동
   const handleClose = useCallback(() => {
-    if (from === 'history') {
+    // origin이 있으면 최초 진입점으로 직접 이동
+    if (origin === 'history') {
+      router.push('/history');
+    } else if (origin === 'input') {
+      router.push('/input');
+    } else if (from === 'history') {
       router.push('/history');
     } else if (from === 'editor') {
       // Editor로 돌아가기: id 파라미터 유지
@@ -58,7 +66,7 @@ export default function ViewerContent() {
       // from === 'input' 또는 기본값
       router.push('/input');
     }
-  }, [from, currentPresentation, router]);
+  }, [origin, from, currentPresentation, router]);
 
   // URL 파라미터로부터 프리젠테이션 로드
   useEffect(() => {

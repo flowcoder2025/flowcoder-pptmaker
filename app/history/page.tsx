@@ -124,11 +124,11 @@ export default function HistoryPage() {
   };
 
   const handleView = (id: string) => {
-    router.push(`/viewer?id=${id}&from=history`);
+    router.push(`/viewer?id=${id}&from=history&origin=history`);
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/editor?id=${id}&from=history`);
+    router.push(`/editor?id=${id}&from=history&origin=history`);
   };
 
   const handleDownloadClick = (id: string) => {

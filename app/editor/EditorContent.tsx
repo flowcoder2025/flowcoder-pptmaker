@@ -43,6 +43,9 @@ export default function EditorContent() {
   // Viewer의 원래 진입점 추출 (History → Viewer → Editor 체인을 위해)
   const viewerFrom = searchParams.get('viewerFrom');
 
+  // 최초 진입점 추출 (history, input 등)
+  const origin = searchParams.get('origin') || 'input';
+
   // URL 파라미터로부터 프리젠테이션 로드
   useEffect(() => {
     const id = searchParams.get('id');
@@ -133,7 +136,9 @@ export default function EditorContent() {
     try {
       await savePresentation();
       const id = currentPresentation?.id;
-      const url = id ? `/viewer?id=${id}&from=editor` : '/viewer?from=editor';
+      const url = id
+        ? `/viewer?id=${id}&from=editor&origin=${origin}`
+        : `/viewer?from=editor&origin=${origin}`;
       router.push(url);
     } catch (error) {
       console.error('저장 실패:', error);
@@ -142,9 +147,14 @@ export default function EditorContent() {
     }
   };
 
-  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
+  // 뒤로가기/닫기: origin 우선, 없으면 from 파라미터에 따라 이전 페이지로 이동
   const handleClose = () => {
-    if (from === 'history') {
+    // origin이 있으면 최초 진입점으로 직접 이동
+    if (origin === 'history') {
+      router.push('/history');
+    } else if (origin === 'input') {
+      router.push('/input');
+    } else if (from === 'history') {
       // History에서 직접 온 경우
       router.push('/history');
     } else if (from === 'viewer') {
