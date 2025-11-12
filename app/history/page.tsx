@@ -298,49 +298,83 @@ export default function HistoryPage() {
       {/* 다운로드 형식 선택 다이얼로그 */}
       {showDownloadDialog && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
           onClick={() => setShowDownloadDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
         >
-          <div
-            className="bg-white rounded-xl p-6 max-w-[400px] w-[90%] shadow-lg"
+          <Card
             onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
           >
-            <h3 className="text-xl font-bold mb-4 text-foreground">
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowDownloadDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 다운로드 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <Download size={48} className="text-primary" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
               다운로드 형식 선택
             </h3>
+
+            <p className="text-gray-600 mb-6 text-center">
+              원하는 형식을 선택해주세요
+            </p>
+
             <div className="flex flex-col gap-3">
               {/* HTML 다운로드 (개발 모드 전용) */}
               {process.env.NODE_ENV === 'development' && (
-                <button
+                <Button
                   onClick={() => handleDownload('html')}
                   disabled={isDownloading}
-                  className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
+                  variant="outline"
+                  size="lg"
+                  className="w-full text-base font-medium"
                 >
                   📄 HTML 파일
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={() => handleDownload('pdf')}
                 disabled={isDownloading}
-                className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
+                variant="outline"
+                size="lg"
+                className="w-full text-base font-medium"
               >
                 📕 PDF 파일
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleDownload('pptx')}
                 disabled={isDownloading}
-                className="p-4 text-base font-medium text-foreground bg-white border-2 border-primary rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 transition-all hover:bg-primary/10"
+                variant="outline"
+                size="lg"
+                className="w-full text-base font-medium"
               >
                 📊 PowerPoint 파일
-              </button>
+              </Button>
             </div>
-            <button
-              onClick={() => setShowDownloadDialog(false)}
-              className="mt-4 w-full p-3 text-sm text-muted-foreground bg-transparent border-none cursor-pointer"
-            >
-              {BUTTON_TEXT.cancel}
-            </button>
-          </div>
+          </Card>
         </div>
       )}
 
