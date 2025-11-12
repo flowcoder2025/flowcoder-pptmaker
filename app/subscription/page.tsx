@@ -18,7 +18,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Check, X, Star, Sparkles, Loader2 } from 'lucide-react';
+import { Check, X, Star, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -45,6 +45,7 @@ export default function SubscriptionPage() {
 
   const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
@@ -69,8 +70,9 @@ export default function SubscriptionPage() {
   // 로딩 상태
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-600">불러오고 있어요...</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-muted-foreground text-lg">불러오고 있어요...</p>
       </div>
     );
   }
@@ -90,6 +92,18 @@ export default function SubscriptionPage() {
     // 결제 채널 선택 다이얼로그 열기
     setSelectedPlan(planId);
     setIsChannelDialogOpen(true);
+  };
+
+  // 구독 취소 처리
+  const handleCancelClick = () => {
+    setShowCancelDialog(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    setShowCancelDialog(false);
+
+    // TODO: API 연동
+    toast.info('구독 취소 준비 중이에요!');
   };
 
   // 결제 채널 선택 후 결제 진행
@@ -189,12 +203,7 @@ export default function SubscriptionPage() {
           {currentPlan !== 'free' && (
             <Button
               variant="outline"
-              onClick={() => {
-                if (confirm('구독을 취소할까요?')) {
-                  // TODO: API 연동
-                  alert('구독 취소 준비 중이에요!');
-                }
-              }}
+              onClick={handleCancelClick}
             >
               구독 취소
             </Button>
@@ -368,6 +377,77 @@ export default function SubscriptionPage() {
             <span className="text-foreground">
               결제를 진행하고 있어요...
             </span>
+          </Card>
+        </div>
+      )}
+
+      {/* 구독 취소 확인 모달 */}
+      {showCancelDialog && (
+        <div
+          onClick={() => setShowCancelDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowCancelDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 경고 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <AlertTriangle size={48} className="text-yellow-500" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              구독을 취소할까요?
+            </h3>
+
+            <p className="text-gray-600 mb-2 text-center">
+              구독을 취소하면 다음 결제일부터 자동 결제가 중단돼요
+            </p>
+            <p className="text-gray-600 mb-6 text-center text-sm">
+              현재 구독 기간이 끝날 때까지는 계속 사용할 수 있어요
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setShowCancelDialog(false)}
+                variant="outline"
+                size="lg"
+                className="px-8"
+              >
+                {BUTTON_TEXT.cancel}
+              </Button>
+              <Button
+                onClick={handleConfirmCancel}
+                size="lg"
+                className="px-8 bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                구독 취소하기
+              </Button>
+            </div>
           </Card>
         </div>
       )}
