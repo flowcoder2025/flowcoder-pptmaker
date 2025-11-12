@@ -12,10 +12,21 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
+// 연결 풀 설정 추가 (P1017 에러 방지)
+const databaseUrl = process.env.DATABASE_URL
+const connectionString = databaseUrl?.includes('?')
+  ? `${databaseUrl}&connection_limit=20&pool_timeout=20`
+  : `${databaseUrl}?connection_limit=20&pool_timeout=20`
+
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    datasources: {
+      db: {
+        url: connectionString
+      }
+    }
   })
 
 if (process.env.NODE_ENV !== 'production') {
