@@ -6,15 +6,19 @@ import { prisma } from '@/lib/prisma';
  * GET /api/user/stats
  *
  * @description
- * 사용자 통계 정보를 조회해요:
+ * 사용자 통계 정보를 조회해요 (최적화: 4개 쿼리만 실행):
  * - 생성한 프리젠테이션 개수
+ * - 최근 프리젠테이션 3개 (슬라이드 수 계산용)
  * - 크레딧 잔액
  * - 구독 플랜
  *
  * @returns {
  *   presentationsCount: number,
+ *   totalSlides: number,  // 최근 3개 프리젠테이션의 슬라이드 수
  *   creditsBalance: number,
- *   subscriptionTier: 'FREE' | 'PRO' | 'PREMIUM'
+ *   creditsUsed: number,  // 현재 0 (추후 구현)
+ *   subscriptionTier: 'FREE' | 'PRO' | 'PREMIUM',
+ *   recentPresentations: Presentation[]
  * }
  */
 export async function GET() {
@@ -30,8 +34,8 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // 2. 병렬로 데이터 조회
-    const [presentationsCount, latestCreditTransaction, subscription, recentPresentations, allPresentations, creditTransactions] = await Promise.all([
+    // 2. 필수 데이터만 조회 (연결 풀 부담 최소화)
+    const results = await Promise.allSettled([
       // 프리젠테이션 개수
       prisma.presentation.count({
         where: { userId, deletedAt: null },
@@ -55,7 +59,7 @@ export async function GET() {
         },
       }),
 
-      // 최근 프리젠테이션 3개
+      // 최근 프리젠테이션 3개 (metadata 포함해서 슬라이드 수도 계산)
       prisma.presentation.findMany({
         where: {
           userId,
@@ -74,40 +78,35 @@ export async function GET() {
         },
         take: 3,
       }),
-
-      // 모든 프리젠테이션 (총 슬라이드 수 계산용)
-      prisma.presentation.findMany({
-        where: {
-          userId,
-          deletedAt: null,
-        },
-        select: {
-          metadata: true,
-        },
-      }),
-
-      // 사용한 크레딧 계산용
-      prisma.creditTransaction.findMany({
-        where: {
-          userId,
-          type: 'CONSUMED',
-        },
-        select: {
-          amount: true,
-        },
-      }),
     ]);
 
-    // 3. 총 슬라이드 수 계산
-    const totalSlides = allPresentations.reduce((sum, p) => {
+    // 결과 추출 (실패 시 기본값 사용 및 로그 기록)
+    const presentationsCount = results[0].status === 'fulfilled' ? results[0].value : 0;
+    const latestCreditTransaction = results[1].status === 'fulfilled' ? results[1].value : null;
+    const subscription = results[2].status === 'fulfilled' ? results[2].value : null;
+    const recentPresentations = results[3].status === 'fulfilled' ? results[3].value : [];
+
+    // 실패한 쿼리 로그 기록
+    const queryNames = [
+      'presentationsCount',
+      'latestCreditTransaction',
+      'subscription',
+      'recentPresentations',
+    ];
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`⚠️ ${queryNames[index]} 쿼리 실패:`, result.reason);
+      }
+    });
+
+    // 3. 최근 프리젠테이션의 총 슬라이드 수 계산 (전체가 아닌 최근 3개만)
+    const totalSlides = recentPresentations.reduce((sum, p) => {
       const slideCount = (p.metadata as any)?.slideCount || 0;
       return sum + slideCount;
     }, 0);
 
-    // 4. 사용한 크레딧 계산
-    const creditsUsed = creditTransactions.reduce((sum, tx) => {
-      return sum + Math.abs(tx.amount); // CONSUMED는 음수이므로 절댓값
-    }, 0);
+    // 4. 사용한 크레딧은 나중에 추가 (현재는 0으로 반환)
+    const creditsUsed = 0;
 
     // 5. 구독 플랜 결정
     let subscriptionTier: 'FREE' | 'PRO' | 'PREMIUM' = 'FREE';
