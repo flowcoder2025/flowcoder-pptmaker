@@ -58,9 +58,9 @@ export default function ViewerContent() {
     } else if (from === 'history') {
       router.push('/history');
     } else if (from === 'editor') {
-      // Editor로 돌아가기: id 파라미터 유지
+      // Editor로 돌아가기: id 파라미터 유지, origin도 함께 전달
       const id = currentPresentation?.id;
-      const url = id ? `/editor?id=${id}&from=viewer` : '/editor?from=viewer';
+      const url = id ? `/editor?id=${id}&from=viewer&origin=${origin}` : `/editor?from=viewer&origin=${origin}`;
       router.push(url);
     } else {
       // from === 'input' 또는 기본값
@@ -257,10 +257,10 @@ export default function ViewerContent() {
   const handleEdit = () => {
     if (currentPresentation?.slideData) {
       const id = currentPresentation.id;
-      // viewerFrom 파라미터로 Viewer의 원래 진입점 전달
+      // viewerFrom 파라미터로 Viewer의 원래 진입점 전달, origin도 함께 전달
       const url = id
-        ? `/editor?id=${id}&from=viewer&viewerFrom=${from}`
-        : `/editor?from=viewer&viewerFrom=${from}`;
+        ? `/editor?id=${id}&from=viewer&viewerFrom=${from}&origin=${origin}`
+        : `/editor?from=viewer&viewerFrom=${from}&origin=${origin}`;
       router.push(url);
     } else {
       alert('편집할 수 없는 프리젠테이션이에요 (구 버전)');

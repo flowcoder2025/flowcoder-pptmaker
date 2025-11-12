@@ -158,10 +158,10 @@ export default function EditorContent() {
       // History에서 직접 온 경우
       router.push('/history');
     } else if (from === 'viewer') {
-      // Viewer에서 온 경우: Viewer의 원래 진입점으로 돌아갈 수 있도록 from 파라미터 전달
+      // Viewer에서 온 경우: Viewer의 원래 진입점으로 돌아갈 수 있도록 from 파라미터 전달, origin도 함께 전달
       const id = searchParams.get('id');
       const fromParam = viewerFrom ? `&from=${viewerFrom}` : '';
-      const url = id ? `/viewer?id=${id}${fromParam}` : `/viewer${fromParam}`;
+      const url = id ? `/viewer?id=${id}${fromParam}&origin=${origin}` : `/viewer${fromParam}&origin=${origin}`;
       router.push(url);
     } else {
       // 기타 경우 (기본값)
