@@ -52,7 +52,6 @@ export default function HistoryPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [presentationToDelete, setPresentationToDelete] = useState<string | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -125,12 +124,10 @@ export default function HistoryPage() {
   };
 
   const handleView = (id: string) => {
-    setIsNavigating(true);
     router.push(`/viewer?id=${id}&from=history`);
   };
 
   const handleEdit = (id: string) => {
-    setIsNavigating(true);
     router.push(`/editor?id=${id}&from=history`);
   };
 
@@ -331,23 +328,6 @@ export default function HistoryPage() {
               {BUTTON_TEXT.cancel}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* 네비게이션 로딩 모달 */}
-      {isNavigating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
-          <Card className="p-8 max-w-md w-full mx-4 bg-white shadow-2xl">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                페이지를 불러오고 있어요
-              </h3>
-              <p className="text-gray-600">
-                잠시만 기다려 주세요
-              </p>
-            </div>
-          </Card>
         </div>
       )}
 
