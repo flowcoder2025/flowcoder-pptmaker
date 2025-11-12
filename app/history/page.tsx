@@ -590,7 +590,7 @@ function PresentationCard({
             size="sm"
             variant="outline"
             onClick={() => onDelete(presentation.id)}
-            className="text-destructive hover:border-current"
+            className="text-destructive hover:bg-transparent hover:text-destructive hover:border-destructive transition-colors"
           >
             <Trash2 size={16} className="mr-1" />
             {BUTTON_TEXT.delete}

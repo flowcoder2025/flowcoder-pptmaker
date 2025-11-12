@@ -7,6 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2 } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
@@ -248,85 +250,103 @@ export default function EditorContent() {
           {/* 우측: 액션 버튼들 */}
           <div className="flex gap-1 sm:gap-2 shrink-0">
             {/* Undo/Redo - 항상 표시 */}
-            <button
+            <Button
               onClick={undo}
               disabled={!canUndo()}
-              className="p-2 sm:px-4 sm:py-2 border border-gray-400 text-gray-700 rounded hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              variant="outline"
+              size="default"
+              className="transition-colors"
               title="실행 취소 (Ctrl+Z)"
               aria-label="실행 취소"
             >
-              ↶
-            </button>
-            <button
+              <Undo2 size={18} strokeWidth={2} />
+              <span className="hidden sm:inline ml-2">실행 취소</span>
+            </Button>
+            <Button
               onClick={redo}
               disabled={!canRedo()}
-              className="p-2 sm:px-4 sm:py-2 border border-gray-400 text-gray-700 rounded hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              variant="outline"
+              size="default"
+              className="transition-colors"
               title="다시 실행 (Ctrl+Shift+Z)"
               aria-label="다시 실행"
             >
-              ↷
-            </button>
+              <Redo2 size={18} strokeWidth={2} />
+              <span className="hidden sm:inline ml-2">다시 실행</span>
+            </Button>
 
             {/* 템플릿 - 태블릿 이상 */}
-            <button
+            <Button
               onClick={() => setIsTemplateSelectorOpen(true)}
-              className="hidden md:flex px-3 py-2 border border-purple-500 text-purple-500 rounded hover:bg-purple-50 transition-colors items-center gap-1"
+              variant="outline"
+              size="default"
+              className="hidden md:flex items-center gap-2 transition-colors"
               title="템플릿 변경"
             >
-              <span className="text-lg">🎨</span>
+              <Palette size={18} strokeWidth={2} />
               <span className="hidden lg:inline">템플릿</span>
-            </button>
+            </Button>
 
             {/* 슬라이드 추가 - 태블릿 이상 */}
-            <button
+            <Button
               onClick={() => setIsAddDialogOpen(true)}
-              className="hidden md:flex px-3 py-2 border border-blue-500 text-blue-500 rounded hover:bg-blue-50 transition-colors items-center gap-1"
+              variant="outline"
+              size="default"
+              className="hidden md:flex items-center gap-2 transition-colors"
               title="현재 슬라이드 다음에 추가"
             >
-              <span className="text-lg">+</span>
+              <Plus size={18} strokeWidth={2} />
               <span className="hidden lg:inline">추가</span>
-            </button>
+            </Button>
 
             {/* 복제 - 데스크톱만 */}
-            <button
+            <Button
               onClick={handleDuplicateSlide}
-              className="hidden lg:flex px-3 py-2 border border-gray-600 text-gray-600 rounded hover:bg-gray-50 transition-colors items-center gap-1"
+              variant="outline"
+              size="default"
+              className="hidden lg:flex items-center gap-2 transition-colors"
               title="현재 슬라이드 복제"
             >
-              <span className="text-lg">📋</span>
+              <Copy size={18} strokeWidth={2} />
               <span>복제</span>
-            </button>
+            </Button>
 
             {/* 삭제 - 데스크톱만 */}
-            <button
+            <Button
               onClick={() => setIsDeleteDialogOpen(true)}
               disabled={currentPresentation.slideData.slides.length <= 1}
-              className="hidden lg:flex px-3 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50 transition-colors items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="outline"
+              size="default"
+              className="hidden lg:flex items-center gap-2 text-destructive hover:bg-transparent hover:text-destructive hover:border-destructive transition-colors"
               title="현재 슬라이드 삭제"
             >
-              <span className="text-lg">🗑️</span>
+              <Trash2 size={18} strokeWidth={2} />
               <span>삭제</span>
-            </button>
+            </Button>
 
             {/* 저장 - 항상 표시 */}
-            <button
+            <Button
               onClick={handleSave}
-              className="px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              variant="outline"
+              size="default"
+              className="transition-colors"
               title="저장"
             >
-              <span className="hidden sm:inline">저장</span>
-              <span className="sm:hidden">💾</span>
-            </button>
+              <Save size={18} strokeWidth={2} />
+              <span className="hidden sm:inline ml-2">저장</span>
+            </Button>
 
             {/* 저장 후 보기 - 태블릿 이상 */}
-            <button
+            <Button
               onClick={handleSaveAndView}
-              className="hidden md:flex px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors items-center"
+              variant="default"
+              size="default"
+              className="hidden md:flex items-center gap-2 transition-all duration-200 hover:scale-105"
               title="저장 후 보기"
             >
+              <Eye size={18} strokeWidth={2} />
               <span className="hidden lg:inline">저장 후 보기</span>
-              <span className="lg:hidden">👁️</span>
-            </button>
+            </Button>
 
             {/* 더보기 메뉴 - 모바일/태블릿 */}
             <div className="md:hidden">
