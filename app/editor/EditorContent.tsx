@@ -30,6 +30,12 @@ export default function EditorContent() {
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // URL에서 from 파라미터 추출 (어디서 왔는지)
+  const from = searchParams.get('from') || 'viewer'; // 기본값: viewer
+
+  // Viewer의 원래 진입점 추출 (History → Viewer → Editor 체인을 위해)
+  const viewerFrom = searchParams.get('viewerFrom');
+
   // URL 파라미터로부터 프리젠테이션 로드
   useEffect(() => {
     const id = searchParams.get('id');
@@ -124,6 +130,25 @@ export default function EditorContent() {
     }
   };
 
+  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
+  const handleClose = () => {
+    if (from === 'history') {
+      // History에서 직접 온 경우
+      router.push('/history');
+    } else if (from === 'viewer') {
+      // Viewer에서 온 경우: Viewer의 원래 진입점으로 돌아갈 수 있도록 from 파라미터 전달
+      const id = searchParams.get('id');
+      const fromParam = viewerFrom ? `&from=${viewerFrom}` : '';
+      const url = id ? `/viewer?id=${id}${fromParam}` : `/viewer${fromParam}`;
+      router.push(url);
+    } else {
+      // 기타 경우 (기본값)
+      const id = searchParams.get('id');
+      const url = id ? `/viewer?id=${id}` : '/viewer';
+      router.push(url);
+    }
+  };
+
   const currentSlide = currentPresentation.slideData.slides[selectedSlideIndex];
 
   const handleSlideChange = (updatedSlide: typeof currentSlide) => {
@@ -195,9 +220,9 @@ export default function EditorContent() {
         <div className="flex justify-between items-center px-4 py-3 gap-2">
           {/* 좌측: 뒤로가기 버튼 */}
           <button
-            onClick={() => router.push('/viewer')}
+            onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
-            title="뷰어로 돌아가기"
+            title="이전 페이지로 돌아가기"
             aria-label="뒤로가기"
           >
             <svg
@@ -307,6 +332,28 @@ export default function EditorContent() {
             <div className="md:hidden">
               <MoreMenu items={moreMenuItems} />
             </div>
+
+            {/* 닫기(X) 버튼 - 항상 표시 */}
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+              title="닫기"
+              aria-label="닫기"
+            >
+              <svg
+                className="w-6 h-6 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </header>

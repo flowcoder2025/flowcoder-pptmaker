@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { FileText } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
@@ -159,8 +159,9 @@ export default function InputPage() {
   // 로딩 상태 표시
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-600">불러오고 있어요...</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-muted-foreground text-lg">불러오고 있어요...</p>
       </div>
     );
   }
@@ -219,7 +220,7 @@ export default function InputPage() {
       console.error('Failed to delete draft:', error);
     }
 
-    router.push('/viewer');
+    router.push('/viewer?from=input');
   };
 
   const handleRestoreDraft = () => {

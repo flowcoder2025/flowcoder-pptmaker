@@ -10,7 +10,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Search, Plus, Calendar, Trash2, Eye, Edit, Download } from 'lucide-react';
+import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -52,6 +52,7 @@ export default function HistoryPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [presentationToDelete, setPresentationToDelete] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -124,11 +125,13 @@ export default function HistoryPage() {
   };
 
   const handleView = (id: string) => {
-    router.push(`/viewer?id=${id}`);
+    setIsNavigating(true);
+    router.push(`/viewer?id=${id}&from=history`);
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/editor?id=${id}`);
+    setIsNavigating(true);
+    router.push(`/editor?id=${id}&from=history`);
   };
 
   const handleDownloadClick = (id: string) => {
@@ -179,8 +182,9 @@ export default function HistoryPage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">불러오고 있어요...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-muted-foreground text-lg">불러오고 있어요...</p>
       </div>
     );
   }
@@ -327,6 +331,23 @@ export default function HistoryPage() {
               {BUTTON_TEXT.cancel}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 네비게이션 로딩 모달 */}
+      {isNavigating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
+          <Card className="p-8 max-w-md w-full mx-4 bg-white shadow-2xl">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                페이지를 불러오고 있어요
+              </h3>
+              <p className="text-gray-600">
+                잠시만 기다려 주세요
+              </p>
+            </div>
+          </Card>
         </div>
       )}
 

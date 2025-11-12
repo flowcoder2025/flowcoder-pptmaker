@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Save, Download, Share2, Edit, X } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
@@ -25,6 +26,9 @@ export default function ViewerContent() {
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // URL에서 from 파라미터 추출 (어디서 왔는지)
+  const from = searchParams.get('from') || 'input'; // 기본값: input
 
   // 워터마크 표시 여부 및 광고 표시 여부
   const { hasWatermark, plan } = useSubscriptionStore();
@@ -88,13 +92,18 @@ export default function ViewerContent() {
       } else if (e.key === 'ArrowRight' && currentIndex < slides.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else if (e.key === 'Escape') {
-        router.push('/input');
+        // ESC 키: from 파라미터에 따라 이전 페이지로 이동
+        if (from === 'history') {
+          router.push('/history');
+        } else {
+          router.push('/input');
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, currentPresentation, router]);
+  }, [currentIndex, currentPresentation, router, from]);
 
   if (isLoading) {
     return (
@@ -227,9 +236,24 @@ export default function ViewerContent() {
 
   const handleEdit = () => {
     if (currentPresentation?.slideData) {
-      router.push('/editor');
+      const id = currentPresentation.id;
+      // viewerFrom 파라미터로 Viewer의 원래 진입점 전달
+      const url = id
+        ? `/editor?id=${id}&from=viewer&viewerFrom=${from}`
+        : `/editor?from=viewer&viewerFrom=${from}`;
+      router.push(url);
     } else {
       alert('편집할 수 없는 프리젠테이션이에요 (구 버전)');
+    }
+  };
+
+  // 뒤로가기/닫기: from 파라미터에 따라 이전 페이지로 이동
+  const handleClose = () => {
+    if (from === 'history') {
+      router.push('/history');
+    } else {
+      // from === 'input' 또는 기본값
+      router.push('/input');
     }
   };
 
@@ -283,7 +307,7 @@ export default function ViewerContent() {
       }}>
         {/* 뒤로가기 버튼 */}
         <button
-          onClick={() => router.push('/input')}
+          onClick={handleClose}
           style={{
             padding: '8px',
             background: 'transparent',
@@ -297,7 +321,7 @@ export default function ViewerContent() {
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#F9FAFB'}
           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-          title="입력 페이지로 돌아가기"
+          title="이전 페이지로 돌아가기"
           aria-label="뒤로가기"
         >
           <svg
@@ -332,8 +356,10 @@ export default function ViewerContent() {
             onClick={handleSave}
             size="default"
             variant="default"
+            className="flex items-center gap-2"
           >
-            {isSaved ? (isMobile ? '✓' : '✓ 저장됨') : (isMobile ? '💾' : '💾 저장')}
+            <Save size={18} strokeWidth={2} />
+            {!isMobile && (isSaved ? '저장됨' : '저장')}
           </Button>
 
           {/* 다운로드 버튼 (드롭다운) */}
@@ -346,10 +372,10 @@ export default function ViewerContent() {
               disabled={isDownloading}
               size="default"
               variant="outline"
+              className="flex items-center gap-2"
             >
-              {isDownloading
-                ? (isMobile ? '⏳' : '변환하고 있어요')
-                : (isMobile ? '⬇️' : '⬇️ 다운로드')}
+              <Download size={18} strokeWidth={2} />
+              {!isMobile && (isDownloading ? '변환하고 있어요' : '다운로드')}
             </Button>
 
             {/* 다운로드 메뉴 */}
@@ -395,8 +421,10 @@ export default function ViewerContent() {
             onClick={handleShare}
             size="default"
             variant="outline"
+            className="flex items-center gap-2"
           >
-            {isMobile ? '📤' : '📤 공유'}
+            <Share2 size={18} strokeWidth={2} />
+            {!isMobile && '공유'}
           </Button>
 
           <Button
@@ -404,8 +432,21 @@ export default function ViewerContent() {
             disabled={!currentPresentation?.slideData}
             size="default"
             variant="outline"
+            className="flex items-center gap-2"
           >
-            {isMobile ? '✏️' : '✏️ 편집'}
+            <Edit size={18} strokeWidth={2} />
+            {!isMobile && '편집'}
+          </Button>
+
+          <Button
+            onClick={handleClose}
+            size="default"
+            variant="ghost"
+            className="flex items-center gap-2"
+            title="닫기"
+            aria-label="닫기"
+          >
+            <X size={18} strokeWidth={2} />
           </Button>
         </div>
       </div>
