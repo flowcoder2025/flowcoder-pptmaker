@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 const typeLabels: Record<string, { label: string; color: string }> = {
   FREE: { label: '무료', color: 'bg-blue-100 text-blue-800' },
@@ -192,35 +193,31 @@ export default function AdminCreditsPage() {
         </Card>
       </div>
 
-      {/* 필터 및 검색 */}
-      <Card style={{ marginBottom: '20px' }}>
-        <CardHeader>
-          <CardTitle>필터 및 검색</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* 검색 및 필터 */}
+      <Card style={{ marginBottom: '24px' }}>
+        <CardContent style={{ paddingTop: '24px' }}>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'end' }}>
             {/* 검색 */}
-            <div>
-              <label style={{ fontSize: '14px', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
-                사용자 검색 (이메일 또는 이름)
-              </label>
+            <div style={{ flex: '1', minWidth: '240px' }}>
+              <Label htmlFor="search" className="text-gray-700 font-medium">
+                검색
+              </Label>
               <Input
-                type="text"
-                placeholder="이메일 또는 이름을 입력하세요"
+                id="search"
+                placeholder="이메일 또는 이름으로 검색..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="mt-2"
               />
             </div>
 
             {/* 소스 타입 필터 */}
-            <div>
-              <label style={{ fontSize: '14px', fontWeight: 500, marginBottom: '8px', display: 'block' }}>
-                소스 타입 필터
-              </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ minWidth: '240px' }}>
+              <Label className="text-gray-700 font-medium">소스 타입</Label>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
                 <Button
-                  variant={sourceType === '' ? 'default' : 'outline'}
                   size="sm"
+                  variant={sourceType === '' ? 'default' : 'outline'}
                   onClick={() => setSourceType('')}
                 >
                   전체
@@ -228,8 +225,8 @@ export default function AdminCreditsPage() {
                 {Object.entries(sourceTypeLabels).map(([key, label]) => (
                   <Button
                     key={key}
-                    variant={sourceType === key ? 'default' : 'outline'}
                     size="sm"
+                    variant={sourceType === key ? 'default' : 'outline'}
                     onClick={() => setSourceType(key)}
                   >
                     {label}
@@ -239,17 +236,20 @@ export default function AdminCreditsPage() {
             </div>
 
             {/* 만료 포함 여부 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <input
-                type="checkbox"
-                id="includeExpired"
-                checked={includeExpired}
-                onChange={(e) => setIncludeExpired(e.target.checked)}
-                style={{ width: '16px', height: '16px' }}
-              />
-              <label htmlFor="includeExpired" style={{ fontSize: '14px', cursor: 'pointer' }}>
-                만료된 크래딧 포함
-              </label>
+            <div style={{ minWidth: '160px' }}>
+              <Label className="text-gray-700 font-medium">표시 옵션</Label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                <input
+                  type="checkbox"
+                  id="includeExpired"
+                  checked={includeExpired}
+                  onChange={(e) => setIncludeExpired(e.target.checked)}
+                  style={{ width: '16px', height: '16px' }}
+                />
+                <label htmlFor="includeExpired" style={{ fontSize: '14px', cursor: 'pointer' }}>
+                  만료 포함
+                </label>
+              </div>
             </div>
           </div>
         </CardContent>
