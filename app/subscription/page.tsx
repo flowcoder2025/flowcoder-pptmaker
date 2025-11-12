@@ -20,6 +20,7 @@ import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
 import { Check, X, Star, Sparkles, Loader2 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
+import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
@@ -114,13 +115,27 @@ export default function SubscriptionPage() {
         await fetchSubscription();
         router.push(`/payments/result?success=true&paymentId=${result.payment.id}`);
       } else {
-        // 실패: 결제 결과 페이지로 이동 (에러 메시지 포함)
-        router.push(`/payments/result?success=false&error=${encodeURIComponent(result.error || '결제에 실패했어요')}`);
+        // 실패 처리
+        const errorMsg = result.error || '결제에 실패했어요';
+
+        // "결제 시스템 준비 중" 에러는 toast로 표시하고 그 자리에 머물기
+        if (errorMsg.includes('결제 시스템 준비 중')) {
+          toast.error(errorMsg);
+        } else {
+          // 다른 에러는 결제 결과 페이지로 이동
+          router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+        }
       }
     } catch (err) {
       console.error('결제 중 오류:', err);
       const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
-      router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+
+      // "결제 시스템 준비 중" 에러는 toast로 표시
+      if (errorMsg.includes('결제 시스템 준비 중')) {
+        toast.error(errorMsg);
+      } else {
+        router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+      }
     } finally {
       setSelectedPlan(null);
     }

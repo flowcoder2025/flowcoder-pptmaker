@@ -117,6 +117,15 @@ export function usePortOnePayment() {
       setError(null);
 
       try {
+        // 0. 결제 시스템 활성화 체크
+        // 개발 환경에서는 항상 허용, 프로덕션에서는 환경 변수로 제어
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        const isPaymentEnabled = process.env.NEXT_PUBLIC_PAYMENT_ENABLED === 'true';
+
+        if (!isDevelopment && !isPaymentEnabled) {
+          throw new Error('결제 시스템 준비 중입니다. 곧 서비스를 시작할 예정이에요.');
+        }
+
         // 1. 결제 요청 생성 API 호출
         const requestBody: CreatePaymentRequestBody = {
           purpose: options.purpose,
