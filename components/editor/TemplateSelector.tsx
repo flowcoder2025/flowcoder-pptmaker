@@ -44,7 +44,7 @@ export default function TemplateSelector({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div

@@ -70,6 +70,11 @@
 ### 🎨 UI/UX
 
 #### 2025-11-12
+- **Editor 모든 모달 배경 처리 통일**
+  - AddSlideDialog 및 TemplateSelector에 세미 투명 배경 오버레이 추가 (bg-black/50)
+  - 삭제 모달과 동일한 배경 처리로 일관성 확보
+  - 모든 Editor 모달이 동일한 시각적 경험 제공
+
 - **Editor 삭제 모달을 History 패턴과 동일하게 적용**
   - ConfirmDialog 컴포넌트를 History 삭제 모달 패턴으로 완전 재작성
   - Card 컴포넌트 사용 (border-4 border-primary rounded-2xl)

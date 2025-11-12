@@ -45,7 +45,7 @@ export default function AddSlideDialog({ isOpen, onClose, onAdd }: AddSlideDialo
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
