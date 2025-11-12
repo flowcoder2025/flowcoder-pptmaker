@@ -38,8 +38,25 @@ interface User {
   isAdmin: boolean
 }
 
+interface Stats {
+  totalUsers: number
+  todaySignups: number
+  weekSignups: number
+  monthSignups: number
+  adminCount: number
+  activeSubscriptions: number
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const [stats, setStats] = useState<Stats>({
+    totalUsers: 0,
+    todaySignups: 0,
+    weekSignups: 0,
+    monthSignups: 0,
+    adminCount: 0,
+    activeSubscriptions: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [creditDialogOpen, setCreditDialogOpen] = useState(false)
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
@@ -71,6 +88,7 @@ export default function AdminUsersPage() {
       const res = await fetch('/api/admin/users')
       if (!res.ok) throw new Error('사용자 목록 조회 실패')
       const data = await res.json()
+      setStats(data.stats)
       setUsers(data.users)
     } catch (error) {
       console.error(error)
@@ -258,6 +276,78 @@ export default function AdminUsersPage() {
         <p style={{ fontSize: '16px', color: '#6B7280' }}>
           사용자 목록 조회 및 크레딧, 구독, 권한을 관리할 수 있어요.
         </p>
+      </div>
+
+      {/* 통계 카드 */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '20px',
+          marginBottom: '32px',
+        }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">총 사용자</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+            <p className="text-xs text-gray-500 mt-1">전체 사용자 수</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">오늘 가입</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-600">{stats.todaySignups.toLocaleString()}</div>
+            <p className="text-xs text-gray-500 mt-1">오늘 신규 가입자</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">이번 주</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-600">{stats.weekSignups.toLocaleString()}</div>
+            <p className="text-xs text-gray-500 mt-1">최근 7일 가입자</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">이번 달</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-purple-600">{stats.monthSignups.toLocaleString()}</div>
+            <p className="text-xs text-gray-500 mt-1">최근 30일 가입자</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">관리자</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-orange-600">{stats.adminCount.toLocaleString()}</div>
+            <p className="text-xs text-gray-500 mt-1">관리자 권한 사용자</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">활성 구독</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-indigo-600">
+              {stats.activeSubscriptions.toLocaleString()}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">활성 구독 사용자</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 검색 및 필터 */}

@@ -51,7 +51,25 @@ export async function GET() {
       })
     )
 
+    // 통계 계산
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+    const stats = {
+      totalUsers: usersWithDetails.length,
+      todaySignups: usersWithDetails.filter((u) => new Date(u.createdAt) >= today).length,
+      weekSignups: usersWithDetails.filter((u) => new Date(u.createdAt) >= weekAgo).length,
+      monthSignups: usersWithDetails.filter((u) => new Date(u.createdAt) >= monthAgo).length,
+      adminCount: usersWithDetails.filter((u) => u.isAdmin).length,
+      activeSubscriptions: usersWithDetails.filter(
+        (u) => u.subscription?.status === 'ACTIVE'
+      ).length,
+    }
+
     return NextResponse.json({
+      stats,
       users: usersWithDetails,
       total: users.length,
     })
