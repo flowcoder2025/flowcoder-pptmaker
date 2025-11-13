@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       | null
 
     // Where 조건 구성
-    const where: any = { userId }
+    const where: Record<string, unknown> = { userId }
     if (type) {
       where.type = type
     }

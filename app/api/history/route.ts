@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         : undefined
 
     // Where 조건 구성
-    const where: any = { userId }
+    const where: Record<string, unknown> = { userId }
     if (model) {
       where.model = model
     }

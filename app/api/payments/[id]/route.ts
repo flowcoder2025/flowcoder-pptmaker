@@ -65,7 +65,7 @@ export async function GET(
       success: true,
       payment: {
         id: payment.id,
-        status: payment.status as any,
+        status: payment.status as 'PAID' | 'FAILED' | 'CANCELED' | 'REFUNDED',
         amount: payment.amount,
         paidAt: payment.updatedAt.toISOString(),
         receiptUrl: payment.receiptUrl || undefined,

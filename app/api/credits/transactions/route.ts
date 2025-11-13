@@ -40,7 +40,13 @@ export async function GET(req: Request) {
     const endDate = searchParams.get('endDate');
 
     // 3. Where 조건 구성
-    const where: any = { userId };
+    const where: {
+      userId: string;
+      createdAt?: {
+        gte?: Date;
+        lte?: Date;
+      };
+    } = { userId };
 
     // 날짜 필터 추가
     if (startDate || endDate) {

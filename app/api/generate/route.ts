@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     if (researchMode !== 'none') {
       try {
         console.log(`🔍 자료 조사 시작 (${researchMode})...`);
-        research = await researchTopic(topic, researchMode as any);
+        research = await researchTopic(topic, researchMode as 'sonar' | 'sonar-reasoning');
         console.log(`✅ 자료 조사 완료 (${research.sources.length}개 출처)`);
       } catch (error) {
         console.error('⚠️ 자료 조사 실패 (생성은 계속 진행):', error);

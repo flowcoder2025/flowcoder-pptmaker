@@ -68,7 +68,11 @@ export async function GET() {
     }
 
     // 4. 곧 만료될 크레딧 조회 (7일 이내)
-    let expiringCredits: any[] = []
+    let expiringCredits: Array<{
+      sourceType: string;
+      amount: number;
+      expiresAt: string;
+    }> = []
     try {
       expiringCredits = await getExpiringCredits(session.user.id)
     } catch (expiringError) {

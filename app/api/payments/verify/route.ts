@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 /**
  * POST /api/payments/verify
  *
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
         where: { paymentId },
         data: {
           status: portoneData.status,
-          portoneData: portoneData as any,
+          portoneData: portoneData as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -147,18 +148,18 @@ export async function POST(request: NextRequest) {
         data: {
           status: 'PAID',
           method: portoneData.method || null,
-          portoneData: portoneData as any,
+          portoneData: portoneData as unknown as Prisma.InputJsonValue,
           receiptUrl: portoneData.receiptUrl || null,
         },
       });
 
-      const customData = portoneData.customData as any;
+      const customData = portoneData.customData as Record<string, unknown> | undefined;
       const purpose = customData?.purpose;
 
       // 7. 결제 목적에 따라 구독/크레딧 처리
       if (purpose === 'SUBSCRIPTION_UPGRADE') {
         // 구독 업그레이드
-        const subscriptionId = customData?.subscriptionId;
+        const subscriptionId = customData?.subscriptionId as string | undefined;
         if (!subscriptionId) {
           throw new Error('subscriptionId is missing');
         }
@@ -177,7 +178,7 @@ export async function POST(request: NextRequest) {
         };
       } else if (purpose === 'CREDIT_PURCHASE') {
         // 크레딧 충전
-        const creditAmount = customData?.creditAmount;
+        const creditAmount = customData?.creditAmount as number | undefined;
         if (!creditAmount || creditAmount <= 0) {
           throw new Error('creditAmount is invalid');
         }
@@ -214,22 +215,22 @@ export async function POST(request: NextRequest) {
       success: true,
       payment: {
         id: result.payment.id,
-        status: result.payment.status as any, // Prisma string → PortOnePaymentStatus
+        status: result.payment.status as 'PAID' | 'FAILED' | 'CANCELED' | 'REFUNDED',
         amount: result.payment.amount,
         paidAt: result.payment.updatedAt.toISOString(),
         receiptUrl: result.payment.receiptUrl || undefined,
       },
-      subscription: (result as any).subscription
+      subscription: 'subscription' in result && result.subscription
         ? {
-            id: (result as any).subscription.id,
-            tier: (result as any).subscription.tier,
-            status: (result as any).subscription.status,
-            endDate: (result as any).subscription.endDate?.toISOString(),
+            id: result.subscription.id,
+            tier: result.subscription.tier,
+            status: result.subscription.status,
+            endDate: result.subscription.endDate?.toISOString(),
           }
         : undefined,
-      credits: (result as any).creditTransaction
+      credits: 'creditTransaction' in result && result.creditTransaction
         ? {
-            amount: (result as any).creditTransaction.amount,
+            amount: result.creditTransaction.amount,
             balance: 0, // TODO: 실제 잔액 계산
           }
         : undefined,

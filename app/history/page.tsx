@@ -30,8 +30,8 @@ interface Presentation {
   title: string;
   description?: string;
   slides: HTMLSlide[];      // 썸네일 렌더링용 (렌더링된 HTML)
-  slideData?: any;          // 편집용 (구조화된 데이터)
-  metadata?: any;
+  slideData?: Record<string, unknown>;          // 편집용 (구조화된 데이터)
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -267,7 +267,7 @@ export default function HistoryPage() {
             {searchQuery ? (
               <>
                 <p className="text-lg mb-2 text-foreground">
-                  "{searchQuery}"를 찾지 못했어요
+                  &quot;{searchQuery}&quot;를 찾지 못했어요
                 </p>
                 <p className="text-muted-foreground">
                   다른 검색어로 시도해보세요
@@ -492,7 +492,7 @@ function PresentationCard({
   onDelete,
   onDownload,
 }: PresentationCardProps) {
-  const slideCount = presentation.metadata?.slideCount || 0;
+  const slideCount: number = (presentation.metadata?.slideCount as number | undefined) || 0;
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 

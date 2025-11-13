@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 /**
  * POST /api/payments/request
  *
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
         purpose,
         subscriptionId: subscriptionId || null,
         creditTransactionId: null,
-        portoneData: paymentRequest as any, // JSON 타입으로 저장
+        portoneData: paymentRequest as unknown as Prisma.InputJsonValue, // 타입으로 저장
         receiptUrl: null,
         failReason: null,
       },

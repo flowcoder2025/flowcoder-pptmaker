@@ -61,13 +61,32 @@ export default function UsagePage() {
   const [activeTab, setActiveTab] = useState<'credits' | 'payments' | 'dashboard'>('credits');
 
   // 크레딧 거래 내역
-  const [creditTransactions, setCreditTransactions] = useState<any[]>([]);
+  const [creditTransactions, setCreditTransactions] = useState<Array<{
+    id: string;
+    type: string;
+    amount: number;
+    description: string | null;
+    createdAt: Date | string;
+    expiresAt: Date | string | null;
+  }>>([]);
   const [creditTotal, setCreditTotal] = useState(0);
   const [creditPage, setCreditPage] = useState(0);
   const [isLoadingCredits, setIsLoadingCredits] = useState(true);
 
   // 결제 내역
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Array<{
+    id: string;
+    paymentId: string;
+    amount: number;
+    currency: string;
+    status: string;
+    method: string | null;
+    purpose: string | null;
+    orderName: string | null;
+    receiptUrl: string | null;
+    failReason: string | null;
+    createdAt: Date | string;
+  }>>([]);
   const [paymentTotal, setPaymentTotal] = useState(0);
   const [paymentPage, setPaymentPage] = useState(0);
   const [isLoadingPayments, setIsLoadingPayments] = useState(true);
@@ -79,7 +98,27 @@ export default function UsagePage() {
   });
 
   // 대시보드 통계
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<{
+    summary?: {
+      totalCreditsUsed?: number;
+      totalPaymentAmount?: number;
+      currentMonthUsage?: number;
+      currentMonthPayment?: number;
+    };
+    monthlyCredits?: Array<{
+      month: string;
+      used: number;
+      purchased: number;
+    }>;
+    monthlyPayments?: Array<{
+      month: string;
+      amount: number;
+    }>;
+    creditTypeDistribution?: Array<{
+      type: string;
+      count: number;
+    }>;
+  } | null>(null);
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
   const ITEMS_PER_PAGE = 10;
@@ -318,7 +357,7 @@ export default function UsagePage() {
         )}
 
         {/* 탭 UI */}
-        <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'payments' | 'credits' | 'dashboard')} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="credits" className="flex items-center gap-2">
               <CreditCard size={18} />
@@ -525,7 +564,14 @@ export default function UsagePage() {
  * 크레딧 거래 카드 컴포넌트
  */
 interface CreditTransactionCardProps {
-  transaction: any;
+  transaction: {
+    id: string;
+    type: string;
+    amount: number;
+    description: string | null;
+    createdAt: Date | string;
+    expiresAt: Date | string | null;
+  };
 }
 
 function CreditTransactionCard({ transaction }: CreditTransactionCardProps) {
@@ -591,7 +637,19 @@ function CreditTransactionCard({ transaction }: CreditTransactionCardProps) {
  * 결제 카드 컴포넌트
  */
 interface PaymentCardProps {
-  payment: any;
+  payment: {
+    id: string;
+    paymentId: string;
+    amount: number;
+    currency: string;
+    status: string;
+    method: string | null;
+    purpose: string | null;
+    orderName: string | null;
+    receiptUrl: string | null;
+    failReason: string | null;
+    createdAt: Date | string;
+  };
 }
 
 function PaymentCard({ payment }: PaymentCardProps) {
@@ -622,7 +680,7 @@ function PaymentCard({ payment }: PaymentCardProps) {
           <div className="flex items-center gap-2 mb-1">
             <Receipt className="w-4 h-4 text-primary" />
             <span className="font-semibold text-foreground">
-              {purposeLabels[payment.purpose] || payment.purpose}
+              {payment.purpose ? (purposeLabels[payment.purpose] || payment.purpose) : '알 수 없음'}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -671,7 +729,27 @@ function PaymentCard({ payment }: PaymentCardProps) {
  * 대시보드 뷰 컴포넌트
  */
 interface DashboardViewProps {
-  stats: any;
+  stats: {
+    summary?: {
+      totalCreditsUsed?: number;
+      totalPaymentAmount?: number;
+      currentMonthUsage?: number;
+      currentMonthPayment?: number;
+    };
+    monthlyCredits?: Array<{
+      month: string;
+      used: number;
+      purchased: number;
+    }>;
+    monthlyPayments?: Array<{
+      month: string;
+      amount: number;
+    }>;
+    creditTypeDistribution?: Array<{
+      type: string;
+      count: number;
+    }>;
+  };
 }
 
 function DashboardView({ stats }: DashboardViewProps) {

@@ -42,7 +42,14 @@ export async function GET(req: Request) {
     const endDate = searchParams.get('endDate');
 
     // 3. Where 조건 구성
-    const where: any = { userId };
+    const where: {
+      userId: string;
+      status?: string;
+      createdAt?: {
+        gte?: Date;
+        lte?: Date;
+      };
+    } = { userId };
     if (status) {
       where.status = status;
     }

@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     const includeDeleted = searchParams.get('includeDeleted') === 'true'
 
     // Where 조건 구성
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     if (!includeDeleted) {
       where.deletedAt = null // 기본: 삭제되지 않은 것만
     }

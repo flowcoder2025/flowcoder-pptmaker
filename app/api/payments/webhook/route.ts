@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 /**
  * POST /api/payments/webhook
  *
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
           portoneData: {
             ...(payment.portoneData as object),
             webhookData: data,
-          } as any,
+          } as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
         data: {
           status: (status as PortOnePaymentStatus) || 'FAILED',
           failReason: failReason || null,
-          portoneData: { ...data } as any,
+          portoneData: { ...data } as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
         where: { paymentId },
         data: {
           status: (status as PortOnePaymentStatus) || 'CANCELED',
-          portoneData: { ...data } as any,
+          portoneData: { ...data } as unknown as Prisma.InputJsonValue,
         },
       });
 

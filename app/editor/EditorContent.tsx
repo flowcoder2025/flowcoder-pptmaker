@@ -56,16 +56,18 @@ export default function EditorContent() {
 
     if (id) {
       // 히스토리 페이지에서 온 경우 - DB에서 로드
-      setIsLoading(true);
-      fetchPresentation(id)
-        .then(() => {
-          setIsLoading(false);
-        })
-        .catch((error) => {
+      const loadPresentation = async () => {
+        setIsLoading(true);
+        try {
+          await fetchPresentation(id);
+        } catch (error) {
           console.error('프리젠테이션 로드 실패:', error);
-          setIsLoading(false);
           router.push('/history');
-        });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadPresentation();
     }
   }, [searchParams, fetchPresentation, router]);
 

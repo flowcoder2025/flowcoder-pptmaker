@@ -155,7 +155,7 @@ export function usePortOnePayment() {
 
         // 2. 포트원 SDK로 결제창 열기
         // channelKey 설정 (옵션으로 제공되면 사용, 아니면 기본값)
-        const finalPaymentRequest: any = {
+        const finalPaymentRequest: PortOnePaymentRequest = {
           ...paymentRequest,
           channelKey: options.channelKey || paymentRequest.channelKey,
         };
@@ -174,7 +174,7 @@ export function usePortOnePayment() {
           );
         }
 
-        const txId = response.txId || (response as any).transactionId;
+        const txId = response.txId || (response as Record<string, unknown>).transactionId as string | undefined;
         if (!txId) {
           throw new Error('결제 트랜잭션 ID를 받지 못했어요');
         }

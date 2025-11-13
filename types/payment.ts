@@ -192,7 +192,7 @@ export interface PortOnePaymentVerifyResponse {
     fullName?: string;
     email?: string;
   };
-  customData?: Record<string, any>;
+  customData?: Record<string, unknown>;
 }
 
 /**
@@ -254,7 +254,7 @@ export interface PortOneWebhookPayload {
     method?: PortOnePaymentMethod;
     receiptUrl?: string;
     failReason?: string;
-    customData?: Record<string, any>;
+    customData?: Record<string, unknown>;
   };
 }
 
@@ -311,9 +311,7 @@ export interface VerifyPaymentResponse {
 /**
  * API: 빌링키 발급 요청 (POST /api/payments/billing-key/request)
  */
-export interface CreateBillingKeyRequestBody {
-  // 현재는 요청 본문 없음 (세션에서 사용자 정보 추출)
-}
+export type CreateBillingKeyRequestBody = Record<string, never>; // 현재는 요청 본문 없음 (세션에서 사용자 정보 추출)
 
 export interface CreateBillingKeyRequestResponse {
   success: boolean;

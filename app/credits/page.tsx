@@ -95,7 +95,6 @@ export default function CreditsPage() {
                      channelKey === PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key;
 
     if (isInicis) {
-      // @ts-ignore - session.user에 phoneNumber가 없을 수 있음
       const phoneNumber = session.user?.phoneNumber;
 
       if (!phoneNumber) {
