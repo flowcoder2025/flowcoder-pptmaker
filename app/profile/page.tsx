@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { User, Mail, Calendar, CreditCard, FileText, Star, Phone, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, CreditCard, FileText, Star, Phone, Loader2, BarChart } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -434,7 +434,8 @@ export default function ProfilePage() {
             {/* 통계 */}
             <Card className="p-6">
               <h3 className="text-lg font-bold mb-4 text-foreground">
-                📊 사용 통계
+                <BarChart className="inline mr-2" size={20} />
+                사용 통계
               </h3>
 
               <div className="space-y-3">
