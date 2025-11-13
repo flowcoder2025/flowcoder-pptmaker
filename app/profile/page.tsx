@@ -387,7 +387,7 @@ export default function ProfilePage() {
                 구독 플랜
               </h3>
 
-              <div className="text-center p-4 rounded-lg mb-4 bg-primary/[0.15]">
+              <div className="text-center p-4 rounded-lg mb-4 bg-primary/15">
                 <p className="text-2xl font-bold text-primary">
                   {stats.subscriptionTier === 'FREE' ? '무료' :
                    stats.subscriptionTier === 'PRO' ? 'Pro' : 'Premium'}

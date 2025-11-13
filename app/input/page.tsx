@@ -594,7 +594,7 @@ export default function InputPage() {
                       onClick={() => handleTemplateClick(template.example)}
                       variant="outline"
                       size="sm"
-                      className="flex-shrink-0 text-xs"
+                      className="shrink-0 text-xs"
                     >
                       {template.title}
                     </Button>
