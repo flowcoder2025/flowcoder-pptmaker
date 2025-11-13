@@ -7,6 +7,7 @@
 
 import { Scale } from 'lucide-react';
 import type { ComparisonSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
 
 interface ComparisonSlideFormProps {
   slide: ComparisonSlide;
@@ -33,6 +34,32 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
       props: {
         ...slide.props,
         [field]: value,
+      },
+    });
+  };
+
+  const handleLeftFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        leftColumn: {
+          ...slide.style.leftColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleRightFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        rightColumn: {
+          ...slide.style.rightColumn,
+          fontSize,
+        },
       },
     });
   };
@@ -110,6 +137,16 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
                 placeholder="https://..."
               />
             </div>
+
+            {/* 좌측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.leftColumn?.fontSize || 18}
+                onChange={handleLeftFontSizeChange}
+                label="좌측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
 
           {/* 우측 영역 */}
@@ -157,6 +194,16 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
                 onChange={(e) => handleFieldChange('rightImage', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 placeholder="https://..."
+              />
+            </div>
+
+            {/* 우측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.rightColumn?.fontSize || 18}
+                onChange={handleRightFontSizeChange}
+                label="우측 크기"
+                defaultValue={18}
               />
             </div>
           </div>

@@ -990,6 +990,10 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderComparison(slide: ComparisonSlide): HTMLSlide {
     const { title, leftLabel, rightLabel, leftContent, rightContent } = slide.props;
 
+    // fontSize 가져오기
+    const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
+    const rightFontSize = slide.style.rightColumn?.fontSize || this.ctx.fonts.size.body;
+
     // leftContent와 rightContent를 배열로 분리 (줄바꿈 기준)
     const leftItems = leftContent ? leftContent.split('\n').filter((item) => item.trim()) : [];
     const rightItems = rightContent ? rightContent.split('\n').filter((item) => item.trim()) : [];
@@ -1071,7 +1075,7 @@ export class TossDefaultTemplate implements SlideTemplate {
         padding: 0;
         margin: 0;
         font-family: var(--font-family-base);
-        font-size: 16px;
+        font-size: ${leftFontSize}px;
         color: var(--color-text-secondary);
       ">
         ${leftList}
@@ -1099,7 +1103,7 @@ export class TossDefaultTemplate implements SlideTemplate {
         padding: 0;
         margin: 0;
         font-family: var(--font-family-base);
-        font-size: 16px;
+        font-size: ${rightFontSize}px;
         color: var(--color-text-secondary);
       ">
         ${rightList}
