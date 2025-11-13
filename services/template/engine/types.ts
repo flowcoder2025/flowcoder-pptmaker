@@ -28,6 +28,7 @@ import type {
   AgendaSlide,
   TestimonialSlide,
   GallerySlide,
+  ImageSlide,
   HTMLSlide,
 } from '@/types/slide';
 
@@ -221,6 +222,9 @@ export interface SlideTemplate {
 
   /** 21. Gallery Slide (갤러리 슬라이드) */
   renderGallery(slide: GallerySlide): HTMLSlide;
+
+  /** 22. Image Slide (이미지 슬라이드) */
+  renderImage(slide: ImageSlide): HTMLSlide;
 }
 
 /**
@@ -308,6 +312,10 @@ export function isTestimonialSlide(slide: Slide): slide is TestimonialSlide {
 
 export function isGallerySlide(slide: Slide): slide is GallerySlide {
   return slide.type === 'gallery';
+}
+
+export function isImageSlide(slide: Slide): slide is ImageSlide {
+  return slide.type === 'image';
 }
 
 /**

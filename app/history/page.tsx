@@ -492,7 +492,7 @@ function PresentationCard({
   onDelete,
   onDownload,
 }: PresentationCardProps) {
-  const slideCount: number = (presentation.metadata?.slideCount as number | undefined) || 0;
+  const slideCount: number = presentation.slides?.length || 0;
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 

@@ -651,6 +651,12 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   },
 
   updateSlide: (index: number, updatedSlide: Slide) => {
+    console.log('🔄 [presentationStore] updateSlide 시작', {
+      index,
+      슬라이드타입: updatedSlide.type,
+      props키: Object.keys(updatedSlide.props),
+    });
+
     const { currentPresentation } = get();
 
     // 1. 유효성 검사
@@ -669,6 +675,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       return;
     }
 
+    console.log('✅ [presentationStore] 유효성 검사 통과');
+
     // 히스토리 기록 (변경 전)
     useHistoryStore.getState().pushHistory(currentPresentation);
 
@@ -680,21 +688,29 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       ),
     };
 
+    console.log('📝 [presentationStore] slideData 업데이트 완료');
+
     // 3. TemplateEngine으로 HTML 재생성
+    console.log('🎨 [presentationStore] TemplateEngine으로 HTML 재생성 시작...');
     const engine = new TemplateEngine();
     const htmlSlides = engine.generateAll(newSlideData, currentPresentation.templateId || 'toss');
+    console.log('✅ [presentationStore] HTML 재생성 완료', {
+      htmlSlides개수: htmlSlides.length,
+    });
 
     // 4. currentPresentation 업데이트
-    set({
+    const updated = {
       currentPresentation: {
         ...currentPresentation,
         slideData: newSlideData,
         slides: htmlSlides,
         updatedAt: Date.now(),
       },
-    });
+    };
 
-    console.log('✅ 슬라이드 업데이트 완료:', index);
+    console.log('💾 [presentationStore] set() 호출 전');
+    set(updated);
+    console.log('✅ [presentationStore] set() 호출 완료 - 슬라이드 업데이트 완료:', index);
   },
 
   reorderSlides: (startIndex: number, endIndex: number) => {

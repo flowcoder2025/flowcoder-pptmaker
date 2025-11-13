@@ -15,6 +15,14 @@ interface ImageSlideFormProps {
 }
 
 export default function ImageSlideForm({ slide, onChange }: ImageSlideFormProps) {
+  // 디버깅: 컴포넌트 렌더링 확인
+  console.log('🖼️ ImageSlideForm 렌더링:', {
+    slideType: slide.type,
+    arrangement: slide.props.arrangement,
+    hasImage: !!slide.props.image,
+    hasImages: !!slide.props.images,
+  });
+
   const handleArrangementChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newArrangement = e.target.value as 'full' | 'sideBySide' | 'grid' | 'imageLeft';
 

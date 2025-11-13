@@ -9,6 +9,7 @@ import { Scale } from 'lucide-react';
 import type { ComparisonSlide } from '@/types/slide';
 import FontSizeSlider from '../FontSizeSlider';
 import IconSelector from '../IconSelector';
+import ImageUploader from '../ImageUploader';
 
 interface ComparisonSlideFormProps {
   slide: ComparisonSlide;
@@ -35,6 +36,26 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
       props: {
         ...slide.props,
         [field]: value,
+      },
+    });
+  };
+
+  const handleLeftImageChange = (imageBase64: string) => {
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        leftImage: imageBase64,
+      },
+    });
+  };
+
+  const handleRightImageChange = (imageBase64: string) => {
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        rightImage: imageBase64,
       },
     });
   };
@@ -139,16 +160,13 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
             </div>
 
             <div>
-              <label htmlFor="leftImage" className="block text-xs font-medium text-gray-600 mb-1">
-                이미지 URL (선택)
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                이미지 (선택)
               </label>
-              <input
-                id="leftImage"
-                type="text"
-                value={slide.props.leftImage || ''}
-                onChange={(e) => handleFieldChange('leftImage', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="https://..."
+              <ImageUploader
+                currentImage={slide.props.leftImage || ''}
+                onImageChange={handleLeftImageChange}
+                maxSizeMB={2}
               />
             </div>
 
@@ -198,16 +216,13 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
             </div>
 
             <div>
-              <label htmlFor="rightImage" className="block text-xs font-medium text-gray-600 mb-1">
-                이미지 URL (선택)
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                이미지 (선택)
               </label>
-              <input
-                id="rightImage"
-                type="text"
-                value={slide.props.rightImage || ''}
-                onChange={(e) => handleFieldChange('rightImage', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                placeholder="https://..."
+              <ImageUploader
+                currentImage={slide.props.rightImage || ''}
+                onImageChange={handleRightImageChange}
+                maxSizeMB={2}
               />
             </div>
 

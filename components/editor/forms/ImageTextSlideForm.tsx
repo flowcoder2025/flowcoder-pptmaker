@@ -8,6 +8,7 @@
 import { Lightbulb, ImageIcon } from 'lucide-react';
 import type { ImageTextSlide } from '@/types/slide';
 import IconSelector from '../IconSelector';
+import ImageUploader from '../ImageUploader';
 
 interface ImageTextSlideFormProps {
   slide: ImageTextSlide;
@@ -28,12 +29,12 @@ export default function ImageTextSlideForm({
     });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (imageBase64: string) => {
     onChange({
       ...slide,
       props: {
         ...slide.props,
-        image: e.target.value,
+        image: imageBase64,
       },
     });
   };
@@ -130,20 +131,13 @@ export default function ImageTextSlideForm({
         </div>
 
         <div>
-          <label
-            htmlFor="image"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            이미지 URL <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            이미지 <span className="text-red-500">*</span>
           </label>
-          <input
-            id="image"
-            type="url"
-            value={slide.props.image}
-            onChange={handleImageChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="https://example.com/image.jpg"
-            required
+          <ImageUploader
+            currentImage={slide.props.image}
+            onImageChange={handleImageChange}
+            maxSizeMB={2}
           />
         </div>
 

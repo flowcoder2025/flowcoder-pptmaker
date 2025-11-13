@@ -113,7 +113,13 @@ export default function AgendaSlideForm({
             <button
               type="button"
               onClick={handleAddItem}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              disabled={items.length >= 8}
+              className={`text-sm font-medium ${
+                items.length >= 8
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:text-blue-700'
+              }`}
+              title={items.length >= 8 ? '최대 8개까지만 추가할 수 있어요' : ''}
             >
               + 항목 추가
             </button>
@@ -199,7 +205,7 @@ export default function AgendaSlideForm({
 
           <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>각 항목은 큰 번호와 함께 세로로 표시돼요</span>
+            <span>각 항목은 큰 번호와 함께 세로로 표시돼요 (최대 8개)</span>
           </p>
         </div>
       </div>

@@ -20,6 +20,13 @@ import {
   MessageSquare,
   Heart,
   Lightbulb,
+  ImageIcon,
+  Smartphone,
+  Users,
+  RotateCw,
+  Map,
+  DollarSign,
+  Images,
 } from 'lucide-react';
 
 interface AddSlideDialogProps {
@@ -36,17 +43,40 @@ interface SlideTypeOption {
 }
 
 const slideTypeOptions: SlideTypeOption[] = [
+  // 기본 슬라이드
   { type: 'title', label: '제목 슬라이드', description: '프리젠테이션 시작', icon: <FileText className="w-8 h-8" /> },
   { type: 'section', label: '섹션 구분', description: '새로운 섹션 시작', icon: <Pin className="w-8 h-8" /> },
   { type: 'content', label: '본문 슬라이드', description: '텍스트 중심 내용', icon: <PenLine className="w-8 h-8" /> },
   { type: 'bullet', label: '리스트 슬라이드', description: '불릿 포인트', icon: <ClipboardList className="w-8 h-8" /> },
+
+  // 레이아웃
   { type: 'twoColumn', label: '2단 레이아웃', description: '좌우 비교', icon: <Columns2 className="w-8 h-8" /> },
+  { type: 'image', label: '이미지 슬라이드', description: '단독 이미지', icon: <ImageIcon className="w-8 h-8" /> },
+  { type: 'imageText', label: '이미지+텍스트', description: '이미지+텍스트 조합', icon: <ImageIcon className="w-8 h-8" /> },
+
+  // 데이터 시각화
   { type: 'table', label: '표 슬라이드', description: '테이블 데이터', icon: <Table className="w-8 h-8" /> },
   { type: 'chart', label: '차트 슬라이드', description: '데이터 시각화', icon: <TrendingUp className="w-8 h-8" /> },
   { type: 'stats', label: '통계 슬라이드', description: '4개 통계 카드', icon: <TrendingDown className="w-8 h-8" /> },
   { type: 'comparison', label: '비교 슬라이드', description: '장단점 비교', icon: <Scale className="w-8 h-8" /> },
+
+  // 타임라인 & 프로세스
   { type: 'timeline', label: '타임라인', description: '시간 흐름', icon: <Calendar className="w-8 h-8" /> },
+  { type: 'roadmap', label: '로드맵', description: '타임라인 로드맵', icon: <Map className="w-8 h-8" /> },
+  { type: 'process', label: '프로세스', description: '세로 플로우', icon: <RotateCw className="w-8 h-8" /> },
+
+  // 소셜 & 인용
   { type: 'quote', label: '인용 슬라이드', description: '명언/인용문', icon: <MessageSquare className="w-8 h-8" /> },
+  { type: 'testimonial', label: '추천사', description: '고객 추천사', icon: <MessageSquare className="w-8 h-8" /> },
+  { type: 'teamProfile', label: '팀 프로필', description: '팀원 소개', icon: <Users className="w-8 h-8" /> },
+
+  // 기능 & 상품
+  { type: 'featureGrid', label: '기능 그리드', description: '3열 기능 카드', icon: <Smartphone className="w-8 h-8" /> },
+  { type: 'pricing', label: '가격표', description: '가격 플랜', icon: <DollarSign className="w-8 h-8" /> },
+  { type: 'agenda', label: '아젠다', description: '발표 아젠다', icon: <ClipboardList className="w-8 h-8" /> },
+  { type: 'gallery', label: '갤러리', description: '이미지 갤러리', icon: <Images className="w-8 h-8" /> },
+
+  // 마무리
   { type: 'thankYou', label: '감사 슬라이드', description: '마무리', icon: <Heart className="w-8 h-8" /> },
 ];
 

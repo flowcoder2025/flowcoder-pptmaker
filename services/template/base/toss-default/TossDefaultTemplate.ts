@@ -30,6 +30,7 @@ import type {
   RoadmapSlide,
   PricingSlide,
   ImageTextSlide,
+  ImageSlide,
   AgendaSlide,
   TestimonialSlide,
   GallerySlide,
@@ -528,7 +529,7 @@ export class TossDefaultTemplate implements SlideTemplate {
    * Accent Bar + 제목 + 바 차트
    */
   renderChart(slide: ChartSlide): HTMLSlide {
-    const { title, data } = slide.props;
+    const { title, data, chartType } = slide.props;
 
     // 빈 데이터 방어 (에러 방지용)
     if (!data || !Array.isArray(data) || data.length === 0) {
@@ -568,116 +569,329 @@ export class TossDefaultTemplate implements SlideTemplate {
       return { html, css };
     }
 
-    // 첫 번째 데이터 시리즈만 사용 (단순화)
-    const series = data[0];
+    // 다중 시리즈 지원을 위한 색상 팔레트
+    const colors = [
+      this.ctx.colors.primary,  // Toss Blue
+      '#10B981',                // Green
+      '#F59E0B',                // Orange
+      '#EF4444',                // Red
+      '#8B5CF6',                // Purple
+    ];
 
-    // series 검증 (labels와 values 필수)
-    if (!series || !series.labels || !series.values) {
-      const html = `
-<div class="slide" style="
-  background-color: var(--color-background);
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: ${this.ctx.spacing.padding}px;
-  display: flex;
-  flex-direction: column;
-">
-  <div>
-    <div style="
-      width: ${this.ctx.spacing.accentBar.width}px;
-      height: ${this.ctx.spacing.accentBar.height}px;
-      background-color: var(--color-primary);
-      margin-bottom: ${this.ctx.spacing.gapSmall}px;
-    "></div>
-    <h3 style="
-      color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
-      font-family: var(--font-family-base);
-      font-weight: bold;
-      margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
-    ">${this.escapeHtml(title)}</h3>
-  </div>
-  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-    <p style="color: var(--color-text-secondary); font-size: 18px;">차트 데이터가 올바르지 않아요</p>
-  </div>
-</div>
-      `.trim();
-      const css = this.generateCSSVariables();
-      return { html, css };
-    }
-
-    const dataPoints = series.labels.map((label, index) => ({
-      label,
-      value: series.values[index],
-    }));
-
-    // 값 정규화: 0-100 범위로 변환
-    const numericValues = dataPoints.map(point => parseFloat(String(point.value)));
-    const maxValue = Math.max(...numericValues);
-    const minValue = Math.min(...numericValues);
-
-    // 이미 0-100 범위인지 확인 (퍼센트 데이터)
-    const isPercentageData = maxValue <= 100 && minValue >= 0 && maxValue > 1;
-
-    // 정규화된 데이터 포인트 생성
-    const normalizedPoints = dataPoints.map((point, index) => {
-      const numericValue = numericValues[index];
-      let widthPercentage: number;
-
-      if (isPercentageData) {
-        // 이미 퍼센트 범위 데이터면 그대로 사용
-        widthPercentage = numericValue;
-      } else if (maxValue === 0) {
-        // 모든 값이 0이면 0으로 표시
-        widthPercentage = 0;
-      } else {
-        // 최대값을 100%로 정규화 (0.3초 → 25%, 1.2초 → 100% 등)
-        widthPercentage = (numericValue / maxValue) * 100;
+    // 모든 시리즈의 값을 수집하여 최대/최소값 계산
+    const allValues: number[] = [];
+    data.forEach(series => {
+      if (series && series.values && Array.isArray(series.values)) {
+        series.values.forEach(val => {
+          const num = parseFloat(String(val));
+          if (!isNaN(num)) {
+            allValues.push(num);
+          }
+        });
       }
-
-      return {
-        ...point,
-        widthPercentage: Math.round(widthPercentage * 10) / 10, // 소수점 1자리
-      };
     });
 
-    const chartBars = normalizedPoints
-      .map((point) => {
-        return `
-        <div>
-          <div style="
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-          ">
-            <span style="color: var(--color-text-primary); font-family: var(--font-family-base); font-size: 16px; font-weight: 500;">
-              ${this.escapeHtml(point.label)}
-            </span>
-            <span style="color: var(--color-primary); font-family: var(--font-family-base); font-size: 16px; font-weight: bold;">
-              ${point.value}
-            </span>
-          </div>
-          <div style="
-            width: 100%;
-            height: 24px;
-            background-color: ${this.ctx.colors.bg};
-            border-radius: 4px;
-            overflow: hidden;
-          ">
-            <div style="
-              height: 100%;
-              width: ${point.widthPercentage}%;
-              background-color: var(--color-primary);
-              border-radius: 4px;
-              transition: width 0.5s ease-in-out;
-            "></div>
-          </div>
-        </div>
+    const maxValue = allValues.length > 0 ? Math.max(...allValues) : 100;
+    const minValue = allValues.length > 0 ? Math.min(...allValues) : 0;
+
+    // chartType에 따라 다른 차트 렌더링 (다중 시리즈 지원)
+    let chartContent = '';
+
+    if (chartType === 'line') {
+      // Line Chart (SVG) - 다중 시리즈 지원
+      const svgWidth = 800;
+      const svgHeight = 400;
+      const padding = 60;
+      const chartWidth = svgWidth - padding * 2;
+      const chartHeight = svgHeight - padding * 2;
+
+      // 첫 번째 시리즈의 라벨을 X축으로 사용
+      const baseLabels = data[0]?.labels || [];
+
+      chartContent = `
+        <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" style="max-width: 900px; max-height: 450px;">
+          <!-- 그리드 라인 -->
+          ${[0, 0.25, 0.5, 0.75, 1].map(ratio => `
+            <line x1="${padding}" y1="${padding + chartHeight * ratio}" x2="${svgWidth - padding}" y2="${padding + chartHeight * ratio}"
+                  stroke="${this.ctx.colors.border}" stroke-width="1" opacity="0.3"/>
+          `).join('')}
+
+          <!-- 각 시리즈의 선과 포인트 -->
+          ${data.map((series, seriesIndex) => {
+            if (!series || !series.values || series.values.length === 0) return '';
+
+            const color = colors[seriesIndex % colors.length];
+            const points = series.values.map((value, index) => {
+              const x = padding + (index / Math.max(1, series.values.length - 1)) * chartWidth;
+              const y = padding + chartHeight - ((parseFloat(String(value)) - minValue) / (maxValue - minValue || 1)) * chartHeight;
+              return `${x},${y}`;
+            }).join(' ');
+
+            return `
+              <!-- 시리즈 ${seriesIndex + 1}: ${this.escapeHtml(series.name)} -->
+              <polyline points="${points}" fill="none" stroke="${color}" stroke-width="3"/>
+              ${series.values.map((value, index) => {
+                const x = padding + (index / Math.max(1, series.values.length - 1)) * chartWidth;
+                const y = padding + chartHeight - ((parseFloat(String(value)) - minValue) / (maxValue - minValue || 1)) * chartHeight;
+                return `<circle cx="${x}" cy="${y}" r="5" fill="${color}"/>`;
+              }).join('')}
+            `;
+          }).join('')}
+
+          <!-- X축 라벨 -->
+          ${baseLabels.map((label, index) => {
+            const x = padding + (index / Math.max(1, baseLabels.length - 1)) * chartWidth;
+            return `<text x="${x}" y="${svgHeight - padding + 30}" text-anchor="middle" fill="${this.ctx.colors.text}" font-size="14">${this.escapeHtml(String(label))}</text>`;
+          }).join('')}
+
+          <!-- 범례 -->
+          ${data.map((series, seriesIndex) => {
+            const color = colors[seriesIndex % colors.length];
+            const legendX = padding + seriesIndex * 120;
+            const legendY = padding - 30;
+            return `
+              <rect x="${legendX}" y="${legendY}" width="15" height="3" fill="${color}"/>
+              <text x="${legendX + 20}" y="${legendY + 4}" fill="${this.ctx.colors.text}" font-size="12">${this.escapeHtml(series.name || `시리즈 ${seriesIndex + 1}`)}</text>
+            `;
+          }).join('')}
+        </svg>
+      `;
+    } else if (chartType === 'pie') {
+      // Pie Chart (SVG) - 최대 3개 시리즈까지 나란히 표시
+      const validSeries = data.filter(s => s && s.values && s.values.length > 0);
+
+      if (validSeries.length === 0) {
+        chartContent = '<p style="text-align: center; color: var(--color-text-secondary);">Pie 차트 데이터가 없어요</p>';
+      } else {
+        // 최대 3개 시리즈까지만 표시
+        const seriesToRender = validSeries.slice(0, 3);
+        const seriesCount = seriesToRender.length;
+
+        const pieSize = 500; // 각 파이 차트 크기
+        const svgWidth = pieSize * seriesCount;
+        const svgHeight = pieSize;
+        const radius = 140;
+
+        // 3개 초과 경고 메시지
+        const overflowWarning = data.length > 3
+          ? `<text x="${svgWidth / 2}" y="20" text-anchor="middle" fill="${this.ctx.colors.textSecondary}" font-size="12">⚠️ Pie 차트는 최대 3개 시리즈까지 표시해요 (현재 ${data.length}개 중 3개 표시)</text>`
+          : '';
+
+        // 각 시리즈마다 파이 차트 생성
+        const pieCharts = seriesToRender.map((series, seriesIndex) => {
+          const numericValues = series.values.map(v => parseFloat(String(v)));
+          const total = numericValues.reduce((sum, val) => sum + val, 0);
+          let currentAngle = -90; // 12시 방향부터 시작
+
+          const offsetX = seriesIndex * pieSize;
+          const centerX = offsetX + pieSize / 2;
+          const centerY = svgHeight / 2;
+
+          // 시리즈 이름 (상단)
+          const seriesTitle = `
+            <text x="${centerX}" y="40" text-anchor="middle" fill="${this.ctx.colors.text}" font-size="18" font-weight="600">
+              ${this.escapeHtml(series.name || `시리즈 ${seriesIndex + 1}`)}
+            </text>
+          `;
+
+          // 파이 슬라이스 및 라벨
+          const slices = series.labels.map((label, index) => {
+            const value = numericValues[index];
+            const percentage = (value / total) * 100;
+            const angle = (value / total) * 360;
+
+            const startAngle = currentAngle;
+            const endAngle = currentAngle + angle;
+
+            const startRad = (startAngle * Math.PI) / 180;
+            const endRad = (endAngle * Math.PI) / 180;
+
+            const x1 = centerX + radius * Math.cos(startRad);
+            const y1 = centerY + radius * Math.sin(startRad);
+            const x2 = centerX + radius * Math.cos(endRad);
+            const y2 = centerY + radius * Math.sin(endRad);
+
+            const largeArcFlag = angle > 180 ? 1 : 0;
+
+            // 라벨 위치 (중간 각도, 반지름 밖)
+            const midAngle = (startAngle + endAngle) / 2;
+            const midRad = (midAngle * Math.PI) / 180;
+            const labelDistance = radius + 45;
+            const labelX = centerX + labelDistance * Math.cos(midRad);
+            const labelY = centerY + labelDistance * Math.sin(midRad);
+
+            currentAngle = endAngle;
+
+            const color = colors[index % colors.length];
+
+            return `
+              <path d="M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z"
+                    fill="${color}" stroke="${this.ctx.colors.white}" stroke-width="2"/>
+              <text x="${labelX}" y="${labelY}" text-anchor="middle" fill="${this.ctx.colors.text}" font-size="13" font-weight="600">
+                ${this.escapeHtml(String(label))}
+              </text>
+              <text x="${labelX}" y="${labelY + 16}" text-anchor="middle" fill="${this.ctx.colors.textSecondary}" font-size="12">
+                ${percentage.toFixed(1)}%
+              </text>
+            `;
+          }).join('');
+
+          return seriesTitle + slices;
+        }).join('');
+
+        chartContent = `
+          <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" style="max-width: ${svgWidth}px; max-height: ${svgHeight}px;">
+            ${overflowWarning}
+            ${pieCharts}
+          </svg>
         `;
-      })
-      .join('');
+      }
+    } else if (chartType === 'area') {
+      // Area Chart (SVG) - 다중 시리즈 지원
+      const svgWidth = 800;
+      const svgHeight = 400;
+      const padding = 60;
+      const chartWidth = svgWidth - padding * 2;
+      const chartHeight = svgHeight - padding * 2;
+
+      // 첫 번째 시리즈의 라벨을 X축으로 사용
+      const baseLabels = data[0]?.labels || [];
+
+      chartContent = `
+        <svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" style="max-width: 900px; max-height: 450px;">
+          <!-- 그리드 라인 -->
+          ${[0, 0.25, 0.5, 0.75, 1].map(ratio => `
+            <line x1="${padding}" y1="${padding + chartHeight * ratio}" x2="${svgWidth - padding}" y2="${padding + chartHeight * ratio}"
+                  stroke="${this.ctx.colors.border}" stroke-width="1" opacity="0.3"/>
+          `).join('')}
+
+          <!-- 각 시리즈의 영역과 선 -->
+          ${data.map((series, seriesIndex) => {
+            if (!series || !series.values || series.values.length === 0) return '';
+
+            const color = colors[seriesIndex % colors.length];
+            const points = series.values.map((value, index) => {
+              const x = padding + (index / Math.max(1, series.values.length - 1)) * chartWidth;
+              const y = padding + chartHeight - ((parseFloat(String(value)) - minValue) / (maxValue - minValue || 1)) * chartHeight;
+              return { x, y };
+            });
+
+            const areaPath = `
+              M ${points[0].x} ${padding + chartHeight}
+              L ${points.map(p => `${p.x} ${p.y}`).join(' L ')}
+              L ${points[points.length - 1].x} ${padding + chartHeight}
+              Z
+            `;
+
+            const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+            return `
+              <!-- 시리즈 ${seriesIndex + 1}: ${this.escapeHtml(series.name)} -->
+              <path d="${areaPath}" fill="${color}" opacity="0.3"/>
+              <path d="${linePath}" fill="none" stroke="${color}" stroke-width="3"/>
+              ${series.values.map((value, index) => {
+                const x = points[index].x;
+                const y = points[index].y;
+                return `<circle cx="${x}" cy="${y}" r="5" fill="${color}"/>`;
+              }).join('')}
+            `;
+          }).join('')}
+
+          <!-- X축 라벨 -->
+          ${baseLabels.map((label, index) => {
+            const x = padding + (index / Math.max(1, baseLabels.length - 1)) * chartWidth;
+            return `<text x="${x}" y="${svgHeight - padding + 30}" text-anchor="middle" fill="${this.ctx.colors.text}" font-size="14">${this.escapeHtml(String(label))}</text>`;
+          }).join('')}
+
+          <!-- 범례 -->
+          ${data.map((series, seriesIndex) => {
+            const color = colors[seriesIndex % colors.length];
+            const legendX = padding + seriesIndex * 120;
+            const legendY = padding - 30;
+            return `
+              <rect x="${legendX}" y="${legendY}" width="15" height="10" fill="${color}" opacity="0.5"/>
+              <text x="${legendX + 20}" y="${legendY + 9}" fill="${this.ctx.colors.text}" font-size="12">${this.escapeHtml(series.name || `시리즈 ${seriesIndex + 1}`)}</text>
+            `;
+          }).join('')}
+        </svg>
+      `;
+    } else {
+      // Bar Chart (HTML/CSS) - 다중 시리즈 지원 (Grouped Bar)
+      const isPercentageData = maxValue <= 100 && minValue >= 0 && maxValue > 1;
+
+      // 첫 번째 시리즈의 라벨을 X축으로 사용
+      const baseLabels = data[0]?.labels || [];
+
+      // 범례 생성
+      const legend = data.map((series, seriesIndex) => {
+        const color = colors[seriesIndex % colors.length];
+        return `
+          <div style="display: inline-flex; align-items: center; margin-right: 20px;">
+            <div style="width: 15px; height: 15px; background-color: ${color}; border-radius: 2px; margin-right: 8px;"></div>
+            <span style="color: ${this.ctx.colors.text}; font-size: 14px; font-family: var(--font-family-base);">
+              ${this.escapeHtml(series.name || `시리즈 ${seriesIndex + 1}`)}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      // 각 라벨(X축)마다 모든 시리즈의 막대를 그룹으로 표시
+      const groupedBars = baseLabels.map((label, labelIndex) => {
+        // 해당 라벨에 대한 모든 시리즈의 막대들
+        const bars = data.map((series, seriesIndex) => {
+          if (!series.values || labelIndex >= series.values.length) {
+            return ''; // 데이터 없으면 스킵
+          }
+
+          const value = series.values[labelIndex];
+          const numericValue = parseFloat(String(value));
+          const color = colors[seriesIndex % colors.length];
+
+          // 너비 퍼센트 계산
+          let widthPercentage: number;
+          if (isPercentageData) {
+            widthPercentage = numericValue;
+          } else if (maxValue === 0) {
+            widthPercentage = 0;
+          } else {
+            widthPercentage = (numericValue / maxValue) * 100;
+          }
+          widthPercentage = Math.round(widthPercentage * 10) / 10;
+
+          return `
+            <div style="margin-bottom: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="color: ${this.ctx.colors.textSecondary}; font-size: 13px; font-family: var(--font-family-base);">
+                  ${this.escapeHtml(series.name || `시리즈 ${seriesIndex + 1}`)}
+                </span>
+                <span style="color: ${color}; font-size: 14px; font-weight: 600; font-family: var(--font-family-base);">
+                  ${value}
+                </span>
+              </div>
+              <div style="width: 100%; height: 20px; background-color: ${this.ctx.colors.bg}; border-radius: 4px; overflow: hidden;">
+                <div style="height: 100%; width: ${widthPercentage}%; background-color: ${color}; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div style="margin-bottom: 20px;">
+            <div style="font-weight: 600; font-size: 16px; color: ${this.ctx.colors.text}; margin-bottom: 10px; font-family: var(--font-family-base);">
+              ${this.escapeHtml(String(label))}
+            </div>
+            ${bars}
+          </div>
+        `;
+      }).join('');
+
+      chartContent = `
+        <div style="margin-bottom: 20px;">
+          ${legend}
+        </div>
+        ${groupedBars}
+      `;
+    }
 
     const html = `
 <div class="slide" style="
@@ -707,10 +921,10 @@ export class TossDefaultTemplate implements SlideTemplate {
     ">${this.escapeHtml(title)}</h3>
   </div>
 
-  <!-- Bar Chart -->
-  <div style="flex: 1; display: flex; align-items: center;">
-    <div style="width: 100%; display: flex; flex-direction: column; gap: ${this.ctx.spacing.chartGap}px;">
-      ${chartBars}
+  <!-- Chart Content -->
+  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+    <div style="width: 100%; ${chartType === 'bar' ? `display: flex; flex-direction: column; gap: ${this.ctx.spacing.chartGap}px;` : 'display: flex; align-items: center; justify-content: center;'}">
+      ${chartContent}
     </div>
   </div>
 </div>
@@ -988,7 +1202,7 @@ export class TossDefaultTemplate implements SlideTemplate {
    * Accent Bar + 제목 + 2 컬럼 비교
    */
   renderComparison(slide: ComparisonSlide): HTMLSlide {
-    const { title, leftLabel, rightLabel, leftContent, rightContent } = slide.props;
+    const { title, leftLabel, rightLabel, leftContent, rightContent, leftImage, rightImage } = slide.props;
 
     // fontSize 가져오기
     const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
@@ -1070,6 +1284,42 @@ export class TossDefaultTemplate implements SlideTemplate {
         margin: 0 0 20px 0;
       ">${this.escapeHtml(leftLabel)}</h4>
       ` : ''}
+      ${leftImage ? `
+      <!-- Left Image -->
+      <div style="margin-bottom: 20px;">
+        <img src="${leftImage}" alt="${leftLabel || '좌측 이미지'}" style="
+          width: 100%;
+          max-height: 200px;
+          object-fit: contain;
+          border-radius: 4px;
+        " />
+      </div>
+      ` : `
+      <!-- Left Image Placeholder -->
+      <div style="
+        margin-bottom: 20px;
+        border: 2px dashed #e0e0e0;
+        border-radius: 4px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        min-height: 150px;
+      ">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" stroke-width="2" style="margin-bottom: 10px;">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <p style="
+          color: #9e9e9e;
+          font-size: 14px;
+          margin: 0;
+          font-family: var(--font-family-base);
+        ">이미지를 추가하세요</p>
+      </div>
+      `}
       <ul style="
         list-style: none;
         padding: 0;
@@ -1098,6 +1348,42 @@ export class TossDefaultTemplate implements SlideTemplate {
         margin: 0 0 20px 0;
       ">${this.escapeHtml(rightLabel)}</h4>
       ` : ''}
+      ${rightImage ? `
+      <!-- Right Image -->
+      <div style="margin-bottom: 20px;">
+        <img src="${rightImage}" alt="${rightLabel || '우측 이미지'}" style="
+          width: 100%;
+          max-height: 200px;
+          object-fit: contain;
+          border-radius: 4px;
+        " />
+      </div>
+      ` : `
+      <!-- Right Image Placeholder -->
+      <div style="
+        margin-bottom: 20px;
+        border: 2px dashed #e0e0e0;
+        border-radius: 4px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        min-height: 150px;
+      ">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" stroke-width="2" style="margin-bottom: 10px;">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <p style="
+          color: #9e9e9e;
+          font-size: 14px;
+          margin: 0;
+          font-family: var(--font-family-base);
+        ">이미지를 추가하세요</p>
+      </div>
+      `}
       <ul style="
         list-style: none;
         padding: 0;
@@ -1215,7 +1501,7 @@ export class TossDefaultTemplate implements SlideTemplate {
   </div>
 
   <!-- Timeline -->
-  <div style="flex: 1; display: flex; align-items: flex-start; padding-top: 70px;">
+  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
     <div style="
       width: 100%;
       display: flex;
@@ -1240,18 +1526,25 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderFeatureGrid(slide: FeatureGridSlide): HTMLSlide {
     const { title, features } = slide.props;
 
-    // 기능 카드 생성 (최대 3개), 빈 배열 방어
+    // 기능 카드 생성 (빈 배열 방어)
     const featureCards = (features || [])
-      .slice(0, 3)
-      .map(
-        (feature) => `
+      .map((feature) => {
+        const iconType = feature.iconType || 'emoji';
+
+        // 아이콘 렌더링 (이모지 vs 이미지)
+        const iconHtml =
+          iconType === 'image'
+            ? `<img src="${feature.icon}" alt="아이콘" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 20px;" />`
+            : `<div style="font-size: 44px; line-height: 1; margin-bottom: 20px; color: ${this.ctx.colors.primary};">${this.escapeHtml(feature.icon)}</div>`;
+
+        return `
       <div style="min-height: 280px; background: ${this.ctx.colors.lightBg}; padding: 30px 25px; border-radius: ${this.ctx.borderRadius.medium}px; text-align: center; border-top: 4px solid ${this.ctx.colors.primary}; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
-        <div style="font-size: 44px; line-height: 1; margin-bottom: 20px; color: ${this.ctx.colors.primary};">${this.escapeHtml(feature.icon)}</div>
+        ${iconHtml}
         <h4 style="font-size: ${this.ctx.fonts.size.subtitle}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0 0 12px 0; height: 2.4em; line-height: 1.2;">${this.escapeHtml(feature.title)}</h4>
         <p style="font-size: 15px; color: ${this.ctx.colors.textSecondary}; line-height: 1.6; margin: 0;">${this.escapeHtml(feature.description)}</p>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     const html = `
@@ -1300,22 +1593,35 @@ export class TossDefaultTemplate implements SlideTemplate {
     const { title, profiles } = slide.props;
 
     // 빈 프로필 방어 (에러 방지용)
-    const safeProfiles = profiles || [];
+    const allProfiles = profiles || [];
+
+    // 최대 6명으로 제한
+    const safeProfiles = allProfiles.slice(0, 6);
+    const hasOverflow = allProfiles.length > 6;
 
     // 프로필 개수에 따른 그리드 컬럼 계산
     const profileCount = safeProfiles.length;
     const columns =
-      profileCount <= 3 ? profileCount : profileCount <= 6 ? 3 : 4;
+      profileCount <= 3 ? profileCount : 3; // 최대 3컬럼
 
-    // 프로필 카드 생성 (제한 없음)
+    // 경고 메시지 (6명 초과 시)
+    const overflowWarning = hasOverflow
+      ? `<div style="background: #FFF4E5; border: 1px solid #FFB020; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: center;">
+          <p style="margin: 0; font-size: 14px; color: #D97706;">
+            ⚠️ 팀 프로필은 최대 6명까지 표시해요 (현재 ${allProfiles.length}명 중 6명 표시)
+          </p>
+        </div>`
+      : '';
+
+    // 프로필 카드 생성 (최적화: 높이 및 크기 줄임)
     const profileCards = safeProfiles
       .map(
         (profile) => `
-      <div style="min-height: 340px; text-align: center; display: flex; flex-direction: column; align-items: center;">
-        <img src="${this.escapeHtml(profile.image || `https://placehold.co/140x140/${this.ctx.colors.primary.replace('#', '')}/FFFFFF?text=P&font=sans-serif`)}" alt="${this.escapeHtml(profile.name)}" style="width: 140px; height: 140px; border-radius: ${this.ctx.borderRadius.circle}; object-fit: cover; margin-bottom: 20px; border: 4px solid ${this.ctx.colors.lightBg}; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <h4 style="font-size: ${this.ctx.fonts.size.subtitle}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0 0 5px 0;">${this.escapeHtml(profile.name)}</h4>
-        <p style="font-size: 16px; color: ${this.ctx.colors.primary}; font-weight: 500; margin: 0 0 12px 0;">${this.escapeHtml(profile.role)}</p>
-        <p style="font-size: 14px; color: ${this.ctx.colors.textSecondary}; line-height: 1.5; margin: 0; max-width: 250px;">${this.escapeHtml(profile.bio)}</p>
+      <div style="min-height: 260px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+        <img src="${this.escapeHtml(profile.image || `https://placehold.co/120x120/${this.ctx.colors.primary.replace('#', '')}/FFFFFF?text=P&font=sans-serif`)}" alt="${this.escapeHtml(profile.name)}" style="width: 120px; height: 120px; border-radius: ${this.ctx.borderRadius.circle}; object-fit: cover; margin-bottom: 16px; border: 3px solid ${this.ctx.colors.lightBg}; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <h4 style="font-size: ${this.ctx.fonts.size.subtitle - 2}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0 0 4px 0;">${this.escapeHtml(profile.name)}</h4>
+        <p style="font-size: 15px; color: ${this.ctx.colors.primary}; font-weight: 500; margin: 0 0 10px 0;">${this.escapeHtml(profile.role)}</p>
+        <p style="font-size: 13px; color: ${this.ctx.colors.textSecondary}; line-height: 1.4; margin: 0; max-width: 220px;">${this.escapeHtml(profile.bio)}</p>
       </div>
     `
       )
@@ -1338,18 +1644,20 @@ export class TossDefaultTemplate implements SlideTemplate {
     <h2 style="font-size: ${this.ctx.fonts.size.heading}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
   </div>
 
-  <!-- Profiles Grid (유동적 컬럼) -->
+  <!-- Overflow Warning -->
+  ${overflowWarning}
+
+  <!-- Profiles Grid (최대 3컬럼, 6명까지) -->
   <div style="
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow-y: auto;
   ">
     <div style="
       display: grid;
       grid-template-columns: repeat(${columns}, 1fr);
-      gap: ${this.ctx.spacing.gap}px;
+      gap: ${Math.max(this.ctx.spacing.gap - 10, 24)}px;
       align-items: start;
       width: 100%;
     ">
@@ -1371,8 +1679,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderProcess(slide: ProcessSlide): HTMLSlide {
     const { title, steps } = slide.props;
 
-    // 프로세스 스텝 생성 (최대 3개), 빈 배열 방어
-    const safeSteps = (steps || []).slice(0, 3);
+    // 프로세스 스텝 생성 (빈 배열 방어)
+    const safeSteps = (steps || []);
     const processSteps = safeSteps
       .map((step, index) => {
         const isLast = index === safeSteps.length - 1;
@@ -1439,8 +1747,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderRoadmap(slide: RoadmapSlide): HTMLSlide {
     const { title, items } = slide.props;
 
-    // 로드맵 아이템 생성 (최대 3개), 빈 배열 방어
-    const safeItems = (items || []).slice(0, 3);
+    // 로드맵 아이템 생성 (빈 배열 방어)
+    const safeItems = (items || []);
     const roadmapItems = safeItems
       .map((item, index) => {
         const isLast = index === safeItems.length - 1;
@@ -1512,9 +1820,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderPricing(slide: PricingSlide): HTMLSlide {
     const { title, tiers } = slide.props;
 
-    // 가격표 티어 생성 (최대 3개), 빈 배열 방어
+    // 가격표 티어 생성 (빈 배열 방어)
     const pricingTiers = (tiers || [])
-      .slice(0, 3)
       .map((tier) => {
         const isRecommended = tier.recommended || false;
         const headerBg = isRecommended
@@ -1645,7 +1952,33 @@ export class TossDefaultTemplate implements SlideTemplate {
   ">
     <!-- Image Column (55%) -->
     <div style="flex: 1.2; height: 100%;">
+      ${image ? `
       <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="width: 100%; height: 100%; object-fit: contain; border-radius: ${this.ctx.borderRadius.medium}px; background: ${this.ctx.colors.lightBg};">
+      ` : `
+      <!-- Image Placeholder -->
+      <div style="
+        width: 100%;
+        height: 100%;
+        border: 2px dashed #e0e0e0;
+        border-radius: ${this.ctx.borderRadius.medium}px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: ${this.ctx.colors.lightBg};
+      ">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" stroke-width="2" style="margin-bottom: 10px;">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <p style="
+          color: #9e9e9e;
+          font-size: 16px;
+          margin: 0;
+          font-family: ${this.ctx.fonts.main};
+        ">이미지를 추가하세요</p>
+      </div>
+      `}
     </div>
     <!-- Text Column (45%) -->
     <div style="flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center;">
@@ -1784,27 +2117,115 @@ export class TossDefaultTemplate implements SlideTemplate {
   /**
    * 21. Gallery Slide (갤러리 슬라이드)
    *
-   * 2x2 그리드 이미지 갤러리
+   * 이미지 개수에 따라 반응형 그리드 레이아웃
+   * - 1-3장: 1행 n열
+   * - 4장: 2행 2열
+   * - 5-6장: 2행 3열
+   * - 7-9장: 3행 3열
+   * - 10-12장: 3행 4열
    */
   renderGallery(slide: GallerySlide): HTMLSlide {
     const { title, images } = slide.props;
 
-    // 이미지 카드 생성 (최대 4개 - 2x2 그리드), 빈 배열 방어
-    const imageCards = (images || [])
-      .slice(0, 4)
-      .map(
+    // 이미지 개수에 따른 그리드 레이아웃 결정
+    const imageCount = (images || []).length;
+    let gridColumns = 2;
+    let gridRows = 2;
+    let maxImages = 4;
+
+    if (imageCount === 0) {
+      // 이미지 없음 - 기본 2x2
+      gridColumns = 2;
+      gridRows = 2;
+      maxImages = 4;
+    } else if (imageCount <= 3) {
+      // 1-3장: 1행 n열
+      gridRows = 1;
+      gridColumns = imageCount;
+      maxImages = imageCount;
+    } else if (imageCount === 4) {
+      // 4장: 2행 2열
+      gridRows = 2;
+      gridColumns = 2;
+      maxImages = 4;
+    } else if (imageCount <= 6) {
+      // 5-6장: 2행 3열
+      gridRows = 2;
+      gridColumns = 3;
+      maxImages = 6;
+    } else if (imageCount <= 9) {
+      // 7-9장: 3행 3열
+      gridRows = 3;
+      gridColumns = 3;
+      maxImages = 9;
+    } else {
+      // 10장 이상: 3행 4열 (최대 12장)
+      gridRows = 3;
+      gridColumns = 4;
+      maxImages = 12;
+    }
+
+    // 이미지가 없으면 플레이스홀더용 더미 객체 생성
+    const imagesToRender = imageCount === 0
+      ? Array(maxImages).fill({ url: '', caption: '이미지 추가' })
+      : (images || []).slice(0, maxImages);
+
+    // 이미지 카드 생성
+    const imageCards = imagesToRender.map(
         (img) => `
-      <div style="font-family: ${this.ctx.fonts.main}; display: flex; flex-direction: column; min-height: 0;">
+      <div style="
+        font-family: ${this.ctx.fonts.main};
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      ">
+        ${img.url ? `
         <img src="${this.escapeHtml(img.url)}" alt="${this.escapeHtml(img.caption)}" style="
           width: 100%;
-          flex: 1;
-          min-height: 0;
+          height: calc(100% - 30px);
           object-fit: cover;
           border-radius: ${this.ctx.borderRadius.medium}px;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
           background: ${this.ctx.colors.lightBg};
         ">
-        <p style="font-size: ${this.ctx.fonts.size.caption}px; color: ${this.ctx.colors.textSecondary}; text-align: center; margin: 0;">${this.escapeHtml(img.caption)}</p>
+        ` : `
+        <!-- Image Placeholder -->
+        <div style="
+          width: 100%;
+          height: calc(100% - 30px);
+          border: 2px dashed #e0e0e0;
+          border-radius: ${this.ctx.borderRadius.medium}px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: ${this.ctx.colors.lightBg};
+          margin-bottom: 8px;
+        ">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" stroke-width="2" style="margin-bottom: 8px;">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <p style="
+            color: #9e9e9e;
+            font-size: 14px;
+            margin: 0;
+            font-family: ${this.ctx.fonts.main};
+          ">이미지를 추가하세요</p>
+        </div>
+        `}
+        <p style="
+          font-size: ${this.ctx.fonts.size.caption}px;
+          color: ${this.ctx.colors.textSecondary};
+          text-align: center;
+          margin: 0;
+          height: 22px;
+          line-height: 22px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        ">${this.escapeHtml(img.caption)}</p>
       </div>
     `
       )
@@ -1827,24 +2248,116 @@ export class TossDefaultTemplate implements SlideTemplate {
     <h2 style="font-size: ${this.ctx.fonts.size.heading}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
   </div>
 
-  <!-- 2x2 Gallery Grid -->
+  <!-- Gallery Grid (반응형: ${gridRows}행 ${gridColumns}열) -->
   <div style="
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 0;
   ">
     <div style="
       width: 100%;
-      max-width: 900px;
+      height: 100%;
+      max-width: ${gridRows === 1 ? (gridColumns === 1 ? '600px' : '95%') : '95%'};
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(${gridColumns}, 1fr);
+      grid-template-rows: repeat(${gridRows}, 1fr);
       gap: ${this.ctx.spacing.gap}px;
-      min-height: 0;
     ">
       ${imageCards}
     </div>
+  </div>
+</div>
+    `.trim();
+
+    const css = this.generateCSSVariables();
+    return { html, css };
+  }
+
+  /**
+   * 22. Image Slide (이미지 슬라이드)
+   *
+   * 단독 이미지 표시 (전체 화면)
+   */
+  renderImage(slide: ImageSlide): HTMLSlide {
+    const { title, image, caption } = slide.props;
+
+    const html = `
+<div style="
+  width: 100%;
+  height: 100%;
+  background: ${this.ctx.colors.white};
+  display: flex;
+  flex-direction: column;
+  padding: ${this.ctx.spacing.padding}px;
+  box-sizing: border-box;
+  font-family: ${this.ctx.fonts.main};
+">
+  <!-- Accent Bar + Title -->
+  <div style="margin-bottom: ${this.ctx.spacing.gapSmall}px;">
+    <div style="width: ${this.ctx.spacing.accentBar.width}px; height: ${this.ctx.spacing.accentBar.height}px; background: ${this.ctx.colors.primary}; margin-bottom: 12px;"></div>
+    <h2 style="font-size: ${this.ctx.fonts.size.heading}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
+  </div>
+
+  <!-- Image Container -->
+  <div style="
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  ">
+    ${image ? `
+    <div style="
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    ">
+      <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="
+        max-width: 100%;
+        max-height: ${caption ? 'calc(100% - 40px)' : '100%'};
+        object-fit: contain;
+        border-radius: ${this.ctx.borderRadius.medium}px;
+      ">
+      ${caption ? `
+      <p style="
+        font-size: ${this.ctx.fonts.size.body}px;
+        color: ${this.ctx.colors.textSecondary};
+        text-align: center;
+        margin: 20px 0 0 0;
+        max-width: 80%;
+      ">${this.escapeHtml(caption)}</p>
+      ` : ''}
+    </div>
+    ` : `
+    <!-- Image Placeholder -->
+    <div style="
+      width: 80%;
+      height: 80%;
+      border: 2px dashed #e0e0e0;
+      border-radius: ${this.ctx.borderRadius.medium}px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: ${this.ctx.colors.lightBg};
+    ">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#9e9e9e" stroke-width="2" style="margin-bottom: 16px;">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      <p style="
+        color: #9e9e9e;
+        font-size: 20px;
+        margin: 0;
+        font-family: ${this.ctx.fonts.main};
+      ">이미지를 추가하세요</p>
+    </div>
+    `}
   </div>
 </div>
     `.trim();

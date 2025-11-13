@@ -7,6 +7,7 @@
 
 import { Lightbulb, ImageIcon } from 'lucide-react';
 import type { GallerySlide } from '@/types/slide';
+import ImageUploader from '../ImageUploader';
 
 interface GallerySlideFormProps {
   slide: GallerySlide;
@@ -110,7 +111,13 @@ export default function GallerySlideForm({
             <button
               type="button"
               onClick={handleAddImage}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              disabled={slide.props.images.length >= 12}
+              className={`text-sm font-medium ${
+                slide.props.images.length >= 12
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:text-blue-700'
+              }`}
+              title={slide.props.images.length >= 12 ? '최대 12개까지만 추가할 수 있어요' : ''}
             >
               + 이미지 추가
             </button>
@@ -139,22 +146,13 @@ export default function GallerySlideForm({
                 </div>
 
                 <div>
-                  <label
-                    htmlFor={`image-url-${index}`}
-                    className="block text-xs font-medium text-gray-600 mb-1"
-                  >
-                    이미지 URL
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    이미지
                   </label>
-                  <input
-                    id={`image-url-${index}`}
-                    type="url"
-                    value={image.url}
-                    onChange={(e) =>
-                      handleImageChange(index, 'url', e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
-                    required
+                  <ImageUploader
+                    currentImage={image.url}
+                    onImageChange={(base64) => handleImageChange(index, 'url', base64)}
+                    maxSizeMB={2}
                   />
                 </div>
 
@@ -183,7 +181,7 @@ export default function GallerySlideForm({
 
           <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>4개 이미지가 2x2 그리드로 가장 보기 좋아요</span>
+            <span>4개 이미지가 2x2 그리드로 가장 보기 좋아요 (최대 12개)</span>
           </p>
         </div>
       </div>

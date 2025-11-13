@@ -7,6 +7,7 @@
 
 import { Lightbulb, MessageSquareQuote } from 'lucide-react';
 import type { TestimonialSlide } from '@/types/slide';
+import ImageUploader from '../ImageUploader';
 
 interface TestimonialSlideFormProps {
   slide: TestimonialSlide;
@@ -57,12 +58,12 @@ export default function TestimonialSlideForm({
     });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (imageBase64: string) => {
     onChange({
       ...slide,
       props: {
         ...slide.props,
-        image: e.target.value,
+        image: imageBase64,
       },
     });
   };
@@ -158,19 +159,13 @@ export default function TestimonialSlideForm({
         </div>
 
         <div>
-          <label
-            htmlFor="image"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            프로필 이미지 URL (선택)
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            프로필 이미지 (선택)
           </label>
-          <input
-            id="image"
-            type="url"
-            value={slide.props.image || ''}
-            onChange={handleImageChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="https://example.com/image.jpg"
+          <ImageUploader
+            currentImage={slide.props.image || ''}
+            onImageChange={handleImageChange}
+            maxSizeMB={2}
           />
           <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />

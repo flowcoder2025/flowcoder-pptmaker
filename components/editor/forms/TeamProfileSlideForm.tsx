@@ -7,6 +7,7 @@
 
 import { Lightbulb, Users } from 'lucide-react';
 import type { TeamProfileSlide } from '@/types/slide';
+import ImageUploader from '../ImageUploader';
 
 interface TeamProfileSlideFormProps {
   slide: TeamProfileSlide;
@@ -113,7 +114,17 @@ export default function TeamProfileSlideForm({
             <button
               type="button"
               onClick={handleAddProfile}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              disabled={slide.props.profiles.length >= 6}
+              className={`text-sm font-medium ${
+                slide.props.profiles.length >= 6
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:text-blue-700'
+              }`}
+              title={
+                slide.props.profiles.length >= 6
+                  ? '최대 6명까지만 추가할 수 있어요'
+                  : ''
+              }
             >
               + 프로필 추가
             </button>
@@ -202,21 +213,13 @@ export default function TeamProfileSlideForm({
                 </div>
 
                 <div>
-                  <label
-                    htmlFor={`image-${index}`}
-                    className="block text-xs font-medium text-gray-600 mb-1"
-                  >
-                    프로필 이미지 URL (선택)
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    프로필 이미지 (선택)
                   </label>
-                  <input
-                    id={`image-${index}`}
-                    type="url"
-                    value={profile.image || ''}
-                    onChange={(e) =>
-                      handleProfileChange(index, 'image', e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
+                  <ImageUploader
+                    currentImage={profile.image || ''}
+                    onImageChange={(base64) => handleProfileChange(index, 'image', base64)}
+                    maxSizeMB={2}
                   />
                 </div>
               </div>
@@ -225,7 +228,7 @@ export default function TeamProfileSlideForm({
 
           <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>1-3명: 인원수만큼, 4-6명: 3열, 7명 이상: 4열 그리드로 표시돼요</span>
+            <span>1-3명: 인원수만큼, 4-6명: 3열 그리드로 표시돼요 (최대 6명)</span>
           </p>
         </div>
       </div>

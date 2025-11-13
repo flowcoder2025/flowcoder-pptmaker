@@ -202,9 +202,17 @@ export default function EditorContent() {
     : null;
 
   const handleSlideChange = (updatedSlide: typeof currentSlide) => {
+    console.log('📥 [EditorContent] handleSlideChange 호출됨', {
+      selectedSlideIndex,
+      슬라이드타입: updatedSlide?.type,
+      유효성: selectedSlideIndex >= 0 && !!updatedSlide,
+    });
+
     if (selectedSlideIndex >= 0 && updatedSlide) {
+      console.log('🔄 [EditorContent] updateSlide 호출 전');
       updateSlide(selectedSlideIndex, updatedSlide);
       setIsDirty(true); // 변경사항 표시
+      console.log('✅ [EditorContent] updateSlide 호출 완료');
     }
   };
 

@@ -296,7 +296,8 @@ export interface FeatureGridSlide extends BaseSlide {
   props: {
     title: string;
     features: Array<{
-      icon: string;
+      iconType?: 'emoji' | 'image'; // 아이콘 타입 (기본값: emoji)
+      icon: string; // 이모지 문자열 또는 base64 이미지
       title: string;
       description: string;
     }>;

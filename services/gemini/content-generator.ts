@@ -192,7 +192,18 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
 }
 \`\`\`
 
-8. **chart** (차트 - bar, line, pie, area):
+8. **chart** (차트 - 4가지 타입 지원):
+   - **bar**: 막대 그래프 (비교, 순위, 카테고리별 수치)
+   - **line**: 꺾은선 그래프 (추세, 시간 흐름, 변화)
+   - **pie**: 원형 그래프 (비율, 구성, 점유율) - 최대 3개 시리즈까지 나란히 표시
+   - **area**: 영역 그래프 (누적 추세, 볼륨 변화)
+
+   **✨ 다중 시리즈 지원**:
+   - **bar, line, area**: 여러 데이터 시리즈를 겹쳐서 비교 (연도별, 제품별, 목표 vs 실적 등)
+   - **pie**: 최대 3개 시리즈까지 나란히 표시 (각 시리즈가 별도 파이 차트로 렌더링)
+   - 단일 시리즈: 하나의 데이터만 표시 (기본)
+
+**Bar 차트 예시** (비교 데이터):
 \`\`\`json
 {
   "type": "chart",
@@ -204,6 +215,158 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
       "labels": ["2024 Q1", "2024 Q2", "2024 Q3", "2024 Q4"],
       "values": [25, 40, 60, 85]
     }]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Bar 차트 (다중 시리즈 비교)** - 각 카테고리마다 여러 막대를 그룹으로 표시:
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "분기별 목표 달성률 비교",
+    "chartType": "bar",
+    "data": [
+      {
+        "name": "목표",
+        "labels": ["Q1", "Q2", "Q3", "Q4"],
+        "values": [80, 80, 85, 90]
+      },
+      {
+        "name": "실적",
+        "labels": ["Q1", "Q2", "Q3", "Q4"],
+        "values": [75, 85, 92, 95]
+      }
+    ]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Line 차트 예시** (시간 추세):
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "월별 사용자 증가 추이",
+    "chartType": "line",
+    "data": [{
+      "name": "활성 사용자",
+      "labels": ["1월", "2월", "3월", "4월", "5월", "6월"],
+      "values": [120, 150, 180, 220, 280, 350]
+    }]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Line 차트 (다중 시리즈 비교)** - 여러 시리즈를 겹쳐서 추세 비교:
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "연도별 매출 비교",
+    "chartType": "line",
+    "data": [
+      {
+        "name": "2023년",
+        "labels": ["1Q", "2Q", "3Q", "4Q"],
+        "values": [120, 150, 180, 200]
+      },
+      {
+        "name": "2024년",
+        "labels": ["1Q", "2Q", "3Q", "4Q"],
+        "values": [150, 190, 240, 280]
+      }
+    ]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Pie 차트 예시** (비율 구성):
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "시장 점유율",
+    "chartType": "pie",
+    "data": [{
+      "name": "점유율",
+      "labels": ["우리 제품", "경쟁사 A", "경쟁사 B", "기타"],
+      "values": [35, 28, 22, 15]
+    }]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Pie 차트 (다중 시리즈 비교)** - 최대 3개 시리즈를 나란히 표시:
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "지역별 매출 구성 비교",
+    "chartType": "pie",
+    "data": [
+      {
+        "name": "서울",
+        "labels": ["제품 A", "제품 B", "제품 C"],
+        "values": [45, 35, 20]
+      },
+      {
+        "name": "경기",
+        "labels": ["제품 A", "제품 B", "제품 C"],
+        "values": [50, 30, 20]
+      },
+      {
+        "name": "부산",
+        "labels": ["제품 A", "제품 B", "제품 C"],
+        "values": [40, 40, 20]
+      }
+    ]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Area 차트 예시** (누적 볼륨):
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "분기별 매출 추이",
+    "chartType": "area",
+    "data": [{
+      "name": "매출",
+      "labels": ["Q1", "Q2", "Q3", "Q4"],
+      "values": [1200, 1850, 2400, 3100]
+    }]
+  },
+  "style": {}
+}
+\`\`\`
+
+**Area 차트 (다중 시리즈 비교)** - 영역을 겹쳐서 볼륨 비교:
+\`\`\`json
+{
+  "type": "chart",
+  "props": {
+    "title": "제품별 매출 추이",
+    "chartType": "area",
+    "data": [
+      {
+        "name": "제품 A",
+        "labels": ["Q1", "Q2", "Q3", "Q4"],
+        "values": [800, 1200, 1600, 2000]
+      },
+      {
+        "name": "제품 B",
+        "labels": ["Q1", "Q2", "Q3", "Q4"],
+        "values": [400, 650, 800, 1100]
+      }
+    ]
   },
   "style": {}
 }
@@ -266,6 +429,11 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
 \`\`\`
 
 13. **featureGrid** (기능 그리드 - 3열 기능 카드):
+
+**아이콘 타입**:
+- **iconType**: \`"emoji"\` (기본값, 이모지 문자) 또는 \`"image"\` (사용자가 업로드한 base64 이미지)
+- **기본적으로 이모지 사용 권장** (사용자가 이미지로 변경 가능)
+
 \`\`\`json
 {
   "type": "featureGrid",
@@ -273,16 +441,19 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
     "title": "핵심 기능",
     "features": [
       {
+        "iconType": "emoji",
         "icon": "⚡",
         "title": "빠른 처리 속도",
         "description": "평균 0.3초의 응답 시간으로 실시간 분석을 제공합니다"
       },
       {
+        "iconType": "emoji",
         "icon": "🔒",
         "title": "데이터 보안",
         "description": "엔터프라이즈급 보안으로 민감한 정보를 안전하게 보호합니다"
       },
       {
+        "iconType": "emoji",
         "icon": "📊",
         "title": "상세한 분석",
         "description": "직관적인 대시보드로 복잡한 데이터를 쉽게 이해할 수 있습니다"
@@ -292,6 +463,8 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
   "style": {}
 }
 \`\`\`
+
+**참고**: iconType을 생략하면 자동으로 "emoji"로 처리됩니다. 이미지 아이콘은 사용자가 편집기에서 직접 업로드할 수 있습니다.
 
 14. **teamProfile** (팀 프로필 - 1-6명 최적화):
 \`\`\`json

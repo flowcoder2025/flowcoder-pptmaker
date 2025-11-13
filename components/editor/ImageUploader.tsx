@@ -43,6 +43,13 @@ export default function ImageUploader({
   onImageChange,
   maxSizeMB = 2,
 }: ImageUploaderProps) {
+  // 디버깅: 컴포넌트 마운트 확인
+  console.log('📸 ImageUploader 마운트:', {
+    hasCurrentImage: !!currentImage,
+    currentImageLength: currentImage?.length || 0,
+    maxSizeMB,
+  });
+
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);

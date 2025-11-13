@@ -171,6 +171,135 @@ export function createDefaultSlide(type: SlideType): Slide {
         style: defaultStyle,
       };
 
+    case 'featureGrid':
+      return {
+        type: 'featureGrid',
+        props: {
+          title: '기능 그리드',
+          features: [
+            { icon: '🚀', title: '기능 1', description: '설명을 입력하세요' },
+            { icon: '💡', title: '기능 2', description: '설명을 입력하세요' },
+            { icon: '⚡', title: '기능 3', description: '설명을 입력하세요' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'teamProfile':
+      return {
+        type: 'teamProfile',
+        props: {
+          title: '팀 프로필',
+          profiles: [
+            { name: '이름 1', role: '역할 1', bio: '소개를 입력하세요' },
+            { name: '이름 2', role: '역할 2', bio: '소개를 입력하세요' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'process':
+      return {
+        type: 'process',
+        props: {
+          title: '프로세스',
+          steps: [
+            { title: '1단계', description: '설명을 입력하세요' },
+            { title: '2단계', description: '설명을 입력하세요' },
+            { title: '3단계', description: '설명을 입력하세요' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'roadmap':
+      return {
+        type: 'roadmap',
+        props: {
+          title: '로드맵',
+          items: [
+            { period: 'Q1 2024', status: '완료', title: '마일스톤 1', description: '설명을 입력하세요' },
+            { period: 'Q2 2024', status: '진행 중', title: '마일스톤 2', description: '설명을 입력하세요' },
+            { period: 'Q3 2024', status: '계획', title: '마일스톤 3', description: '설명을 입력하세요' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'pricing':
+      return {
+        type: 'pricing',
+        props: {
+          title: '가격표',
+          tiers: [
+            {
+              name: 'Free',
+              price: '0원',
+              period: '월',
+              description: '무료 플랜',
+              features: ['기능 1', '기능 2'],
+            },
+            {
+              name: 'Pro',
+              price: '9,900원',
+              period: '월',
+              description: '프로 플랜',
+              features: ['기능 1', '기능 2', '기능 3'],
+              recommended: true,
+            },
+            {
+              name: 'Premium',
+              price: '19,900원',
+              period: '월',
+              description: '프리미엄 플랜',
+              features: ['모든 기능', '무제한 사용'],
+            },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'agenda':
+      return {
+        type: 'agenda',
+        props: {
+          title: '아젠다',
+          items: [
+            { title: '주제 1', description: '내용을 입력하세요' },
+            { title: '주제 2', description: '내용을 입력하세요' },
+            { title: '주제 3', description: '내용을 입력하세요' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
+    case 'testimonial':
+      return {
+        type: 'testimonial',
+        props: {
+          title: '추천사',
+          quote: '인용문을 입력하세요',
+          author: '작성자',
+          role: '역할 또는 소속',
+        },
+        style: defaultStyle,
+      };
+
+    case 'gallery':
+      return {
+        type: 'gallery',
+        props: {
+          title: '갤러리',
+          images: [
+            { url: 'https://via.placeholder.com/400', caption: '이미지 1' },
+            { url: 'https://via.placeholder.com/400', caption: '이미지 2' },
+            { url: 'https://via.placeholder.com/400', caption: '이미지 3' },
+            { url: 'https://via.placeholder.com/400', caption: '이미지 4' },
+          ],
+        },
+        style: defaultStyle,
+      };
+
     default:
       // Fallback: content 타입
       return {

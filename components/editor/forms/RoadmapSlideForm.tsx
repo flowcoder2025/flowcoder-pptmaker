@@ -47,17 +47,29 @@ export default function RoadmapSlideForm({
   };
 
   const handleAddItem = () => {
+    console.log('➕ [RoadmapForm] 항목 추가 시작', {
+      현재항목수: slide.props.items.length,
+    });
+
     const newItems = [
       ...slide.props.items,
       { period: '', status: 'Planned', title: '', description: '' },
     ];
-    onChange({
+
+    const updatedSlide = {
       ...slide,
       props: {
         ...slide.props,
         items: newItems,
       },
+    };
+
+    console.log('📤 [RoadmapForm] onChange 호출', {
+      새항목수: newItems.length,
+      슬라이드타입: updatedSlide.type,
     });
+
+    onChange(updatedSlide);
   };
 
   const handleRemoveItem = (index: number) => {

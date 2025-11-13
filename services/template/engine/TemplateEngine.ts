@@ -32,6 +32,7 @@ import {
   isAgendaSlide,
   isTestimonialSlide,
   isGallerySlide,
+  isImageSlide,
 } from './types';
 
 /**
@@ -205,8 +206,12 @@ export class TemplateEngine {
       return template.renderGallery(slide);
     }
 
+    if (isImageSlide(slide)) {
+      return template.renderImage(slide);
+    }
+
     // 지원하지 않는 타입
-    throw new Error(`지원하지 않는 슬라이드 타입입니다: ${slide.type}`);
+    throw new Error(`지원하지 않는 슬라이드 타입입니다: ${(slide as any).type}`);
   }
 
   /**

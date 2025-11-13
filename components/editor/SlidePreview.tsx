@@ -56,13 +56,29 @@ function createSlideDocument(html: string, css: string): string {
 }
 
 export default function SlidePreview({ slide, templateId = 'toss-default' }: SlidePreviewProps) {
+  // 🔍 DEBUG: slide prop 변경 감지
+  useEffect(() => {
+    console.log('🔍 [SlidePreview] slide prop 변경됨:', {
+      type: slide.type,
+      propsKeys: Object.keys(slide.props),
+      timestamp: Date.now()
+    });
+  }, [slide]);
+
   // TemplateEngine으로 HTML 생성 (useMemo로 최적화)
   const htmlSlide = useMemo(() => {
+    console.log('🔄 [SlidePreview] useMemo 재계산 중...', {
+      type: slide.type,
+      propsKeys: Object.keys(slide.props),
+    });
+
     try {
       const engine = new TemplateEngine();
-      return engine.generateSlide(slide, templateId);
+      const result = engine.generateSlide(slide, templateId);
+      console.log('✅ [SlidePreview] HTML 생성 완료');
+      return result;
     } catch (error) {
-      console.error('슬라이드 HTML 생성 실패:', error);
+      console.error('❌ [SlidePreview] 슬라이드 HTML 생성 실패:', error);
       return null;
     }
   }, [slide, templateId]);
@@ -151,7 +167,7 @@ export default function SlidePreview({ slide, templateId = 'toss-default' }: Sli
             transformOrigin: 'top left',
           }}
           title="슬라이드 미리보기"
-          sandbox="allow-same-origin"
+          sandbox="allow-same-origin allow-scripts"
         />
       </div>
     </div>

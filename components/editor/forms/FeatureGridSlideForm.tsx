@@ -6,6 +6,7 @@
 'use client';
 
 import { Lightbulb, Palette } from 'lucide-react';
+import ImageUploader from '@/components/editor/ImageUploader';
 import type { FeatureGridSlide } from '@/types/slide';
 
 interface FeatureGridSlideFormProps {
@@ -29,7 +30,7 @@ export default function FeatureGridSlideForm({
 
   const handleFeatureChange = (
     index: number,
-    field: 'icon' | 'title' | 'description',
+    field: 'icon' | 'title' | 'description' | 'iconType',
     value: string
   ) => {
     const newFeatures = [...slide.props.features];
@@ -46,10 +47,27 @@ export default function FeatureGridSlideForm({
     });
   };
 
+  const handleIconTypeChange = (index: number, iconType: 'emoji' | 'image') => {
+    const newFeatures = [...slide.props.features];
+    newFeatures[index] = {
+      ...newFeatures[index],
+      iconType,
+      // iconType 변경 시 icon 초기화
+      icon: iconType === 'emoji' ? '⭐' : '',
+    };
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        features: newFeatures,
+      },
+    });
+  };
+
   const handleAddFeature = () => {
     const newFeatures = [
       ...slide.props.features,
-      { icon: '⭐', title: '', description: '' },
+      { iconType: 'emoji' as const, icon: '⭐', title: '', description: '' },
     ];
     onChange({
       ...slide,
@@ -113,17 +131,27 @@ export default function FeatureGridSlideForm({
             <button
               type="button"
               onClick={handleAddFeature}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              disabled={slide.props.features.length >= 6}
+              className={`text-sm font-medium ${
+                slide.props.features.length >= 6
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-blue-600 hover:text-blue-700'
+              }`}
+              title={
+                slide.props.features.length >= 6
+                  ? '최대 6개까지만 추가할 수 있어요'
+                  : ''
+              }
             >
               + 기능 추가
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {slide.props.features.map((feature, index) => (
               <div
                 key={index}
-                className="border border-gray-300 rounded-lg p-4 space-y-3"
+                className="border border-gray-300 rounded-lg p-3 space-y-2"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold text-gray-500">
@@ -141,25 +169,75 @@ export default function FeatureGridSlideForm({
                   )}
                 </div>
 
+                {/* 아이콘 타입 선택 */}
                 <div>
-                  <label
-                    htmlFor={`icon-${index}`}
-                    className="block text-xs font-medium text-gray-600 mb-1"
-                  >
-                    아이콘 (이모지)
+                  <label className="block text-xs font-medium text-gray-600 mb-2">
+                    아이콘 타입
                   </label>
-                  <input
-                    id={`icon-${index}`}
-                    type="text"
-                    value={feature.icon}
-                    onChange={(e) =>
-                      handleFeatureChange(index, 'icon', e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-2xl text-center"
-                    placeholder="⚡"
-                    required
-                  />
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`iconType-${index}`}
+                        value="emoji"
+                        checked={(feature.iconType || 'emoji') === 'emoji'}
+                        onChange={() => handleIconTypeChange(index, 'emoji')}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="text-sm text-gray-700">이모지</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`iconType-${index}`}
+                        value="image"
+                        checked={(feature.iconType || 'emoji') === 'image'}
+                        onChange={() => handleIconTypeChange(index, 'image')}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="text-sm text-gray-700">이미지</span>
+                    </label>
+                  </div>
                 </div>
+
+                {/* 이모지 입력 */}
+                {(feature.iconType || 'emoji') === 'emoji' && (
+                  <div>
+                    <label
+                      htmlFor={`icon-${index}`}
+                      className="block text-xs font-medium text-gray-600 mb-1"
+                    >
+                      이모지
+                    </label>
+                    <input
+                      id={`icon-${index}`}
+                      type="text"
+                      value={feature.icon}
+                      onChange={(e) =>
+                        handleFeatureChange(index, 'icon', e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-2xl text-center"
+                      placeholder="⚡"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* 이미지 업로드 */}
+                {(feature.iconType || 'emoji') === 'image' && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      아이콘 이미지
+                    </label>
+                    <ImageUploader
+                      currentImage={feature.icon}
+                      onImageChange={(imageBase64) =>
+                        handleFeatureChange(index, 'icon', imageBase64)
+                      }
+                      maxSizeMB={1}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label
