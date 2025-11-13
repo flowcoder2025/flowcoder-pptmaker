@@ -131,15 +131,15 @@ export default function FeatureGridSlideForm({
             <button
               type="button"
               onClick={handleAddFeature}
-              disabled={slide.props.features.length >= 6}
+              disabled={slide.props.features.length >= 3}
               className={`text-sm font-medium ${
-                slide.props.features.length >= 6
+                slide.props.features.length >= 3
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-blue-600 hover:text-blue-700'
               }`}
               title={
-                slide.props.features.length >= 6
-                  ? '최대 6개까지만 추가할 수 있어요'
+                slide.props.features.length >= 3
+                  ? '최대 3개까지만 추가할 수 있어요'
                   : ''
               }
             >
