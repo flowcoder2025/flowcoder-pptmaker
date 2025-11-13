@@ -14,7 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Save, Download, Share2, Edit, X, Loader2, FileCode, FileText, Presentation } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Save, Download, Share2, Edit, X, Loader2, FileCode, FileText, Presentation, CheckCircle, AlertCircle } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
@@ -38,6 +39,12 @@ export default function ViewerContent() {
   const [downloadStatus, setDownloadStatus] = useState<'downloading' | 'success' | 'error'>('downloading');
   const [downloadFormat, setDownloadFormat] = useState<'html' | 'pdf' | 'pptx'>('html');
   const [downloadError, setDownloadError] = useState<string>('');
+
+  // 공유 알림 상태 관리
+  const [showShareAlert, setShowShareAlert] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareType, setShareType] = useState<'success' | 'error'>('success');
+  const [isSharing, setIsSharing] = useState(false);
 
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'input'; // 기본값: input
@@ -215,21 +222,33 @@ export default function ViewerContent() {
     try {
       await savePresentation();
       setIsSaved(true);
-      alert('저장했어요!');
+      setShareMessage('저장했어요!');
+      setShareType('success');
+      setShowShareAlert(true);
     } catch (error) {
-      alert('저장하지 못했어요: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
+      setShareMessage('저장하지 못했어요: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
+      setShareType('error');
+      setShowShareAlert(true);
     }
   };
 
   const handleShare = async () => {
+    // 중복 호출 방지
+    if (isSharing) {
+      return;
+    }
+
     if (!currentPresentation) {
-      alert('공유할 프리젠테이션이 없어요.');
+      setShareMessage('공유할 프리젠테이션이 없어요.');
+      setShareType('error');
+      setShowShareAlert(true);
       return;
     }
 
     // 웹 서비스에서는 Web Share API 사용
     if (navigator.share) {
       try {
+        setIsSharing(true);
         await navigator.share({
           title: currentPresentation.title,
           text: `${currentPresentation.title} - PPT Maker로 제작`,
@@ -239,17 +258,28 @@ export default function ViewerContent() {
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
           console.error('공유 실패:', error);
-          alert('공유하지 못했어요. 다시 시도해 주세요.');
+          setShareMessage('공유하지 못했어요. 다시 시도해 주세요.');
+          setShareType('error');
+          setShowShareAlert(true);
         }
+      } finally {
+        setIsSharing(false);
       }
     } else {
       // Web Share API 미지원 브라우저 - 링크 복사
       try {
+        setIsSharing(true);
         await navigator.clipboard.writeText(window.location.href);
-        alert('링크를 복사했어요!');
+        setShareMessage('링크를 복사했어요!');
+        setShareType('success');
+        setShowShareAlert(true);
       } catch (error) {
         console.error('링크 복사 실패:', error);
-        alert('링크 복사에 실패했어요.');
+        setShareMessage('링크 복사에 실패했어요.');
+        setShareType('error');
+        setShowShareAlert(true);
+      } finally {
+        setIsSharing(false);
       }
     }
   };
@@ -617,6 +647,70 @@ export default function ViewerContent() {
       )}
 
       {/* 다운로드 진행 상태 모달 */}
+      {/* 공유 알림 모달 */}
+      {showShareAlert && (
+        <div
+          onClick={() => setShowShareAlert(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-primary rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowShareAlert(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                {shareType === 'success' ? (
+                  <CheckCircle size={48} className="text-green-500" strokeWidth={1.5} />
+                ) : (
+                  <AlertCircle size={48} className="text-yellow-500" strokeWidth={1.5} />
+                )}
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              {shareType === 'success' ? '성공' : '알림'}
+            </h3>
+
+            <p className="text-gray-600 mb-6 text-center whitespace-pre-line">
+              {shareMessage}
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setShowShareAlert(false)}
+                size="lg"
+                className="px-8 bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                확인
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
       <DownloadProgressModal
         isOpen={showDownloadProgress}
         onClose={() => setShowDownloadProgress(false)}
