@@ -286,6 +286,7 @@ export default function ImageUploader({
 
   // 파일 선택 버튼 클릭
   const handleButtonClick = () => {
+    if (isProcessing) return; // 처리 중일 때는 클릭 무시
     fileInputRef.current?.click();
   };
 
@@ -355,7 +356,7 @@ export default function ImageUploader({
                 ${isDragging ? 'border-primary bg-primary/5' : 'border-border bg-secondary/30'}
                 ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-secondary/50'}
               `}
-              onClick={!isProcessing ? handleButtonClick : undefined}
+              onClick={handleButtonClick}
             >
               <input
                 ref={fileInputRef}
