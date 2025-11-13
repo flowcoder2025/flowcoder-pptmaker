@@ -221,8 +221,8 @@ export default function SlideList({ slides, selectedIndex, onSelect, onReorder }
   const slideIds = slides.map((_, index) => `slide-${index}`);
 
   return (
-    <div className="border-b border-gray-200 bg-gray-50">
-      <div className="px-4 py-2">
+    <div className="border-b border-gray-200 bg-gray-50 max-h-36 flex flex-col">
+      <div className="px-4 py-2 flex-1 overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold text-gray-700">
             슬라이드 <span className="text-xs text-gray-500">(드래그하여 순서 변경)</span>

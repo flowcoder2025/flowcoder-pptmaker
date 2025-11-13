@@ -456,7 +456,7 @@ export default function EditorContent() {
           />
 
           {/* 편집 폼 영역 */}
-          <div className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="flex-1 overflow-y-auto p-4 bg-white">
             <div className="max-w-2xl mx-auto">
               {/* 조건부 렌더링: 전역 설정 vs 개별 슬라이드 편집 */}
               {selectedSlideIndex === -1 ? (
