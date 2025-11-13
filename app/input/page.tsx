@@ -279,7 +279,7 @@ export default function InputPage() {
           {/* 왼쪽: 옵션 패널 */}
           <div className="space-y-4">
             {/* 크래딧 잔액 */}
-            <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <Card className="p-4 bg-linear-to-br from-blue-50 to-indigo-50 border-blue-200">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-blue-700">
                   <CreditCard className="w-4 h-4" />

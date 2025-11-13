@@ -413,7 +413,7 @@ export default function ProfilePage() {
                 크레딧
               </h3>
 
-              <div className="text-center p-4 rounded-lg mb-4 bg-gradient-to-br from-primary to-blue-600">
+              <div className="text-center p-4 rounded-lg mb-4 bg-linear-to-br from-primary to-blue-600">
                 <p className="text-3xl font-bold text-white">
                   {stats.creditsBalance.toLocaleString()}
                 </p>
