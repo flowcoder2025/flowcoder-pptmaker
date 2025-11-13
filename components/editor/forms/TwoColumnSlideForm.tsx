@@ -8,6 +8,7 @@
 import { Columns2 } from 'lucide-react';
 import type { TwoColumnSlide } from '@/types/slide';
 import FontSizeSlider from '../FontSizeSlider';
+import IconSelector from '../IconSelector';
 
 interface TwoColumnSlideFormProps {
   slide: TwoColumnSlide;
@@ -66,6 +67,19 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
         rightColumn: {
           ...slide.style.rightColumn,
           fontSize,
+        },
+      },
+    });
+  };
+
+  const handleIconChange = (iconType: 'arrow' | 'dot' | 'check') => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          iconType,
         },
       },
     });
@@ -151,6 +165,15 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 아이콘 선택 (전역) */}
+      <div>
+        <IconSelector
+          value={slide.style.bullets?.iconType || 'arrow'}
+          onChange={handleIconChange}
+          label="불릿 아이콘"
+        />
       </div>
 
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">

@@ -260,7 +260,7 @@ export class TossDefaultTemplate implements SlideTemplate {
             margin-right: 15px;
             font-size: ${this.ctx.spacing.iconSize}px;
             line-height: 1.2;
-          ">→</span>
+          ">${this.getIcon(slide.style.bullets?.iconType)}</span>
           <span style="
             color: var(--color-text-secondary);
             font-size: ${fontSize}px;
@@ -362,7 +362,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               margin-right: 12px;
               font-size: ${this.ctx.spacing.iconSize}px;
               line-height: 1.2;
-            ">→</span>
+            ">${this.getIcon(slide.style.bullets?.iconType)}</span>
             <span style="
               color: var(--color-text-secondary);
               font-size: ${fontSize}px;
@@ -1004,7 +1004,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           <li style="
             margin-bottom: 12px;
             padding-left: 0;
-          ">• ${this.escapeHtml(item)}</li>
+          ">${this.getIcon(slide.style.bullets?.iconType)} ${this.escapeHtml(item)}</li>
         `
       )
       .join('');
@@ -1015,7 +1015,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           <li style="
             margin-bottom: 12px;
             padding-left: 0;
-          ">• ${this.escapeHtml(item)}</li>
+          ">${this.getIcon(slide.style.bullets?.iconType)} ${this.escapeHtml(item)}</li>
         `
       )
       .join('');
@@ -1607,7 +1607,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       .map(
         (bullet) => `
       <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-        <span style="color: ${this.ctx.colors.primary}; margin-right: 12px; font-size: ${this.ctx.spacing.iconSize}px; line-height: 1.4;">→</span>
+        <span style="color: ${this.ctx.colors.primary}; margin-right: 12px; font-size: ${this.ctx.spacing.iconSize}px; line-height: 1.4;">${this.getIcon(slide.style.bullets?.iconType)}</span>
         <span style="color: ${this.ctx.colors.textSecondary}; font-size: ${this.ctx.fonts.size.body}px; line-height: 1.6;">${this.escapeHtml(bullet)}</span>
       </li>
     `
@@ -1851,6 +1851,21 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     const css = this.generateCSSVariables();
     return { html, css };
+  }
+
+  /**
+   * 불릿 아이콘 선택 헬퍼 함수
+   *
+   * iconType에 따라 적절한 아이콘 문자열 반환
+   * @param iconType - 'arrow', 'dot', 'check' 중 하나 (기본값: 'arrow')
+   */
+  private getIcon(iconType?: 'arrow' | 'dot' | 'check'): string {
+    const iconMap = {
+      arrow: '→',
+      dot: '•',
+      check: '✓',
+    };
+    return iconMap[iconType || 'arrow'];
   }
 
   /**

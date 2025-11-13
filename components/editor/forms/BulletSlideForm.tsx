@@ -8,6 +8,7 @@
 import { Lightbulb, ClipboardList } from 'lucide-react';
 import type { BulletSlide } from '@/types/slide';
 import FontSizeSlider from '../FontSizeSlider';
+import IconSelector from '../IconSelector';
 
 interface BulletSlideFormProps {
   slide: BulletSlide;
@@ -72,6 +73,19 @@ export default function BulletSlideForm({ slide, onChange }: BulletSlideFormProp
         bullets: {
           ...slide.style.bullets,
           fontSize,
+        },
+      },
+    });
+  };
+
+  const handleIconChange = (iconType: 'arrow' | 'dot' | 'check') => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          iconType,
         },
       },
     });
@@ -157,12 +171,21 @@ export default function BulletSlideForm({ slide, onChange }: BulletSlideFormProp
             defaultValue={18}
           />
         </div>
+
+        {/* 아이콘 선택 */}
+        <div className="pt-2">
+          <IconSelector
+            value={slide.style.bullets?.iconType || 'arrow'}
+            onChange={handleIconChange}
+            label="불릿 아이콘"
+          />
+        </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
         <p className="flex items-center gap-1.5 text-xs text-purple-700">
           <ClipboardList className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>목록은 슬라이드에 화살표 아이콘(→)과 함께 표시돼요</span>
+          <span>목록은 슬라이드에 선택한 아이콘과 함께 표시돼요</span>
         </p>
       </div>
     </div>
