@@ -527,7 +527,7 @@ export default function AdminUsersPage() {
                           variant="outline"
                           onClick={() => {
                             setSelectedUser(user)
-                            setSelectedTier(user.subscription?.tier as any || 'FREE')
+                            setSelectedTier((user.subscription?.tier || 'FREE') as 'FREE' | 'PRO' | 'PREMIUM')
                             setSubscriptionDialogOpen(true)
                           }}
                         >
@@ -710,7 +710,7 @@ export default function AdminUsersPage() {
                     name="tier"
                     value="FREE"
                     checked={selectedTier === 'FREE'}
-                    onChange={(e) => setSelectedTier(e.target.value as any)}
+                    onChange={(e) => setSelectedTier(e.target.value as 'FREE' | 'PRO' | 'PREMIUM')}
                     style={{ width: '16px', height: '16px' }}
                   />
                   <div>
@@ -735,7 +735,7 @@ export default function AdminUsersPage() {
                     name="tier"
                     value="PRO"
                     checked={selectedTier === 'PRO'}
-                    onChange={(e) => setSelectedTier(e.target.value as any)}
+                    onChange={(e) => setSelectedTier(e.target.value as 'FREE' | 'PRO' | 'PREMIUM')}
                     style={{ width: '16px', height: '16px' }}
                   />
                   <div>
@@ -760,7 +760,7 @@ export default function AdminUsersPage() {
                     name="tier"
                     value="PREMIUM"
                     checked={selectedTier === 'PREMIUM'}
-                    onChange={(e) => setSelectedTier(e.target.value as any)}
+                    onChange={(e) => setSelectedTier(e.target.value as 'FREE' | 'PRO' | 'PREMIUM')}
                     style={{ width: '16px', height: '16px' }}
                   />
                   <div>

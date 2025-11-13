@@ -7,6 +7,8 @@
 
 import { Columns2 } from 'lucide-react';
 import type { TwoColumnSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
+import IconSelector from '../IconSelector';
 
 interface TwoColumnSlideFormProps {
   slide: TwoColumnSlide;
@@ -40,6 +42,45 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
       props: {
         ...slide.props,
         rightContent: e.target.value,
+      },
+    });
+  };
+
+  const handleLeftFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        leftColumn: {
+          ...slide.style.leftColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleRightFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        rightColumn: {
+          ...slide.style.rightColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleIconChange = (iconType: 'arrow' | 'dot' | 'check') => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          iconType,
+        },
       },
     });
   };
@@ -86,6 +127,15 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
             <p className="text-xs text-gray-500 mt-1">
               ← 좌측 영역
             </p>
+            {/* 좌측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.leftColumn?.fontSize || 18}
+                onChange={handleLeftFontSizeChange}
+                label="좌측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
 
           <div>
@@ -104,8 +154,26 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
             <p className="text-xs text-gray-500 mt-1">
               우측 영역 →
             </p>
+            {/* 우측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.rightColumn?.fontSize || 18}
+                onChange={handleRightFontSizeChange}
+                label="우측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* 아이콘 선택 (전역) */}
+      <div>
+        <IconSelector
+          value={slide.style.bullets?.iconType || 'arrow'}
+          onChange={handleIconChange}
+          label="불릿 아이콘"
+        />
       </div>
 
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">

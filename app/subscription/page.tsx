@@ -34,7 +34,7 @@ export default function SubscriptionPage() {
     isActive,
     fetchSubscription,
   } = useSubscriptionStore();
-  const { requestPayment, isLoading, error, clearError } = usePortOnePayment();
+  const { requestPayment, isLoading, clearError } = usePortOnePayment();
 
   const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);

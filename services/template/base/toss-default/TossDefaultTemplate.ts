@@ -220,7 +220,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     <div style="
       width: 100%;
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.body}px;
+      font-size: ${slide.style.body?.fontSize || this.ctx.fonts.size.body}px;
       font-family: var(--font-family-base);
       line-height: 1.6;
     ">${this.escapeHtml(bodyText)}</div>
@@ -245,7 +245,8 @@ export class TossDefaultTemplate implements SlideTemplate {
     const bulletItems = (bullets || [])
       .map((bullet) => {
         const indent = bullet.level * 30; // level 0: 0px, level 1: 30px, level 2: 60px
-        const fontSize = bullet.level === 0 ? 18 : bullet.level === 1 ? 16 : 14;
+        const baseFontSize = slide.style.bullets?.fontSize || this.ctx.fonts.size.body;
+        const fontSize = bullet.level === 0 ? baseFontSize : bullet.level === 1 ? baseFontSize * 0.89 : baseFontSize * 0.78;
 
         return `
         <li style="
@@ -259,7 +260,7 @@ export class TossDefaultTemplate implements SlideTemplate {
             margin-right: 15px;
             font-size: ${this.ctx.spacing.iconSize}px;
             line-height: 1.2;
-          ">→</span>
+          ">${this.getIcon(slide.style.bullets?.iconType)}</span>
           <span style="
             color: var(--color-text-secondary);
             font-size: ${fontSize}px;
@@ -349,7 +350,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     const rightParsed = parseColumnContent(rightContent);
 
     // 불릿 리스트 HTML 생성
-    const createBulletList = (items: string[]) => {
+    const createBulletList = (items: string[], fontSize: number) => {
       return items.map(item => `
           <li style="
             display: flex;
@@ -361,18 +362,20 @@ export class TossDefaultTemplate implements SlideTemplate {
               margin-right: 12px;
               font-size: ${this.ctx.spacing.iconSize}px;
               line-height: 1.2;
-            ">→</span>
+            ">${this.getIcon(slide.style.bullets?.iconType)}</span>
             <span style="
               color: var(--color-text-secondary);
-              font-size: 16px;
+              font-size: ${fontSize}px;
               line-height: 1.5;
             ">${this.escapeHtml(item)}</span>
           </li>
         `).join('');
     };
 
-    const leftBulletList = createBulletList(leftParsed.bulletItems);
-    const rightBulletList = createBulletList(rightParsed.bulletItems);
+    const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
+    const rightFontSize = slide.style.rightColumn?.fontSize || this.ctx.fonts.size.body;
+    const leftBulletList = createBulletList(leftParsed.bulletItems, leftFontSize);
+    const rightBulletList = createBulletList(rightParsed.bulletItems, rightFontSize);
 
     const html = `
 <div class="slide" style="
@@ -987,6 +990,10 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderComparison(slide: ComparisonSlide): HTMLSlide {
     const { title, leftLabel, rightLabel, leftContent, rightContent } = slide.props;
 
+    // fontSize 가져오기
+    const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
+    const rightFontSize = slide.style.rightColumn?.fontSize || this.ctx.fonts.size.body;
+
     // leftContent와 rightContent를 배열로 분리 (줄바꿈 기준)
     const leftItems = leftContent ? leftContent.split('\n').filter((item) => item.trim()) : [];
     const rightItems = rightContent ? rightContent.split('\n').filter((item) => item.trim()) : [];
@@ -997,7 +1004,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           <li style="
             margin-bottom: 12px;
             padding-left: 0;
-          ">• ${this.escapeHtml(item)}</li>
+          ">${this.getIcon(slide.style.bullets?.iconType)} ${this.escapeHtml(item)}</li>
         `
       )
       .join('');
@@ -1008,7 +1015,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           <li style="
             margin-bottom: 12px;
             padding-left: 0;
-          ">• ${this.escapeHtml(item)}</li>
+          ">${this.getIcon(slide.style.bullets?.iconType)} ${this.escapeHtml(item)}</li>
         `
       )
       .join('');
@@ -1068,7 +1075,7 @@ export class TossDefaultTemplate implements SlideTemplate {
         padding: 0;
         margin: 0;
         font-family: var(--font-family-base);
-        font-size: 16px;
+        font-size: ${leftFontSize}px;
         color: var(--color-text-secondary);
       ">
         ${leftList}
@@ -1096,7 +1103,7 @@ export class TossDefaultTemplate implements SlideTemplate {
         padding: 0;
         margin: 0;
         font-family: var(--font-family-base);
-        font-size: 16px;
+        font-size: ${rightFontSize}px;
         color: var(--color-text-secondary);
       ">
         ${rightList}
@@ -1600,7 +1607,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       .map(
         (bullet) => `
       <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-        <span style="color: ${this.ctx.colors.primary}; margin-right: 12px; font-size: ${this.ctx.spacing.iconSize}px; line-height: 1.4;">→</span>
+        <span style="color: ${this.ctx.colors.primary}; margin-right: 12px; font-size: ${this.ctx.spacing.iconSize}px; line-height: 1.4;">${this.getIcon(slide.style.bullets?.iconType)}</span>
         <span style="color: ${this.ctx.colors.textSecondary}; font-size: ${this.ctx.fonts.size.body}px; line-height: 1.6;">${this.escapeHtml(bullet)}</span>
       </li>
     `
@@ -1844,6 +1851,21 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     const css = this.generateCSSVariables();
     return { html, css };
+  }
+
+  /**
+   * 불릿 아이콘 선택 헬퍼 함수
+   *
+   * iconType에 따라 적절한 아이콘 문자열 반환
+   * @param iconType - 'arrow', 'dot', 'check' 중 하나 (기본값: 'arrow')
+   */
+  private getIcon(iconType?: 'arrow' | 'dot' | 'check'): string {
+    const iconMap = {
+      arrow: '→',
+      dot: '•',
+      check: '✓',
+    };
+    return iconMap[iconType || 'arrow'];
   }
 
   /**

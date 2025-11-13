@@ -7,6 +7,7 @@
 
 import { Lightbulb, ImageIcon } from 'lucide-react';
 import type { ImageTextSlide } from '@/types/slide';
+import IconSelector from '../IconSelector';
 
 interface ImageTextSlideFormProps {
   slide: ImageTextSlide;
@@ -81,6 +82,19 @@ export default function ImageTextSlideForm({
       props: {
         ...slide.props,
         bullets: newBullets,
+      },
+    });
+  };
+
+  const handleIconChange = (iconType: 'arrow' | 'dot' | 'check') => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          iconType,
+        },
       },
     });
   };
@@ -192,8 +206,17 @@ export default function ImageTextSlideForm({
 
           <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>각 항목은 화살표(→)와 함께 리스트로 표시돼요</span>
+            <span>각 항목은 선택한 아이콘과 함께 리스트로 표시돼요</span>
           </p>
+        </div>
+
+        {/* 아이콘 선택 */}
+        <div>
+          <IconSelector
+            value={slide.style.bullets?.iconType || 'arrow'}
+            onChange={handleIconChange}
+            label="불릿 아이콘"
+          />
         </div>
       </div>
 

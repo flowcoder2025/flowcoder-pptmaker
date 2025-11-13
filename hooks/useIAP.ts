@@ -29,7 +29,7 @@ import type {
 export const useIAP = (): IAPState => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [purchasedTemplates, setPurchasedTemplates] = useState<TemplateSKU[]>(
+  const [purchasedTemplates] = useState<TemplateSKU[]>(
     []
   );
 

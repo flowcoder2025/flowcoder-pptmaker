@@ -7,7 +7,6 @@ import {
   PerformanceTimer,
   validatePPTData,
   extractMetadata,
-  formatTestResult,
   type TestResult,
 } from "@/utils/sandbox/testHelpers"
 import type { UnifiedPPTJSON } from "@/types/pptJson"

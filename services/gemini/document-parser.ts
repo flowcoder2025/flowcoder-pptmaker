@@ -91,7 +91,7 @@ export async function parseDocument(file: FileAttachment): Promise<ParsedDocumen
 **중요**: 실제 문서의 내용만 출력하세요. 템플릿이나 형식 예시를 출력하지 마세요.`;
 
     // API 요청 구성
-    const parts: any[] = [
+    const parts = [
       { text: prompt },
       {
         inlineData: {

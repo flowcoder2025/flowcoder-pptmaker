@@ -23,7 +23,8 @@ import { calculateBalance, consumeCredits } from '@/lib/credits'
  * @auth Required
  * @permission viewer (본인의 프레젠테이션만 조회)
  */
-export async function GET(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(_request: NextRequest) {
   try {
     // NextAuth 세션에서 userId 가져오기
     const userId = await getCurrentUserId()

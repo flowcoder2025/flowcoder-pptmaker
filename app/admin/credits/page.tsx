@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -60,7 +60,7 @@ export default function AdminCreditsPage() {
   const [includeExpired, setIncludeExpired] = useState(false)
 
   // 데이터 가져오기
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -79,12 +79,12 @@ export default function AdminCreditsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [search, sourceType, includeExpired])
 
   // 초기 로드 및 필터 변경 시 재로드
   useEffect(() => {
     fetchData()
-  }, [search, sourceType, includeExpired])
+  }, [fetchData])
 
   // 유효기간 표시 헬퍼
   const getExpirationDisplay = (expiresAt: string | null) => {

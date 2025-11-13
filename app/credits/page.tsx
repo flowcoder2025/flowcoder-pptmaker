@@ -36,9 +36,9 @@ import PaymentChannelModal from '@/components/PaymentChannelModal';
 export default function CreditsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
+  const { totalCredits, isFirstTimeFree, fetchBalance } = useCreditStore();
   const { plan } = useSubscriptionStore();
-  const { requestPayment, isLoading, error, clearError } = usePortOnePayment();
+  const { requestPayment, isLoading, clearError } = usePortOnePayment();
 
   const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedBundle, setSelectedBundle] = useState<typeof CREDIT_BUNDLES[0] | null>(null);
@@ -95,7 +95,6 @@ export default function CreditsPage() {
                      channelKey === PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key;
 
     if (isInicis) {
-      // @ts-ignore - session.user에 phoneNumber가 없을 수 있음
       const phoneNumber = session.user?.phoneNumber;
 
       if (!phoneNumber) {
@@ -251,25 +250,35 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* 광고 - 중간 (무료 플랜만) */}
+      {/* 사용 내역 보기 버튼 */}
+      <div className="my-10">
+        <Card className="p-6 bg-secondary/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold mb-2 text-foreground">
+                사용 내역 확인하기
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                크레딧 사용 내역과 결제 내역을 확인하세요
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/usage')}
+              className="whitespace-nowrap"
+            >
+              사용 내역 보기 →
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      {/* 광고 - 하단 (무료 플랜만) */}
       {showAds && (
-        <div className="my-10">
+        <div className="mt-10">
           <KakaoAdBanner />
         </div>
       )}
-
-      {/* 사용 내역 */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6 text-foreground">
-          사용 내역
-        </h2>
-
-        <Card className="p-6">
-          <p className="text-center text-sm text-muted-foreground">
-            아직 사용 내역이 없어요
-          </p>
-        </Card>
-      </div>
 
       {/* 결제 채널 선택 모달 */}
       <PaymentChannelModal

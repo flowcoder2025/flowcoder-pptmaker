@@ -106,7 +106,7 @@ export const authOptions: NextAuthOptions = {
     error: '/login', // 에러 페이지
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // OAuth 로그인 시 사용자 생성 또는 업데이트
       if (account?.provider === 'github' || account?.provider === 'google') {
         try {
@@ -217,7 +217,7 @@ export const authOptions: NextAuthOptions = {
       // Credentials 로그인은 그대로 통과
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       // 로그인 시 user 정보를 token에 추가
       if (user) {
         token.id = user.id

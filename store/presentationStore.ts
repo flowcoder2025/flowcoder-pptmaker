@@ -12,7 +12,7 @@ import { researchTopic } from '@/services/perplexity/researcher';
 import { generateSlideContent } from '@/services/gemini/content-generator';
 import { TemplateEngine } from '@/services/template';
 import { RESEARCH_MODE_CONFIG } from '@/types/research';
-import type { UnifiedPPTJSON, Slide, SlideType } from '@/types/slide';
+import type { UnifiedPPTJSON, Slide, SlideType, GlobalSlideSettings } from '@/types/slide';
 import type { AttachmentFile } from '@/types/research';
 import { createDefaultSlide } from '@/utils/slideDefaults';
 
@@ -40,6 +40,9 @@ interface PresentationState {
   // 목표 슬라이드 분량
   targetSlideCount: number; // 플랜별로 동적 제한 (Free: 10, Pro: 20, Premium: 50)
 
+  // 전역 슬라이드 설정
+  globalSettings: GlobalSlideSettings;
+
   // 액션
   setCurrentPresentation: (presentation: Presentation | null) => void;
   setSelectedColorPreset: (presetId: string) => void;
@@ -47,6 +50,8 @@ interface PresentationState {
   setUseProContentModel: (usePro: boolean) => void;
   setUseProHtmlModel: (usePro: boolean) => void;
   setTargetSlideCount: (count: number) => void;
+  setGlobalSettings: (settings: Partial<GlobalSlideSettings>) => void;
+  applyGlobalSettingsToAll: () => void;
   generatePresentation: (text: string, attachments?: AttachmentFile[]) => Promise<void>;
   savePresentation: () => Promise<void>;
   fetchPresentations: () => Promise<Presentation[]>;
@@ -75,6 +80,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   useProContentModel: false, // 기본값: Flash (빠른속도)
   useProHtmlModel: true, // 기본값: Pro (고품질 HTML) - A/B 테스트 후 변경 고려
   targetSlideCount: 20, // 기본값: 20장 (10-40 범위)
+  globalSettings: {
+    fontSize: 18, // 기본값: 18px
+    iconType: 'arrow', // 기본값: 화살표
+  },
 
   setCurrentPresentation: (presentation) => set({ currentPresentation: presentation }),
 
@@ -89,6 +98,113 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   // 플랜별 최대값 검증은 UI 레벨(app/input/page.tsx)에서 처리
   // 최소값 5만 보장
   setTargetSlideCount: (count) => set({ targetSlideCount: Math.max(5, count) }),
+
+  // 전역 슬라이드 설정 변경
+  setGlobalSettings: (settings) => set((state) => ({
+    globalSettings: { ...state.globalSettings, ...settings }
+  })),
+
+  // 전역 설정을 모든 슬라이드에 적용
+  applyGlobalSettingsToAll: () => {
+    const { currentPresentation, globalSettings } = get();
+    if (!currentPresentation?.slideData) {
+      console.warn('⚠️ 프리젠테이션이 없거나 편집 데이터가 없어요');
+      return;
+    }
+
+    const updatedSlides = currentPresentation.slideData.slides.map((slide) => {
+      const updatedSlide = { ...slide };
+
+      // 슬라이드 타입별로 fontSize 적용
+      switch (slide.type) {
+        case 'content':
+          // ContentSlide: body.fontSize 적용
+          updatedSlide.style = {
+            ...updatedSlide.style,
+            body: {
+              ...updatedSlide.style?.body,
+              fontSize: globalSettings.fontSize,
+            },
+          };
+          break;
+
+        case 'bullet':
+          // BulletSlide: bullets.fontSize, bullets.iconType 적용
+          updatedSlide.style = {
+            ...updatedSlide.style,
+            bullets: {
+              ...updatedSlide.style?.bullets,
+              fontSize: globalSettings.fontSize,
+              iconType: globalSettings.iconType,
+            },
+          };
+          break;
+
+        case 'twoColumn':
+        case 'comparison':
+          // TwoColumnSlide, ComparisonSlide: leftColumn.fontSize, rightColumn.fontSize, bullets.iconType 적용
+          updatedSlide.style = {
+            ...updatedSlide.style,
+            leftColumn: {
+              ...updatedSlide.style?.leftColumn,
+              fontSize: globalSettings.fontSize,
+            },
+            rightColumn: {
+              ...updatedSlide.style?.rightColumn,
+              fontSize: globalSettings.fontSize,
+            },
+            bullets: {
+              ...updatedSlide.style?.bullets,
+              iconType: globalSettings.iconType,
+            },
+          };
+          break;
+
+        case 'imageText':
+          // ImageTextSlide: bullets.fontSize, bullets.iconType 적용
+          updatedSlide.style = {
+            ...updatedSlide.style,
+            bullets: {
+              ...updatedSlide.style?.bullets,
+              fontSize: globalSettings.fontSize,
+              iconType: globalSettings.iconType,
+            },
+          };
+          break;
+
+        // 다른 슬라이드 타입은 변경하지 않음
+        default:
+          break;
+      }
+
+      return updatedSlide;
+    });
+
+    // slideData 업데이트
+    const updatedSlideData: UnifiedPPTJSON = {
+      ...currentPresentation.slideData,
+      slides: updatedSlides,
+    };
+
+    // HTML 재생성
+    const { selectedColorPresetId } = get();
+    const engine = new TemplateEngine();
+    const updatedHtmlSlides = engine.generateAll(updatedSlideData, selectedColorPresetId);
+
+    // 프리젠테이션 업데이트
+    const updatedPresentation: Presentation = {
+      ...currentPresentation,
+      slideData: updatedSlideData,
+      slides: updatedHtmlSlides,
+    };
+
+    // 히스토리에 추가
+    useHistoryStore.getState().pushHistory(currentPresentation);
+
+    set({ currentPresentation: updatedPresentation });
+
+    console.log('✅ 전역 설정이 모든 슬라이드에 적용되었어요!');
+  },
 
   generatePresentation: async (text: string, attachments?: AttachmentFile[]) => {
     set({

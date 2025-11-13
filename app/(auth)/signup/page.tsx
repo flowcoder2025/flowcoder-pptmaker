@@ -66,7 +66,7 @@ export default function SignupPage() {
 
       toast.success(data.message);
       router.push('/login');
-    } catch (error) {
+    } catch {
       toast.error('회원가입 중 문제가 발생했어요. 다시 시도해주세요');
     } finally {
       setIsLoading(false);

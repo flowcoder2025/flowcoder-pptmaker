@@ -7,6 +7,7 @@
 
 import { Lightbulb, PenLine } from 'lucide-react';
 import type { ContentSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
 
 interface ContentSlideFormProps {
   slide: ContentSlide;
@@ -30,6 +31,19 @@ export default function ContentSlideForm({ slide, onChange }: ContentSlideFormPr
       props: {
         ...slide.props,
         body: e.target.value,
+      },
+    });
+  };
+
+  const handleFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        body: {
+          ...slide.style.body,
+          fontSize,
+        },
       },
     });
   };
@@ -76,6 +90,16 @@ export default function ContentSlideForm({ slide, onChange }: ContentSlideFormPr
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
             <span>명확하고 간결한 내용을 작성하세요 (3-5줄 권장)</span>
           </p>
+        </div>
+
+        {/* 본문 크기 조정 */}
+        <div className="pt-2">
+          <FontSizeSlider
+            value={slide.style.body?.fontSize || 18}
+            onChange={handleFontSizeChange}
+            label="본문 크기"
+            defaultValue={18}
+          />
         </div>
       </div>
 

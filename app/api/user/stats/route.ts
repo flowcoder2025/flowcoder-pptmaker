@@ -101,7 +101,7 @@ export async function GET() {
 
     // 3. 최근 프리젠테이션의 총 슬라이드 수 계산 (전체가 아닌 최근 3개만)
     const totalSlides = recentPresentations.reduce((sum, p) => {
-      const slideCount = (p.metadata as any)?.slideCount || 0;
+      const slideCount = (p.metadata as Record<string, unknown> | null)?.slideCount as number || 0;
       return sum + slideCount;
     }, 0);
 

@@ -138,9 +138,9 @@ export interface PortOnePaymentRequest {
   paymentId: string;         // 고유 결제 ID (UUID 등)
   orderName: string;         // 주문명 (예: "프리미엄 구독", "크레딧 10개")
   totalAmount: number;       // 결제 금액 (원)
-  currency: string;          // 통화 (기본: 'KRW')
+  currency: 'KRW' | 'USD' | 'EUR' | 'JPY'; // 통화 (기본: 'KRW')
   channelKey?: string;       // 채널 키 (특정 PG사 지정 시)
-  payMethod?: PortOnePaymentMethod; // 결제 방법
+  payMethod: PortOnePaymentMethod; // 결제 방법 (필수)
   customer?: {
     customerId: string;      // 고객 ID
     fullName?: string;       // 고객명
@@ -192,7 +192,7 @@ export interface PortOnePaymentVerifyResponse {
     fullName?: string;
     email?: string;
   };
-  customData?: Record<string, any>;
+  customData?: Record<string, unknown>;
 }
 
 /**
@@ -254,7 +254,7 @@ export interface PortOneWebhookPayload {
     method?: PortOnePaymentMethod;
     receiptUrl?: string;
     failReason?: string;
-    customData?: Record<string, any>;
+    customData?: Record<string, unknown>;
   };
 }
 
@@ -311,9 +311,7 @@ export interface VerifyPaymentResponse {
 /**
  * API: 빌링키 발급 요청 (POST /api/payments/billing-key/request)
  */
-export interface CreateBillingKeyRequestBody {
-  // 현재는 요청 본문 없음 (세션에서 사용자 정보 추출)
-}
+export type CreateBillingKeyRequestBody = Record<string, never>; // 현재는 요청 본문 없음 (세션에서 사용자 정보 추출)
 
 export interface CreateBillingKeyRequestResponse {
   success: boolean;

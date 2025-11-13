@@ -7,6 +7,8 @@
 
 import { Scale } from 'lucide-react';
 import type { ComparisonSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
+import IconSelector from '../IconSelector';
 
 interface ComparisonSlideFormProps {
   slide: ComparisonSlide;
@@ -33,6 +35,45 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
       props: {
         ...slide.props,
         [field]: value,
+      },
+    });
+  };
+
+  const handleLeftFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        leftColumn: {
+          ...slide.style.leftColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleRightFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        rightColumn: {
+          ...slide.style.rightColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleIconChange = (iconType: 'arrow' | 'dot' | 'check') => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          iconType,
+        },
       },
     });
   };
@@ -110,6 +151,16 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
                 placeholder="https://..."
               />
             </div>
+
+            {/* 좌측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.leftColumn?.fontSize || 18}
+                onChange={handleLeftFontSizeChange}
+                label="좌측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
 
           {/* 우측 영역 */}
@@ -159,8 +210,27 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
                 placeholder="https://..."
               />
             </div>
+
+            {/* 우측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.rightColumn?.fontSize || 18}
+                onChange={handleRightFontSizeChange}
+                label="우측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* 아이콘 선택 (전역) */}
+      <div>
+        <IconSelector
+          value={slide.style.bullets?.iconType || 'arrow'}
+          onChange={handleIconChange}
+          label="불릿 아이콘"
+        />
       </div>
 
       <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -13,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem } from 'lucide-react';
+import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem, Receipt } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BUTTON_TEXT } from '@/lib/text-config';
 
@@ -83,9 +84,11 @@ export default function NavigationBar() {
           </div>
 
           {/* 데스크톱: 이미지 + 텍스트 로고 */}
-          <img
+          <Image
             src="/PPT_Maker_logo_600600__1_-removebg-preview.png"
             alt="PPT Maker Logo"
+            width={48}
+            height={48}
             className="h-12 w-12 object-contain hidden md:block"
           />
           <div className="text-lg font-bold hidden md:block bg-gradient-to-br from-blue-500 to-gray-800 bg-clip-text text-transparent">
@@ -143,9 +146,11 @@ export default function NavigationBar() {
                   >
                     <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary">
                       {session.user?.image ? (
-                        <img
+                        <Image
                           src={session.user.image}
                           alt="프로필"
+                          width={32}
+                          height={32}
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
@@ -191,6 +196,13 @@ export default function NavigationBar() {
                   >
                     <Gem size={16} className="mr-2" />
                     크레딧
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push('/usage')}
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+                  >
+                    <Receipt size={16} className="mr-2" />
+                    사용내역
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

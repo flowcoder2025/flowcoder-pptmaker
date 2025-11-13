@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const includeExpired = searchParams.get('includeExpired') === 'true'
 
     // Where 조건 구성
-    const whereClause: any = {}
+    const whereClause: Record<string, unknown> = {}
 
     // sourceType 필터 (FREE, EVENT, SUBSCRIPTION, PURCHASE)
     if (sourceType && ['FREE', 'EVENT', 'SUBSCRIPTION', 'PURCHASE'].includes(sourceType)) {

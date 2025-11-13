@@ -178,8 +178,9 @@ function PaymentResultContent() {
 
   // 결제 성공 (payment는 항상 정의됨)
   const payment = paymentData.payment;
-  const isSubscription = payment && 'purpose' in (payment as any) && (payment as any).purpose === 'SUBSCRIPTION_UPGRADE';
-  const isCredit = payment && 'purpose' in (payment as any) && (payment as any).purpose === 'CREDIT_PURCHASE';
+  const paymentWithPurpose = payment as Record<string, unknown> | null;
+  const isSubscription = paymentWithPurpose && 'purpose' in paymentWithPurpose && paymentWithPurpose.purpose === 'SUBSCRIPTION_UPGRADE';
+  const isCredit = paymentWithPurpose && 'purpose' in paymentWithPurpose && paymentWithPurpose.purpose === 'CREDIT_PURCHASE';
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
@@ -240,7 +241,7 @@ function PaymentResultContent() {
                   결제 수단
                 </span>
                 <span style={{ color: TOSS_COLORS.text }}>
-                  {'method' in payment ? (payment as any).method || '카드' : '카드'}
+                  {'method' in payment ? (paymentWithPurpose?.method as string) || '카드' : '카드'}
                 </span>
               </div>
             )}

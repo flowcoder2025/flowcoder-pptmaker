@@ -21,14 +21,6 @@ export interface EnvValidationResult {
 }
 
 /**
- * 필수 환경 변수 목록
- */
-const REQUIRED_ENV_VARS = {
-  GEMINI_API_KEY: 'NEXT_PUBLIC_GEMINI_API_KEY',
-  AD_GROUP_ID: 'NEXT_PUBLIC_AD_GROUP_ID',
-} as const
-
-/**
  * 환경 변수 검증 실행
  * @returns 검증 결과
  */

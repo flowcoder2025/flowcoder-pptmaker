@@ -70,7 +70,7 @@ export const ALL_ALLOWED_EXTENSIONS = [
  * 파일 타입 검증 헬퍼
  */
 export function isAllowedMimeType(mimeType: string): boolean {
-  return ALL_ALLOWED_MIME_TYPES.includes(mimeType as any);
+  return (ALL_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType);
 }
 
 /**
@@ -78,7 +78,7 @@ export function isAllowedMimeType(mimeType: string): boolean {
  */
 export function isAllowedExtension(filename: string): boolean {
   const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-  return ALL_ALLOWED_EXTENSIONS.includes(ext as any);
+  return (ALL_ALLOWED_EXTENSIONS as readonly string[]).includes(ext);
 }
 
 /**
