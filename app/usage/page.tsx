@@ -269,25 +269,25 @@ export default function UsagePage() {
 
         {/* 날짜 필터 */}
         {activeTab !== 'dashboard' && (
-          <Card className="p-4 mb-6">
+          <Card className="p-3 sm:p-4 mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium text-foreground">날짜 필터:</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="justify-start text-left font-normal">
+                    <Button variant="outline" size="sm" className="justify-start text-left font-normal text-foreground">
                       {dateRange.from ? (
                         format(dateRange.from, 'yyyy-MM-dd', { locale: ko })
                       ) : (
-                        <span className="text-muted-foreground">시작일</span>
+                        <span>시작일</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
                     <Calendar
                       mode="single"
                       selected={dateRange.from}
@@ -301,15 +301,15 @@ export default function UsagePage() {
 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="justify-start text-left font-normal">
+                    <Button variant="outline" size="sm" className="justify-start text-left font-normal text-foreground">
                       {dateRange.to ? (
                         format(dateRange.to, 'yyyy-MM-dd', { locale: ko })
                       ) : (
-                        <span className="text-muted-foreground">종료일</span>
+                        <span>종료일</span>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
                     <Calendar
                       mode="single"
                       selected={dateRange.to}
@@ -320,13 +320,13 @@ export default function UsagePage() {
                 </Popover>
 
                 {(dateRange.from || dateRange.to) && (
-                  <Button variant="ghost" size="sm" onClick={clearDateRange}>
+                  <Button variant="default" size="sm" onClick={clearDateRange}>
                     초기화
                   </Button>
                 )}
               </div>
 
-              <div className="flex gap-2 ml-auto">
+              <div className="flex flex-wrap gap-2 sm:ml-auto w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"

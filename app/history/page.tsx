@@ -293,7 +293,7 @@ export default function HistoryPage() {
             )}
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
             {filteredPresentations.map((presentation) => (
               <PresentationCard
                 key={presentation.id}
@@ -494,6 +494,7 @@ function PresentationCard({
 }: PresentationCardProps) {
   const slideCount: number = presentation.slides?.length || 0;
   const [isVisible, setIsVisible] = useState(false);
+  const [scale, setScale] = useState(0.29167);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // 타이틀 글자수 제한 함수 (2줄을 넘지 않도록)
@@ -520,6 +521,30 @@ function PresentationCard({
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  // 카드 너비에 맞춰 동적으로 scale 계산
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    const updateScale = () => {
+      if (cardRef.current) {
+        const cardWidth = cardRef.current.offsetWidth;
+        // iframe 원본 크기: 1200px × 675px
+        // 카드 너비에 맞춰 scale 계산
+        const newScale = cardWidth / 1200;
+        setScale(newScale);
+      }
+    };
+
+    // 초기 scale 계산
+    updateScale();
+
+    // ResizeObserver로 카드 크기 변경 감지
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(cardRef.current);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   // 첫 슬라이드 HTML 생성
@@ -560,37 +585,33 @@ function PresentationCard({
   const thumbnailDoc = createThumbnailDocument();
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg max-w-[350px] mx-auto" ref={cardRef}>
+    <Card className="overflow-hidden transition-all hover:shadow-lg w-full" ref={cardRef}>
       {/* 썸네일 영역 */}
       <div
-        className="relative overflow-hidden"
+        className="relative overflow-hidden w-full"
         style={{
-          width: '350px',
-          height: '196.875px',
+          aspectRatio: '16/9',
           background: thumbnailDoc ? '#FFFFFF' : 'linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(210 40% 96.1%) 100%)',
         }}
       >
         {isVisible && thumbnailDoc ? (
-          <div className="absolute top-0 left-0 overflow-hidden">
-            <div
+          <div
+            className="absolute inset-0"
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
+          >
+            <iframe
+              srcDoc={thumbnailDoc}
+              sandbox="allow-same-origin"
               style={{
                 width: '1200px',
                 height: '675px',
-                transform: 'scale(0.29167)',
-                transformOrigin: 'top left',
+                border: 'none',
+                pointerEvents: 'none',
               }}
-            >
-              <iframe
-                srcDoc={thumbnailDoc}
-                sandbox="allow-same-origin"
-                style={{
-                  width: '1200px',
-                  height: '675px',
-                  border: 'none',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
+            />
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-white text-6xl">📊</div>

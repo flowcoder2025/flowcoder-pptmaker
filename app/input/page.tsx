@@ -276,7 +276,7 @@ export default function InputPage() {
           {/* 왼쪽: 옵션 패널 */}
           <div className="space-y-4">
             {/* 크래딧 잔액 */}
-            <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+            <Card className="p-4 bg-linear-to-br from-blue-50 to-indigo-50 border-blue-200">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-blue-700">
                   <CreditCard className="w-4 h-4" />
@@ -591,7 +591,7 @@ export default function InputPage() {
                       onClick={() => handleTemplateClick(template.example)}
                       variant="outline"
                       size="sm"
-                      className="flex-shrink-0 text-xs"
+                      className="shrink-0 text-xs"
                     >
                       {template.title}
                     </Button>
@@ -602,7 +602,7 @@ export default function InputPage() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder={`프리젠테이션 내용을 입력하세요...\n\n예시:\n우리 회사 소개 프리젠테이션을 만들어주세요.\n\n제목: 혁신적인 핀테크 기업\n\n회사 미션:\n- 금융 서비스의 디지털 혁신\n- 모두를 위한 쉬운 금융\n\n주요 서비스:\n1. 간편 송금 서비스\n2. 자산 관리 플랫폼\n\n감사합니다.`}
-                className="w-full flex-1 p-4 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full flex-1 min-h-[400px] md:min-h-[500px] lg:min-h-[600px] p-4 text-gray-900 bg-gray-50 border border-gray-200 rounded-lg resize-none overflow-y-scroll focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
               {/* 파일 첨부 */}

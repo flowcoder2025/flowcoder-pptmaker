@@ -69,6 +69,35 @@
 
 ### 🎨 UI/UX
 
+#### 2025-11-13
+- **Usage 페이지 Calendar 컴포넌트 정렬 및 스타일 개선**
+  - CSS Grid 레이아웃으로 전환하여 날짜 정렬 문제 완전 해결
+  - Flexbox → Grid (grid-cols-7)로 변경하여 1자리/2자리 숫자 정렬 일관성 확보
+  - 요일 헤더 스타일링 강화
+    - 모든 요일 텍스트에 볼드(font-bold) 적용
+    - 일요일 빨간색(text-red-600), 토요일 파란색(text-blue-600) 적용
+  - 월/년 레이블에 볼드(font-bold) 적용
+  - tabular-nums 폰트로 숫자 폭 일관성 확보
+  - 날짜 셀에 요일별 색상 적용 (토요일 파란색, 일요일 빨간색)
+  - 날짜 셀을 Grid cell에 맞춰 w-full aspect-square로 최적화
+
+- **Usage 페이지 반응형 개선**
+  - 캘린더 popover 모바일 대응 개선
+    - PopoverContent align을 start → center로 변경
+    - max-w-[calc(100vw-2rem)] 제약으로 화면 넘침 방지
+  - 날짜 필터 버튼 컨테이너에 flex-wrap 적용
+  - 빠른 필터 버튼 그룹 모바일 대응 (w-full sm:w-auto)
+
+- **Tabs 컴포넌트 활성 상태 스타일 개선**
+  - 활성 탭 하단에 3px primary 색상 border 추가
+  - rounded-none으로 깔끔한 직선 스타일 적용
+  - 폰트 세미볼드 적용으로 활성 탭 강조
+
+- **코드 품질 개선**
+  - Tailwind CSS lint 경고 수정
+  - [[data-slot=card-content]_&] → [data-slot=card-content]로 정규 구문 변경
+  - Calendar 컴포넌트 코드 가독성 개선 (주석 추가, 논리 분리)
+
 #### 2025-11-12
 - **중첩 네비게이션 개선: origin 파라미터로 최초 진입점 추적**
   - `origin` 파라미터 도입으로 최초 진입점(history/input) 추적
