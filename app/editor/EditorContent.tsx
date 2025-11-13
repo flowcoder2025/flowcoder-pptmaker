@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
@@ -231,29 +231,29 @@ export default function EditorContent() {
   const moreMenuItems = [
     {
       label: '템플릿 변경',
-      icon: '🎨',
+      icon: <Palette className="w-5 h-5" />,
       onClick: () => setIsTemplateSelectorOpen(true),
     },
     {
       label: '슬라이드 추가',
-      icon: '+',
+      icon: <Plus className="w-5 h-5" />,
       onClick: () => setIsAddDialogOpen(true),
     },
     {
       label: '슬라이드 복제',
-      icon: '📋',
+      icon: <Copy className="w-5 h-5" />,
       onClick: handleDuplicateSlide,
     },
     {
       label: '슬라이드 삭제',
-      icon: '🗑️',
+      icon: <Trash2 className="w-5 h-5" />,
       onClick: () => setIsDeleteDialogOpen(true),
       disabled: currentPresentation.slideData.slides.length <= 1,
       variant: 'danger' as const,
     },
     {
       label: '저장 후 보기',
-      icon: '👁️',
+      icon: <Eye className="w-5 h-5" />,
       onClick: handleSaveAndView,
     },
   ];
@@ -458,8 +458,9 @@ export default function EditorContent() {
 
       {/* 모바일 안내 메시지 */}
       <div className="md:hidden fixed bottom-4 left-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-lg">
-        <p className="text-sm text-blue-800 text-center">
-          💡 더 나은 편집 경험을 위해 데스크톱을 권장해요
+        <p className="flex items-center justify-center gap-2 text-sm text-blue-800">
+          <Lightbulb className="w-4 h-4" />
+          더 나은 편집 경험을 위해 데스크톱을 권장해요
         </p>
       </div>
 

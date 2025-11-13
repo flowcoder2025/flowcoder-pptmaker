@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, MessageSquareQuote } from 'lucide-react';
 import type { TestimonialSlide } from '@/types/slide';
 
 interface TestimonialSlideFormProps {
@@ -112,8 +113,9 @@ export default function TestimonialSlideForm({
             placeholder="추천사 내용을 입력하세요"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 2-3줄 정도가 가장 읽기 좋아요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>2-3줄 정도가 가장 읽기 좋아요</span>
           </p>
         </div>
 
@@ -170,15 +172,17 @@ export default function TestimonialSlideForm({
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="https://example.com/image.jpg"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 미입력 시 기본 이미지가 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>미입력 시 기본 이미지가 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          💬 추천사는 큰 따옴표와 함께 중앙 정렬로 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <MessageSquareQuote className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>추천사는 큰 따옴표와 함께 중앙 정렬로 표시돼요</span>
         </p>
       </div>
     </div>

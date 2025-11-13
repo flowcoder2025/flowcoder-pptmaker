@@ -5,6 +5,8 @@
 
 'use client';
 
+import { Lightbulb } from 'lucide-react';
+
 interface Template {
   id: string;
   name: string;
@@ -113,9 +115,9 @@ export default function TemplateSelector({
 
         {/* 프리미엄 템플릿 안내 (향후 추가 시) */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            💡 <strong>프리미엄 템플릿</strong>은 향후 업데이트를 통해 추가될
-            예정이에요
+          <p className="flex items-start gap-2 text-sm text-gray-600">
+            <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span><strong>프리미엄 템플릿</strong>은 향후 업데이트를 통해 추가될 예정이에요</span>
           </p>
         </div>
       </div>

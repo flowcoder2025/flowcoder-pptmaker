@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Mail, Heart } from 'lucide-react';
 import type { ThankYouSlide } from '@/types/slide';
 
 interface ThankYouSlideFormProps {
@@ -56,8 +57,9 @@ export default function ThankYouSlideForm({ slide, onChange }: ThankYouSlideForm
             placeholder="예: 감사합니다!"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 간결하고 진심이 담긴 감사 인사를 작성하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>간결하고 진심이 담긴 감사 인사를 작성하세요</span>
           </p>
         </div>
 
@@ -73,15 +75,17 @@ export default function ThankYouSlideForm({ slide, onChange }: ThankYouSlideForm
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="예: email@example.com | +82-10-1234-5678"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            📧 이메일, 전화번호, 웹사이트 등을 입력하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>이메일, 전화번호, 웹사이트 등을 입력하세요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <p className="text-xs text-green-700 text-center">
-          🙏 마지막 슬라이드로 감사 메시지와 연락처를 표시해요
+        <p className="flex items-center justify-center gap-1.5 text-xs text-green-700">
+          <Heart className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>마지막 슬라이드로 감사 메시지와 연락처를 표시해요</span>
         </p>
       </div>
     </div>

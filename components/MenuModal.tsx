@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { CreditCard, Settings } from 'lucide-react';
 
 /**
  * 메뉴 모달 컴포넌트
@@ -55,7 +56,7 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
             onClick={() => handleNavigation('/subscription')}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
           >
-            <span className="text-2xl">💳</span>
+            <CreditCard className="w-6 h-6 text-gray-700" />
             <div>
               <div className="font-medium text-gray-900">구독 관리</div>
               <div className="text-sm text-gray-600">요금제를 확인하고 관리해요</div>
@@ -80,7 +81,7 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
               onClick={() => handleNavigation('/dev-tools')}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
             >
-              <span className="text-2xl">🛠️</span>
+              <Settings className="w-6 h-6 text-gray-700" />
               <div>
                 <div className="font-medium text-gray-900">개발자 도구</div>
                 <div className="text-sm text-gray-600">디버깅 도구에요</div>

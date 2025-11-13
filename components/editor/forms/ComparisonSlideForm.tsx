@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Scale } from 'lucide-react';
 import type { ComparisonSlide } from '@/types/slide';
 
 interface ComparisonSlideFormProps {
@@ -163,8 +164,9 @@ export default function ComparisonSlideForm({ slide, onChange }: ComparisonSlide
       </div>
 
       <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-        <p className="text-xs text-teal-700">
-          ⚖️ 좌우를 나란히 비교해요. Before/After, A안 vs B안 등에 유용해요
+        <p className="flex items-center gap-1.5 text-xs text-teal-700">
+          <Scale className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>좌우를 나란히 비교해요. Before/After, A안 vs B안 등에 유용해요</span>
         </p>
       </div>
     </div>

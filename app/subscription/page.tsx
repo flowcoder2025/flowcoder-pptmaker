@@ -5,17 +5,9 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
+import { usePortOnePayment } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
 import { Check, X, Star, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
@@ -23,6 +15,7 @@ import type { SubscriptionPlan } from '@/types/monetization';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
+import PaymentChannelModal from '@/components/PaymentChannelModal';
 
 /**
  * 구독 관리 페이지
@@ -261,110 +254,16 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* 결제 채널 선택 다이얼로그 */}
-      <Dialog open={isChannelDialogOpen} onOpenChange={setIsChannelDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>결제 방법을 선택해주세요</DialogTitle>
-            <DialogDescription>
-              빠르고 안전하게 결제할 수 있어요
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6">
-            {/* 토스페이 */}
-            <button
-              type="button"
-              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.TOSSPAY.key)}
-              disabled={isLoading}
-              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-blue-50 to-blue-100 hover:border-blue-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl">💳</span>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-blue-700">토스페이</div>
-                </div>
-              </div>
-            </button>
-
-            {/* 카카오페이 (일반) */}
-            <button
-              type="button"
-              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.KAKAOPAY_ONETIME.key)}
-              disabled={isLoading}
-              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-yellow-50 to-yellow-100 hover:border-yellow-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl">💛</span>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-yellow-800">카카오페이</div>
-                </div>
-              </div>
-            </button>
-
-            {/* 카카오페이 (정기) */}
-            <button
-              type="button"
-              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.KAKAOPAY_SUBSCRIPTION.key)}
-              disabled={isLoading}
-              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-yellow-100 to-yellow-200 hover:border-yellow-600 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl">🔄</span>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-yellow-900">카카오페이</div>
-                  <span className="text-xs px-2 py-0.5 bg-yellow-300 text-yellow-900 rounded-full font-semibold">
-                    정기
-                  </span>
-                </div>
-              </div>
-            </button>
-
-            {/* 이니시스 (일반) */}
-            <button
-              type="button"
-              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.INICIS_ONETIME.key)}
-              disabled={isLoading}
-              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-gray-50 to-gray-100 hover:border-gray-500 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl">🏦</span>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-gray-700">이니시스</div>
-                </div>
-              </div>
-            </button>
-
-            {/* 이니시스 (정기) */}
-            <button
-              type="button"
-              onClick={() => handlePaymentChannelSelect(PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key)}
-              disabled={isLoading}
-              className="relative h-24 rounded-xl border-2 border-transparent bg-gradient-to-br from-gray-100 to-gray-200 hover:border-gray-600 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl">🔄</span>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-gray-800">이니시스</div>
-                  <span className="text-xs px-2 py-0.5 bg-gray-300 text-gray-800 rounded-full font-semibold">
-                    정기
-                  </span>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsChannelDialogOpen(false)}
-              disabled={isLoading}
-            >
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* 결제 채널 선택 모달 */}
+      <PaymentChannelModal
+        isOpen={isChannelDialogOpen}
+        onClose={() => setIsChannelDialogOpen(false)}
+        onSelectChannel={handlePaymentChannelSelect}
+        paymentType="subscription"
+        isLoading={isLoading}
+        title="구독 결제 방법을 선택해주세요"
+        description={selectedPlan ? `${PLAN_BENEFITS[selectedPlan].name} 플랜 (1개월)` : '빠르고 안전하게 결제할 수 있어요'}
+      />
 
       {/* 로딩 오버레이 */}
       {isLoading && (

@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { Camera, Loader2 } from 'lucide-react';
 
 interface ImageUploaderProps {
   currentImage?: string; // 현재 이미지 URL (base64)
@@ -184,13 +185,13 @@ export default function ImageUploader({
           />
 
           {isProcessing ? (
-            <div className="text-gray-600">
-              <span className="text-2xl mb-2 block">⏳</span>
+            <div className="text-gray-600 flex flex-col items-center">
+              <Loader2 className="w-12 h-12 mb-2 animate-spin" />
               <p>이미지를 처리하고 있어요...</p>
             </div>
           ) : (
-            <div className="text-gray-600">
-              <span className="text-4xl mb-2 block">📷</span>
+            <div className="text-gray-600 flex flex-col items-center">
+              <Camera className="w-16 h-16 mb-2" />
               <p className="text-lg font-medium mb-1">
                 이미지를 드래그하거나 클릭해서 업로드하세요
               </p>

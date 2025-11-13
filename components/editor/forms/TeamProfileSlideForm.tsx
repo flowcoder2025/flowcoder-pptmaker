@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Users } from 'lucide-react';
 import type { TeamProfileSlide } from '@/types/slide';
 
 interface TeamProfileSlideFormProps {
@@ -222,15 +223,17 @@ export default function TeamProfileSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 1-3명: 인원수만큼, 4-6명: 3열, 7명 이상: 4열 그리드로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>1-3명: 인원수만큼, 4-6명: 3열, 7명 이상: 4열 그리드로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          👥 각 프로필은 원형 이미지와 이름, 역할, 소개로 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <Users className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>각 프로필은 원형 이미지와 이름, 역할, 소개로 표시돼요</span>
         </p>
       </div>
     </div>

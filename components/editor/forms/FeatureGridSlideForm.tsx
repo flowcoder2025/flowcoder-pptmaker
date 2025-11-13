@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Palette } from 'lucide-react';
 import type { FeatureGridSlide } from '@/types/slide';
 
 interface FeatureGridSlideFormProps {
@@ -203,15 +204,17 @@ export default function FeatureGridSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 일반적으로 3개 항목이 3열 그리드로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>일반적으로 3개 항목이 3열 그리드로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          🎨 각 기능은 아이콘, 제목, 설명이 포함된 카드로 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <Palette className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>각 기능은 아이콘, 제목, 설명이 포함된 카드로 표시돼요</span>
         </p>
       </div>
     </div>

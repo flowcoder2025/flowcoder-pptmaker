@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Columns2 } from 'lucide-react';
 import type { TwoColumnSlide } from '@/types/slide';
 
 interface TwoColumnSlideFormProps {
@@ -108,8 +109,9 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
       </div>
 
       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-        <p className="text-xs text-indigo-700">
-          📑 두 컬럼은 슬라이드에서 50:50 비율로 나란히 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-indigo-700">
+          <Columns2 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>두 컬럼은 슬라이드에서 50:50 비율로 나란히 표시돼요</span>
         </p>
       </div>
     </div>

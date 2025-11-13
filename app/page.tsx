@@ -7,6 +7,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
+import { Bot, Palette, PenLine, Search, Zap, Save } from 'lucide-react';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
@@ -65,7 +66,9 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Feature 1 */}
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
-            <div className="text-5xl mb-4">🤖</div>
+            <div className="flex justify-center mb-4">
+              <Bot className="w-16 h-16 text-primary" />
+            </div>
             <h3 className="text-xl font-semibold mb-3 text-foreground">
               AI 자동 생성
             </h3>
@@ -78,7 +81,9 @@ export default function HomePage() {
 
           {/* Feature 2 */}
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
-            <div className="text-5xl mb-4">✏️</div>
+            <div className="flex justify-center mb-4">
+              <PenLine className="w-16 h-16 text-primary" />
+            </div>
             <h3 className="text-xl font-semibold mb-3 text-foreground">
               무제한 편집
             </h3>
@@ -91,7 +96,9 @@ export default function HomePage() {
 
           {/* Feature 3 */}
           <Card className="p-8 text-center hover:shadow-lg transition-shadow border-border">
-            <div className="text-5xl mb-4">🎨</div>
+            <div className="flex justify-center mb-4">
+              <Palette className="w-16 h-16 text-primary" />
+            </div>
             <h3 className="text-xl font-semibold mb-3 text-foreground">
               다양한 템플릿
             </h3>
@@ -119,25 +126,65 @@ export default function HomePage() {
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { step: '1', icon: '📝', title: '텍스트 입력', desc: '프리젠테이션 내용을 입력해요' },
-              { step: '2', icon: '🔍', title: '자료 조사', desc: 'AI가 자동으로 조사해요 (선택)' },
-              { step: '3', icon: '⚡', title: 'AI 생성', desc: '슬라이드를 자동 생성해요' },
-              { step: '4', icon: '💾', title: '저장·공유', desc: 'PDF/PPTX로 다운로드해요' },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="text-6xl mb-4">{item.icon}</div>
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
-                  {item.step}
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {item.desc}
-                </p>
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <PenLine className="w-16 h-16 text-primary" />
               </div>
-            ))}
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
+                1
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">
+                텍스트 입력
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                프리젠테이션 내용을 입력해요
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <Search className="w-16 h-16 text-primary" />
+              </div>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
+                2
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">
+                자료 조사
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                AI가 자동으로 조사해요 (선택)
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <Zap className="w-16 h-16 text-primary" />
+              </div>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
+                3
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">
+                AI 생성
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                슬라이드를 자동 생성해요
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <Save className="w-16 h-16 text-primary" />
+              </div>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white font-bold mb-3">
+                4
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">
+                저장·공유
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                PDF/PPTX로 다운로드해요
+              </p>
+            </div>
           </div>
         </MaxWidthContainer>
       </div>

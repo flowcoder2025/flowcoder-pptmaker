@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, RotateCw } from 'lucide-react';
 import type { ProcessSlide } from '@/types/slide';
 
 interface ProcessSlideFormProps {
@@ -180,15 +181,17 @@ export default function ProcessSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 각 단계는 번호와 함께 세로로 연결되어 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>각 단계는 번호와 함께 세로로 연결되어 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          🔄 프로세스는 세로 플로우 형태로 단계 간 연결선이 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <RotateCw className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>프로세스는 세로 플로우 형태로 단계 간 연결선이 표시돼요</span>
         </p>
       </div>
     </div>

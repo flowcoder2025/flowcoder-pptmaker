@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Calendar } from 'lucide-react';
 import type { RoadmapSlide } from '@/types/slide';
 
 interface RoadmapSlideFormProps {
@@ -226,15 +227,17 @@ export default function RoadmapSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 In Progress는 파란색, Planned는 회색으로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>In Progress는 파란색, Planned는 회색으로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          🗓️ 로드맵은 타임라인 형태로 기간, 상태, 제목, 설명이 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>로드맵은 타임라인 형태로 기간, 상태, 제목, 설명이 표시돼요</span>
         </p>
       </div>
     </div>

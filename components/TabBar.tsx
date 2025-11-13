@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { TOSS_COLORS } from '@/constants/design';
+import { Home, Star, Gem } from 'lucide-react';
 
 /**
  * TabBar 컴포넌트
@@ -23,7 +24,7 @@ import { TOSS_COLORS } from '@/constants/design';
 interface Tab {
   id: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   path: string;
 }
 
@@ -31,19 +32,19 @@ const TABS: Tab[] = [
   {
     id: 'home',
     label: '홈',
-    icon: '🏠',
+    icon: <Home className="w-6 h-6" />,
     path: '/'
   },
   {
     id: 'subscription',
     label: '구독',
-    icon: '⭐',
+    icon: <Star className="w-6 h-6" />,
     path: '/subscription'
   },
   {
     id: 'credits',
     label: '크레딧',
-    icon: '💎',
+    icon: <Gem className="w-6 h-6" />,
     path: '/credits'
   },
 ];

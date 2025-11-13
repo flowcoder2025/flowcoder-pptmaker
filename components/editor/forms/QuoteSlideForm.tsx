@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, PenLine, MessageSquare } from 'lucide-react';
 import type { QuoteSlide } from '@/types/slide';
 
 interface QuoteSlideFormProps {
@@ -56,8 +57,9 @@ export default function QuoteSlideForm({ slide, onChange }: QuoteSlideFormProps)
             placeholder="인용하고 싶은 문구를 입력하세요"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 임팩트 있는 명언이나 핵심 메시지를 인용하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>임팩트 있는 명언이나 핵심 메시지를 인용하세요</span>
           </p>
         </div>
 
@@ -74,15 +76,17 @@ export default function QuoteSlideForm({ slide, onChange }: QuoteSlideFormProps)
             placeholder="예: 스티브 잡스, CEO"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            📝 이름, 직함, 출처 등을 명확히 표기하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <PenLine className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>이름, 직함, 출처 등을 명확히 표기하세요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <p className="text-xs text-yellow-700 italic text-center">
-          💬 인용문은 큰 따옴표와 함께 이탤릭체로 표시돼요
+        <p className="flex items-center justify-center gap-1.5 text-xs text-yellow-700 italic">
+          <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>인용문은 큰 따옴표와 함께 이탤릭체로 표시돼요</span>
         </p>
       </div>
     </div>

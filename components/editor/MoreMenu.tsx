@@ -9,7 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 
 interface MenuItem {
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   variant?: 'default' | 'danger';

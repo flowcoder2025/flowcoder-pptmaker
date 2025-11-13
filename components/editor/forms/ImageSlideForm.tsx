@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, PenLine, CheckCircle2 } from 'lucide-react';
 import type { ImageSlide } from '@/types/slide';
 import ImageUploader from '../ImageUploader';
 
@@ -104,8 +105,9 @@ export default function ImageSlideForm({ slide, onChange }: ImageSlideFormProps)
             <option value="sideBySide">2개 나란히</option>
             <option value="grid">여러 이미지 그리드</option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
-            💡 슬라이드에 표시할 이미지 개수를 선택하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>슬라이드에 표시할 이미지 개수를 선택하세요</span>
           </p>
         </div>
 
@@ -137,8 +139,9 @@ export default function ImageSlideForm({ slide, onChange }: ImageSlideFormProps)
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
             placeholder="이미지에 대한 추가 설명을 입력하세요"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            📝 이미지를 보충하는 간단한 설명을 추가하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <PenLine className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>이미지를 보충하는 간단한 설명을 추가하세요</span>
           </p>
         </div>
 
@@ -173,8 +176,9 @@ export default function ImageSlideForm({ slide, onChange }: ImageSlideFormProps)
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-xs text-blue-700">
-          ✅ 이미지는 Base64로 인코딩되어 저장돼요 (최대 2MB)
+        <p className="flex items-center gap-1.5 text-xs text-blue-700">
+          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>이미지는 Base64로 인코딩되어 저장돼요 (최대 2MB)</span>
         </p>
       </div>
     </div>

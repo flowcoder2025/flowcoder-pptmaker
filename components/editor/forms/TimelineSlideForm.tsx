@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Clock } from 'lucide-react';
 import type { TimelineSlide } from '@/types/slide';
 
 interface TimelineSlideFormProps {
@@ -160,15 +161,17 @@ export default function TimelineSlideForm({ slide, onChange }: TimelineSlideForm
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 시간순, 단계순으로 배치돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>시간순, 단계순으로 배치돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-        <p className="text-xs text-orange-700">
-          🕒 타임라인은 시간 흐름이나 단계별 진행 과정을 표현해요
+        <p className="flex items-center gap-1.5 text-xs text-orange-700">
+          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>타임라인은 시간 흐름이나 단계별 진행 과정을 표현해요</span>
         </p>
       </div>
     </div>

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Pin } from 'lucide-react';
 import type { SectionSlide } from '@/types/slide';
 
 interface SectionSlideFormProps {
@@ -46,15 +47,16 @@ export default function SectionSlideForm({ slide, onChange }: SectionSlideFormPr
             placeholder="섹션 제목을 입력하세요"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 다음 내용의 주제를 명확하게 표현하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>다음 내용의 주제를 명확하게 표현하세요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-gray-100 border border-gray-300 rounded-lg p-6">
-        <div className="text-center">
-          <div className="text-3xl mb-2">📌</div>
+        <div className="text-center flex flex-col items-center">
+          <Pin className="w-12 h-12 mb-2 text-gray-700" />
           <p className="text-sm font-medium text-gray-700 mb-1">섹션 구분 슬라이드</p>
           <p className="text-xs text-gray-600">
             어두운 배경에 큰 제목으로 표시되어 내용을 구분해요

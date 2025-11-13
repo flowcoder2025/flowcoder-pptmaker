@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, DollarSign } from 'lucide-react';
 import type { PricingSlide } from '@/types/slide';
 
 interface PricingSlideFormProps {
@@ -318,15 +319,17 @@ export default function PricingSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 일반적으로 3개 플랜이 가로로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>일반적으로 3개 플랜이 가로로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          💰 추천 플랜은 파란색 헤더와 확대 효과로 강조돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <DollarSign className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>추천 플랜은 파란색 헤더와 확대 효과로 강조돼요</span>
         </p>
       </div>
     </div>

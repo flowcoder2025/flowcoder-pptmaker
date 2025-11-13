@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, ImageIcon } from 'lucide-react';
 import type { ImageTextSlide } from '@/types/slide';
 
 interface ImageTextSlideFormProps {
@@ -189,15 +190,17 @@ export default function ImageTextSlideForm({
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 각 항목은 화살표(→)와 함께 리스트로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>각 항목은 화살표(→)와 함께 리스트로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          🖼️ 이미지는 55%, 텍스트는 45% 비율로 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <ImageIcon className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>이미지는 55%, 텍스트는 45% 비율로 표시돼요</span>
         </p>
       </div>
     </div>

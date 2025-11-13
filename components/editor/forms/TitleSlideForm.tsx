@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, Pin, CheckCircle2 } from 'lucide-react';
 import type { TitleSlide } from '@/types/slide';
 
 interface TitleSlideFormProps {
@@ -56,8 +57,9 @@ export default function TitleSlideForm({ slide, onChange }: TitleSlideFormProps)
             placeholder="프리젠테이션 제목을 입력하세요"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 명확하고 임팩트 있는 제목을 작성하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>명확하고 임팩트 있는 제목을 작성하세요</span>
           </p>
         </div>
 
@@ -73,15 +75,17 @@ export default function TitleSlideForm({ slide, onChange }: TitleSlideFormProps)
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="부제목을 입력하세요"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            📌 제목을 보충하는 간단한 설명을 추가하세요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Pin className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>제목을 보충하는 간단한 설명을 추가하세요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-xs text-blue-700">
-          ✅ 변경사항은 실시간으로 미리보기에 반영돼요 (Task 5 구현 후)
+        <p className="flex items-center gap-1.5 text-xs text-blue-700">
+          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>변경사항은 실시간으로 미리보기에 반영돼요 (Task 5 구현 후)</span>
         </p>
       </div>
     </div>

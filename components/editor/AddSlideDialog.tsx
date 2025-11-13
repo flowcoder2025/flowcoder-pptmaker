@@ -6,6 +6,21 @@
 'use client';
 
 import type { SlideType } from '@/types/slide';
+import {
+  FileText,
+  Pin,
+  PenLine,
+  ClipboardList,
+  Columns2,
+  Table,
+  TrendingUp,
+  TrendingDown,
+  Scale,
+  Calendar,
+  MessageSquare,
+  Heart,
+  Lightbulb,
+} from 'lucide-react';
 
 interface AddSlideDialogProps {
   isOpen: boolean;
@@ -17,22 +32,22 @@ interface SlideTypeOption {
   type: SlideType;
   label: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const slideTypeOptions: SlideTypeOption[] = [
-  { type: 'title', label: '제목 슬라이드', description: '프리젠테이션 시작', icon: '📄' },
-  { type: 'section', label: '섹션 구분', description: '새로운 섹션 시작', icon: '📌' },
-  { type: 'content', label: '본문 슬라이드', description: '텍스트 중심 내용', icon: '📝' },
-  { type: 'bullet', label: '리스트 슬라이드', description: '불릿 포인트', icon: '📋' },
-  { type: 'twoColumn', label: '2단 레이아웃', description: '좌우 비교', icon: '📑' },
-  { type: 'table', label: '표 슬라이드', description: '테이블 데이터', icon: '📊' },
-  { type: 'chart', label: '차트 슬라이드', description: '데이터 시각화', icon: '📈' },
-  { type: 'stats', label: '통계 슬라이드', description: '4개 통계 카드', icon: '📉' },
-  { type: 'comparison', label: '비교 슬라이드', description: '장단점 비교', icon: '⚖️' },
-  { type: 'timeline', label: '타임라인', description: '시간 흐름', icon: '📅' },
-  { type: 'quote', label: '인용 슬라이드', description: '명언/인용문', icon: '💬' },
-  { type: 'thankYou', label: '감사 슬라이드', description: '마무리', icon: '🙏' },
+  { type: 'title', label: '제목 슬라이드', description: '프리젠테이션 시작', icon: <FileText className="w-8 h-8" /> },
+  { type: 'section', label: '섹션 구분', description: '새로운 섹션 시작', icon: <Pin className="w-8 h-8" /> },
+  { type: 'content', label: '본문 슬라이드', description: '텍스트 중심 내용', icon: <PenLine className="w-8 h-8" /> },
+  { type: 'bullet', label: '리스트 슬라이드', description: '불릿 포인트', icon: <ClipboardList className="w-8 h-8" /> },
+  { type: 'twoColumn', label: '2단 레이아웃', description: '좌우 비교', icon: <Columns2 className="w-8 h-8" /> },
+  { type: 'table', label: '표 슬라이드', description: '테이블 데이터', icon: <Table className="w-8 h-8" /> },
+  { type: 'chart', label: '차트 슬라이드', description: '데이터 시각화', icon: <TrendingUp className="w-8 h-8" /> },
+  { type: 'stats', label: '통계 슬라이드', description: '4개 통계 카드', icon: <TrendingDown className="w-8 h-8" /> },
+  { type: 'comparison', label: '비교 슬라이드', description: '장단점 비교', icon: <Scale className="w-8 h-8" /> },
+  { type: 'timeline', label: '타임라인', description: '시간 흐름', icon: <Calendar className="w-8 h-8" /> },
+  { type: 'quote', label: '인용 슬라이드', description: '명언/인용문', icon: <MessageSquare className="w-8 h-8" /> },
+  { type: 'thankYou', label: '감사 슬라이드', description: '마무리', icon: <Heart className="w-8 h-8" /> },
 ];
 
 export default function AddSlideDialog({ isOpen, onClose, onAdd }: AddSlideDialogProps) {
@@ -92,8 +107,9 @@ export default function AddSlideDialog({ isOpen, onClose, onAdd }: AddSlideDialo
 
         {/* 도움말 */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            💡 <strong>팁</strong>: 슬라이드 타입을 선택하면 현재 위치 다음에 추가돼요
+          <p className="flex items-center gap-2 text-sm text-gray-600">
+            <Lightbulb className="w-4 h-4 flex-shrink-0" />
+            <span><strong>팁</strong>: 슬라이드 타입을 선택하면 현재 위치 다음에 추가돼요</span>
           </p>
         </div>
       </div>

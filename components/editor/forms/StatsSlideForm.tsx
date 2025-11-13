@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, BarChart3 } from 'lucide-react';
 import type { StatsSlide } from '@/types/slide';
 
 interface StatsSlideFormProps {
@@ -155,15 +156,17 @@ export default function StatsSlideForm({ slide, onChange }: StatsSlideFormProps)
             ))}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 일반적으로 2x2 그리드(4개)로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>일반적으로 2x2 그리드(4개)로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          📊 통계는 큰 수치와 함께 작은 설명으로 표시돼요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <BarChart3 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>통계는 큰 수치와 함께 작은 설명으로 표시돼요</span>
         </p>
       </div>
     </div>

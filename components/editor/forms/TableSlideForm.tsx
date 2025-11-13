@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, BarChart3 } from 'lucide-react';
 import type { TableSlide } from '@/types/slide';
 
 interface TableSlideFormProps {
@@ -220,15 +221,17 @@ export default function TableSlideForm({ slide, onChange }: TableSlideFormProps)
             </table>
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 표는 헤더(굵게)와 데이터 행으로 구성돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>표는 헤더(굵게)와 데이터 행으로 구성돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-        <p className="text-xs text-cyan-700">
-          📊 표 형식으로 데이터를 정리해 보여줘요
+        <p className="flex items-center gap-1.5 text-xs text-cyan-700">
+          <BarChart3 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>표 형식으로 데이터를 정리해 보여줘요</span>
         </p>
       </div>
     </div>

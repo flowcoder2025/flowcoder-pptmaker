@@ -21,6 +21,27 @@ import {
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  FileText,
+  PenLine,
+  ClipboardList,
+  Pin,
+  Table,
+  TrendingUp,
+  TrendingDown,
+  Scale,
+  Calendar,
+  MessageSquare,
+  Heart,
+  Columns2,
+  Smartphone,
+  Users,
+  RotateCw,
+  Map,
+  DollarSign,
+  ImageIcon,
+  Images,
+} from 'lucide-react';
 import type { Slide } from '@/types/slide';
 
 interface SlideListProps {
@@ -33,32 +54,32 @@ interface SlideListProps {
 /**
  * 슬라이드 타입에 따른 아이콘 반환
  */
-function getSlideIcon(type: string): string {
-  const iconMap: Record<string, string> = {
-    title: '📄',
-    content: '📝',
-    bullet: '📋',
-    section: '📌',
-    table: '📊',
-    chart: '📈',
-    stats: '📉',
-    comparison: '⚖️',
-    timeline: '📅',
-    quote: '💬',
-    thankYou: '🙏',
-    twoColumn: '📑',
+function getSlideIcon(type: string): React.ReactNode {
+  const iconMap: Record<string, React.ReactNode> = {
+    title: <FileText className="w-6 h-6" />,
+    content: <PenLine className="w-6 h-6" />,
+    bullet: <ClipboardList className="w-6 h-6" />,
+    section: <Pin className="w-6 h-6" />,
+    table: <Table className="w-6 h-6" />,
+    chart: <TrendingUp className="w-6 h-6" />,
+    stats: <TrendingDown className="w-6 h-6" />,
+    comparison: <Scale className="w-6 h-6" />,
+    timeline: <Calendar className="w-6 h-6" />,
+    quote: <MessageSquare className="w-6 h-6" />,
+    thankYou: <Heart className="w-6 h-6" />,
+    twoColumn: <Columns2 className="w-6 h-6" />,
     // 9개 새 슬라이드 타입
-    featureGrid: '📱',
-    teamProfile: '👥',
-    process: '🔄',
-    roadmap: '🗓️',
-    pricing: '💰',
-    imageText: '🖼️',
-    agenda: '📋',
-    testimonial: '💬',
-    gallery: '🖼️',
+    featureGrid: <Smartphone className="w-6 h-6" />,
+    teamProfile: <Users className="w-6 h-6" />,
+    process: <RotateCw className="w-6 h-6" />,
+    roadmap: <Map className="w-6 h-6" />,
+    pricing: <DollarSign className="w-6 h-6" />,
+    imageText: <ImageIcon className="w-6 h-6" />,
+    agenda: <ClipboardList className="w-6 h-6" />,
+    testimonial: <MessageSquare className="w-6 h-6" />,
+    gallery: <Images className="w-6 h-6" />,
   };
-  return iconMap[type] || '📄';
+  return iconMap[type] || <FileText className="w-6 h-6" />;
 }
 
 /**
@@ -152,7 +173,7 @@ function SortableSlideItem({ slide, index, isSelected, onSelect }: SortableSlide
         </div>
 
         {/* 아이콘 */}
-        <div className="text-2xl mb-1">{icon}</div>
+        <div className="mb-1 text-gray-700">{icon}</div>
 
         {/* 타입 이름 */}
         <div

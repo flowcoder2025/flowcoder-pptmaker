@@ -6,7 +6,22 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { FileText, Loader2 } from 'lucide-react';
+import {
+  FileText,
+  Loader2,
+  CreditCard,
+  Palette,
+  Search,
+  Gift,
+  Zap,
+  Sparkles,
+  BarChart3,
+  AlertTriangle,
+  CheckCircle2,
+  RotateCw,
+  Lightbulb,
+  Bot
+} from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
@@ -266,7 +281,10 @@ export default function InputPage() {
             {/* 크래딧 잔액 */}
             <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-blue-700">💳 보유 크래딧</span>
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-blue-700">
+                  <CreditCard className="w-4 h-4" />
+                  <span>보유 크래딧</span>
+                </div>
                 {isPremiumUser && (
                   <span className="text-xs text-blue-600">Pro 플랜</span>
                 )}
@@ -346,9 +364,10 @@ export default function InputPage() {
 
             {/* 색상 테마 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                🎨 색상 테마
-              </h3>
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
+                <Palette className="w-4 h-4" />
+                <h3>색상 테마</h3>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {COLOR_PRESETS.slice(0, 6).map((preset) => {
                   const isSelected = selectedColorPresetId === preset.id;
@@ -383,9 +402,10 @@ export default function InputPage() {
 
             {/* 자료 조사 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                🔍 자료 조사
-              </h3>
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
+                <Search className="w-4 h-4" />
+                <h3>자료 조사</h3>
+              </div>
               <div className="space-y-2">
                 {(Object.keys(RESEARCH_MODE_CONFIG) as ResearchMode[]).map((mode) => {
                   const config = RESEARCH_MODE_CONFIG[mode];
@@ -401,7 +421,7 @@ export default function InputPage() {
                     const hasCredit = totalCredits >= creditCost;
 
                     if (isFirstFree) {
-                      priceLabel = '🎁 최초 1회 무료';
+                      priceLabel = '최초 1회 무료';
                     } else if (hasCredit) {
                       priceLabel = `${creditCost} 크래딧`;
                     } else {
@@ -440,9 +460,12 @@ export default function InputPage() {
 
             {/* 생성 모델 */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                🤖 생성 모델
-              </h3>
+              <div className="flex items-center gap-1.5 mb-3">
+                <Bot className="w-4 h-4 text-gray-900" />
+                <h3 className="text-sm font-semibold text-gray-900">
+                  생성 모델
+                </h3>
+              </div>
               <div className="space-y-2">
                 <button
                   onClick={() => handleQualityClick(false)}
@@ -453,9 +476,12 @@ export default function InputPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">
-                      ⚡ 빠른 모델
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-gray-900" />
+                      <span className="text-sm font-semibold text-gray-900">
+                        빠른 모델
+                      </span>
+                    </div>
                     <span className="text-xs font-semibold text-green-600">
                       무료
                     </span>
@@ -474,9 +500,12 @@ export default function InputPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">
-                      ✨ 추론 모델
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-gray-900" />
+                      <span className="text-sm font-semibold text-gray-900">
+                        추론 모델
+                      </span>
+                    </div>
                     <span className="text-xs font-semibold text-blue-600">
                       {(() => {
                         const isFirstFree = isFirstTimeFree('qualityGeneration');
@@ -484,7 +513,7 @@ export default function InputPage() {
                         const hasCredit = totalCredits >= creditCost;
 
                         if (isFirstFree) {
-                          return '🎁 최초 1회 무료';
+                          return '최초 1회 무료';
                         } else if (hasCredit) {
                           return `${creditCost} 크래딧`;
                         } else {
@@ -503,9 +532,12 @@ export default function InputPage() {
             {/* 슬라이드 분량 */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  📊 슬라이드 분량
-                </h3>
+                <div className="flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-gray-900" />
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    슬라이드 분량
+                  </h3>
+                </div>
                 <span className="text-sm font-bold text-blue-600">
                   {targetSlideCount}장
                 </span>
@@ -526,11 +558,13 @@ export default function InputPage() {
               </div>
 
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-xs text-yellow-800">
-                  ⚠️ AI 특성상 ±2-3장 오차가 있을 수 있어요
+                <p className="flex items-center gap-1.5 text-xs text-yellow-800">
+                  <AlertTriangle className="w-4 h-4" />
+                  AI 특성상 ±2-3장 오차가 있을 수 있어요
                 </p>
-                <p className="text-xs text-gray-600 mt-1">
-                  💡 {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
+                <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
+                  <Lightbulb className="w-4 h-4" />
+                  {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
                 </p>
               </div>
             </div>
@@ -543,9 +577,12 @@ export default function InputPage() {
               {/* 템플릿 예시 (카드 내부 상단) */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    📄 템플릿 예시
-                  </h3>
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-gray-900" />
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      템플릿 예시
+                    </h3>
+                  </div>
                   <span className="text-xs text-gray-500">
                     클릭하면 내용이 자동으로 입력돼요
                   </span>
@@ -638,14 +675,14 @@ export default function InputPage() {
               <div className="text-sm text-gray-600">
                 {researchMode !== 'none' && (
                   <div>
-                    {generationStep === 'parsing' && '1️⃣ 자료 조사 → 2️⃣ 콘텐츠 생성 → 3️⃣ 구조 파싱 → 4️⃣ 슬라이드 생성'}
-                    {generationStep === 'generating' && '✅ 자료 조사 → ✅ 콘텐츠 생성 → ✅ 구조 파싱 → 🔄 슬라이드 생성 중'}
+                    {generationStep === 'parsing' && '자료 조사 → 콘텐츠 생성 → 구조 파싱 → 슬라이드 생성'}
+                    {generationStep === 'generating' && '✓ 자료 조사 → ✓ 콘텐츠 생성 → ✓ 구조 파싱 → 진행 중: 슬라이드 생성'}
                   </div>
                 )}
                 {researchMode === 'none' && (
                   <div>
-                    {generationStep === 'parsing' && '1️⃣ 콘텐츠 생성 → 2️⃣ 구조 파싱 → 3️⃣ 슬라이드 생성'}
-                    {generationStep === 'generating' && '✅ 콘텐츠 생성 → ✅ 구조 파싱 → 🔄 슬라이드 생성 중'}
+                    {generationStep === 'parsing' && '콘텐츠 생성 → 구조 파싱 → 슬라이드 생성'}
+                    {generationStep === 'generating' && '✓ 콘텐츠 생성 → ✓ 구조 파싱 → 진행 중: 슬라이드 생성'}
                   </div>
                 )}
               </div>

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, AlertTriangle, BarChart3 } from 'lucide-react';
 import type { ChartSlide } from '@/types/slide';
 
 interface ChartSlideFormProps {
@@ -152,8 +153,9 @@ export default function ChartSlideForm({ slide, onChange }: ChartSlideFormProps)
             <option value="pie">🥧 원형 그래프 (Pie)</option>
             <option value="area">📉 영역 그래프 (Area)</option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
-            💡 차트 타입에 따라 데이터 표현 방식이 달라져요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>차트 타입에 따라 데이터 표현 방식이 달라져요</span>
           </p>
         </div>
 
@@ -243,8 +245,9 @@ export default function ChartSlideForm({ slide, onChange }: ChartSlideFormProps)
 
                 {series.labels.length !== series.values.length && (
                   <div className="bg-red-50 border border-red-200 rounded p-2">
-                    <p className="text-xs text-red-600">
-                      ⚠️ 라벨 개수({series.labels.length})와 값 개수({series.values.length})가 일치하지 않아요
+                    <p className="flex items-center gap-1.5 text-xs text-red-600">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>라벨 개수({series.labels.length})와 값 개수({series.values.length})가 일치하지 않아요</span>
                     </p>
                   </div>
                 )}
@@ -255,8 +258,9 @@ export default function ChartSlideForm({ slide, onChange }: ChartSlideFormProps)
       </div>
 
       <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
-        <p className="text-xs text-pink-700">
-          📊 차트는 선택한 타입에 따라 데이터를 시각화해요
+        <p className="flex items-center gap-1.5 text-xs text-pink-700">
+          <BarChart3 className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>차트는 선택한 타입에 따라 데이터를 시각화해요</span>
         </p>
       </div>
     </div>

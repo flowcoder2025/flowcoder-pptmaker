@@ -5,6 +5,7 @@
 
 'use client';
 
+import { Lightbulb, ClipboardList } from 'lucide-react';
 import type { AgendaSlide } from '@/types/slide';
 
 interface AgendaSlideFormProps {
@@ -196,15 +197,17 @@ export default function AgendaSlideForm({
             )}
           </div>
 
-          <p className="text-xs text-gray-500 mt-2">
-            💡 각 항목은 큰 번호와 함께 세로로 표시돼요
+          <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>각 항목은 큰 번호와 함께 세로로 표시돼요</span>
           </p>
         </div>
       </div>
 
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <p className="text-xs text-purple-700">
-          📋 아젠다는 1, 2, 3 형태로 자동 번호가 매겨져요
+        <p className="flex items-center gap-1.5 text-xs text-purple-700">
+          <ClipboardList className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>아젠다는 1, 2, 3 형태로 자동 번호가 매겨져요</span>
         </p>
       </div>
     </div>
