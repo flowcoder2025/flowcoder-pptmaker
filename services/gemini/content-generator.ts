@@ -84,7 +84,7 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
 **⚠️ 전체 제약사항:**
 - **agenda** 타입: items 배열 최대 8개 (렌더링 제한)
 - **timeline** 타입: items 배열 최대 6개 (렌더링 제한)
-- **featureGrid** 타입: features 배열 최대 6개 (렌더링 제한)
+- **featureGrid** 타입: features 배열 최대 3개 (3열 그리드 최적화)
 - **teamProfile** 타입: members 배열 최대 6개 (렌더링 제한)
 
 1. **title** (표지 슬라이드):
