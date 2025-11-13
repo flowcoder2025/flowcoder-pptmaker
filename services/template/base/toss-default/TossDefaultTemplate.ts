@@ -220,7 +220,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     <div style="
       width: 100%;
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.body}px;
+      font-size: ${slide.style.body?.fontSize || this.ctx.fonts.size.body}px;
       font-family: var(--font-family-base);
       line-height: 1.6;
     ">${this.escapeHtml(bodyText)}</div>
@@ -245,7 +245,8 @@ export class TossDefaultTemplate implements SlideTemplate {
     const bulletItems = (bullets || [])
       .map((bullet) => {
         const indent = bullet.level * 30; // level 0: 0px, level 1: 30px, level 2: 60px
-        const fontSize = bullet.level === 0 ? 18 : bullet.level === 1 ? 16 : 14;
+        const baseFontSize = slide.style.bullets?.fontSize || this.ctx.fonts.size.body;
+        const fontSize = bullet.level === 0 ? baseFontSize : bullet.level === 1 ? baseFontSize * 0.89 : baseFontSize * 0.78;
 
         return `
         <li style="
@@ -349,7 +350,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     const rightParsed = parseColumnContent(rightContent);
 
     // 불릿 리스트 HTML 생성
-    const createBulletList = (items: string[]) => {
+    const createBulletList = (items: string[], fontSize: number) => {
       return items.map(item => `
           <li style="
             display: flex;
@@ -364,15 +365,17 @@ export class TossDefaultTemplate implements SlideTemplate {
             ">→</span>
             <span style="
               color: var(--color-text-secondary);
-              font-size: 16px;
+              font-size: ${fontSize}px;
               line-height: 1.5;
             ">${this.escapeHtml(item)}</span>
           </li>
         `).join('');
     };
 
-    const leftBulletList = createBulletList(leftParsed.bulletItems);
-    const rightBulletList = createBulletList(rightParsed.bulletItems);
+    const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
+    const rightFontSize = slide.style.rightColumn?.fontSize || this.ctx.fonts.size.body;
+    const leftBulletList = createBulletList(leftParsed.bulletItems, leftFontSize);
+    const rightBulletList = createBulletList(rightParsed.bulletItems, rightFontSize);
 
     const html = `
 <div class="slide" style="

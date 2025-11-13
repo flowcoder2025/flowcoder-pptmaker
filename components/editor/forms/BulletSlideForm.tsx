@@ -7,6 +7,7 @@
 
 import { Lightbulb, ClipboardList } from 'lucide-react';
 import type { BulletSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
 
 interface BulletSlideFormProps {
   slide: BulletSlide;
@@ -59,6 +60,19 @@ export default function BulletSlideForm({ slide, onChange }: BulletSlideFormProp
       props: {
         ...slide.props,
         bullets: newBullets,
+      },
+    });
+  };
+
+  const handleFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          fontSize,
+        },
       },
     });
   };
@@ -132,6 +146,16 @@ export default function BulletSlideForm({ slide, onChange }: BulletSlideFormProp
             <Lightbulb className="w-3.5 h-3.5 flex-shrink-0" />
             <span>각 항목은 간결하게 작성하세요 (1-2줄 권장)</span>
           </p>
+        </div>
+
+        {/* 본문 크기 조정 */}
+        <div className="pt-2">
+          <FontSizeSlider
+            value={slide.style.bullets?.fontSize || 18}
+            onChange={handleFontSizeChange}
+            label="목록 크기"
+            defaultValue={18}
+          />
         </div>
       </div>
 

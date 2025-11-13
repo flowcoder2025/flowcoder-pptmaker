@@ -7,6 +7,7 @@
 
 import { Columns2 } from 'lucide-react';
 import type { TwoColumnSlide } from '@/types/slide';
+import FontSizeSlider from '../FontSizeSlider';
 
 interface TwoColumnSlideFormProps {
   slide: TwoColumnSlide;
@@ -40,6 +41,32 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
       props: {
         ...slide.props,
         rightContent: e.target.value,
+      },
+    });
+  };
+
+  const handleLeftFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        leftColumn: {
+          ...slide.style.leftColumn,
+          fontSize,
+        },
+      },
+    });
+  };
+
+  const handleRightFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        rightColumn: {
+          ...slide.style.rightColumn,
+          fontSize,
+        },
       },
     });
   };
@@ -86,6 +113,15 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
             <p className="text-xs text-gray-500 mt-1">
               ← 좌측 영역
             </p>
+            {/* 좌측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.leftColumn?.fontSize || 18}
+                onChange={handleLeftFontSizeChange}
+                label="좌측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
 
           <div>
@@ -104,6 +140,15 @@ export default function TwoColumnSlideForm({ slide, onChange }: TwoColumnSlideFo
             <p className="text-xs text-gray-500 mt-1">
               우측 영역 →
             </p>
+            {/* 우측 컬럼 크기 조정 */}
+            <div className="pt-2">
+              <FontSizeSlider
+                value={slide.style.rightColumn?.fontSize || 18}
+                onChange={handleRightFontSizeChange}
+                label="우측 크기"
+                defaultValue={18}
+              />
+            </div>
           </div>
         </div>
       </div>
