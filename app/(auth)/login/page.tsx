@@ -59,7 +59,7 @@ function LoginPageContent() {
         router.push(callbackUrl);
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error('로그인 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
@@ -71,7 +71,7 @@ function LoginPageContent() {
     setIsLoading(true);
     try {
       await signIn(provider, { callbackUrl });
-    } catch (error) {
+    } catch {
       toast.error('로그인 중 문제가 발생했어요');
       setIsLoading(false);
     }

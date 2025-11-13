@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Camera, Loader2 } from 'lucide-react';
 
 interface ImageUploaderProps {
@@ -141,10 +142,13 @@ export default function ImageUploader({
             현재 이미지
           </label>
           <div className="relative">
-            <img
+            <Image
               src={currentImage}
               alt="업로드된 이미지"
+              width={1200}
+              height={256}
               className="w-full max-h-64 object-contain bg-gray-100 rounded-lg"
+              unoptimized
             />
             <button
               onClick={handleRemoveImage}

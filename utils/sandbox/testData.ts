@@ -2,8 +2,6 @@
  * 샌드박스 테스트용 샘플 데이터
  */
 
-import type { UnifiedPPTJSON } from "@/types/pptJson"
-
 /**
  * 테스트용 프롬프트 목록
  */

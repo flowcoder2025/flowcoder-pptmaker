@@ -123,7 +123,7 @@ export default function HistoryPage() {
 
       toast.success('삭제했어요');
       setPresentations((prev) => prev.filter((p) => p.id !== presentationToDelete));
-    } catch (error) {
+    } catch {
       toast.error('삭제 중 문제가 발생했어요');
     } finally {
       setPresentationToDelete(null);

@@ -463,3 +463,15 @@ export interface Presentation {
   createdAt: number;
   updatedAt?: number;           // 마지막 수정 시간 (NEW - Task 6)
 }
+
+/**
+ * 전역 슬라이드 설정
+ *
+ * 모든 슬라이드에 일괄 적용할 수 있는 공통 스타일 설정
+ */
+export interface GlobalSlideSettings {
+  /** 본문 텍스트 크기 (12-32px, 기본값: 18) */
+  fontSize: number;
+  /** 불릿 아이콘 타입 (기본값: 'arrow') */
+  iconType: 'arrow' | 'dot' | 'check';
+}

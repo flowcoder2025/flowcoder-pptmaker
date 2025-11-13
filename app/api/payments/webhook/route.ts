@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // 3. 이벤트 타입에 따라 처리
     if (type === 'Transaction.Paid') {
       // 결제 완료
-      const { paymentId, status, amount, paidAmount, method, receiptUrl, customData } = data;
+      const { paymentId, status, method, receiptUrl } = data;
 
       if (!paymentId) {
         console.error('[Payment Webhook] paymentId is missing');

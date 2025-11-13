@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,19 +51,7 @@ export default function ProfilePage() {
     phoneNumber: '',
   });
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated' && session?.user) {
-      fetchUserProfile();
-      fetchUserStats();
-    }
-  }, [status, session, router]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       const res = await fetch('/api/profile');
       if (!res.ok) {
@@ -89,9 +77,9 @@ export default function ProfilePage() {
       setCurrentProfile(fallbackProfile);
       setEditForm(fallbackProfile);
     }
-  };
+  }, [session]);
 
-  const fetchUserStats = async () => {
+  const fetchUserStats = useCallback(async () => {
     try {
       const res = await fetch('/api/user/stats');
 
@@ -110,7 +98,19 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user) {
+      fetchUserProfile();
+      fetchUserStats();
+    }
+  }, [status, session, router, fetchUserProfile, fetchUserStats]);
 
   // 프로필 수정 핸들러
   const handleEdit = () => {

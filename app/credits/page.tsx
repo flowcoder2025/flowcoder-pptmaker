@@ -36,9 +36,9 @@ import PaymentChannelModal from '@/components/PaymentChannelModal';
 export default function CreditsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { totalCredits, isFirstTimeFree, useFirstTimeFree, fetchBalance } = useCreditStore();
+  const { totalCredits, isFirstTimeFree, fetchBalance } = useCreditStore();
   const { plan } = useSubscriptionStore();
-  const { requestPayment, isLoading, error, clearError } = usePortOnePayment();
+  const { requestPayment, isLoading, clearError } = usePortOnePayment();
 
   const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedBundle, setSelectedBundle] = useState<typeof CREDIT_BUNDLES[0] | null>(null);

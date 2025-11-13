@@ -12,13 +12,10 @@ import {
   CreditCard,
   Palette,
   Search,
-  Gift,
   Zap,
   Sparkles,
   BarChart3,
   AlertTriangle,
-  CheckCircle2,
-  RotateCw,
   Lightbulb,
   Bot
 } from 'lucide-react';

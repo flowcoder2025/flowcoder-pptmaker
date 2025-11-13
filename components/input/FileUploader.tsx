@@ -101,7 +101,7 @@ export default function FileUploader({
 
       onChange([...files, ...attachments]);
       event.target.value = ''; // input 초기화
-    } catch (err) {
+    } catch {
       setError('파일을 읽지 못했어요. 다시 시도해주세요');
     }
   };

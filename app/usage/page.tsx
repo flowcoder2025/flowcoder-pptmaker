@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -130,20 +130,7 @@ export default function UsagePage() {
     }
   }, [status, router]);
 
-  // 데이터 조회
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      if (activeTab === 'credits') {
-        fetchCreditTransactions();
-      } else if (activeTab === 'payments') {
-        fetchPayments();
-      } else if (activeTab === 'dashboard') {
-        fetchDashboardStats();
-      }
-    }
-  }, [status, session, activeTab, creditPage, paymentPage, dateRange]);
-
-  const fetchCreditTransactions = async () => {
+  const fetchCreditTransactions = useCallback(async () => {
     try {
       setIsLoadingCredits(true);
       const offset = creditPage * ITEMS_PER_PAGE;
@@ -170,9 +157,9 @@ export default function UsagePage() {
     } finally {
       setIsLoadingCredits(false);
     }
-  };
+  }, [creditPage, dateRange]);
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       setIsLoadingPayments(true);
       const offset = paymentPage * ITEMS_PER_PAGE;
@@ -199,7 +186,20 @@ export default function UsagePage() {
     } finally {
       setIsLoadingPayments(false);
     }
-  };
+  }, [paymentPage, dateRange]);
+
+  // 데이터 조회
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      if (activeTab === 'credits') {
+        fetchCreditTransactions();
+      } else if (activeTab === 'payments') {
+        fetchPayments();
+      } else if (activeTab === 'dashboard') {
+        fetchDashboardStats();
+      }
+    }
+  }, [status, session, activeTab, fetchCreditTransactions, fetchPayments]);
 
   const fetchDashboardStats = async () => {
     try {

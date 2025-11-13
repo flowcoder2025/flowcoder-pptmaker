@@ -41,6 +41,7 @@ import {
   DollarSign,
   ImageIcon,
   Images,
+  Settings,
 } from 'lucide-react';
 import type { Slide } from '@/types/slide';
 
@@ -227,17 +228,61 @@ export default function SlideList({ slides, selectedIndex, onSelect, onReorder }
             슬라이드 <span className="text-xs text-gray-500">(드래그하여 순서 변경)</span>
           </h3>
           <span className="text-xs text-gray-500">
-            {selectedIndex + 1} / {slides.length}
+            {selectedIndex === -1 ? '전역 설정' : `${selectedIndex + 1} / ${slides.length}`}
           </span>
         </div>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={slideIds} strategy={horizontalListSortingStrategy}>
-            <div className="flex gap-3 overflow-x-auto py-3 px-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="flex gap-3 overflow-x-auto py-3 px-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          {/* #0 전역 설정 슬라이드 (드래그 불가) */}
+          <button
+            onClick={() => onSelect(-1)}
+            className={`
+              flex-shrink-0 w-36 h-24 rounded-lg overflow-hidden
+              transition-all duration-200
+              ${
+                selectedIndex === -1
+                  ? 'border-2 border-purple-500 ring-2 ring-purple-200 shadow-md scale-105'
+                  : 'border-2 border-gray-300 hover:border-gray-400 hover:shadow-sm'
+              }
+              cursor-pointer
+            `}
+            title="전역 슬라이드 설정 (모든 슬라이드 일괄 조정)"
+          >
+            <div className="h-full bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col items-center justify-center p-2">
+              {/* 번호 */}
+              <div
+                className={`
+                  text-xs font-bold mb-1
+                  ${selectedIndex === -1 ? 'text-purple-600' : 'text-gray-500'}
+                `}
+              >
+                #0
+              </div>
+
+              {/* 아이콘 */}
+              <div className={`mb-1 ${selectedIndex === -1 ? 'text-purple-600' : 'text-gray-700'}`}>
+                <Settings className="w-6 h-6" />
+              </div>
+
+              {/* 타입 이름 */}
+              <div
+                className={`
+                  text-xs font-medium
+                  ${selectedIndex === -1 ? 'text-purple-600' : 'text-gray-600'}
+                `}
+              >
+                전역 설정
+              </div>
+            </div>
+          </button>
+
+          {/* 실제 슬라이드들 (드래그 가능) */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={slideIds} strategy={horizontalListSortingStrategy}>
               {slides.map((slide, index) => (
                 <SortableSlideItem
                   key={`slide-${index}`}
@@ -247,9 +292,9 @@ export default function SlideList({ slides, selectedIndex, onSelect, onReorder }
                   onSelect={onSelect}
                 />
               ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+            </SortableContext>
+          </DndContext>
+        </div>
       </div>
     </div>
   );

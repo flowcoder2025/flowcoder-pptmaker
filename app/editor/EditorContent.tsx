@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb } from 'lucide-react';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb, Settings } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
@@ -18,6 +18,7 @@ import AddSlideDialog from '@/components/editor/AddSlideDialog';
 import ConfirmDialog from '@/components/editor/ConfirmDialog';
 import TemplateSelector from '@/components/editor/TemplateSelector';
 import MoreMenu from '@/components/editor/MoreMenu';
+import GlobalSettingsPanel from '@/components/editor/GlobalSettingsPanel';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import type { SlideType } from '@/types/slide';
@@ -195,11 +196,16 @@ export default function EditorContent() {
     handleCloseWithoutSaving();
   };
 
-  const currentSlide = currentPresentation.slideData.slides[selectedSlideIndex];
+  // selectedSlideIndex가 -1이면 전역 설정, 0 이상이면 개별 슬라이드
+  const currentSlide = selectedSlideIndex >= 0
+    ? currentPresentation.slideData.slides[selectedSlideIndex]
+    : null;
 
   const handleSlideChange = (updatedSlide: typeof currentSlide) => {
-    updateSlide(selectedSlideIndex, updatedSlide);
-    setIsDirty(true); // 변경사항 표시
+    if (selectedSlideIndex >= 0 && updatedSlide) {
+      updateSlide(selectedSlideIndex, updatedSlide);
+      setIsDirty(true); // 변경사항 표시
+    }
   };
 
   const handleAddSlide = (slideType: SlideType) => {
@@ -444,17 +450,41 @@ export default function EditorContent() {
           {/* 편집 폼 영역 */}
           <div className="flex-1 overflow-y-auto p-6 bg-white">
             <div className="max-w-2xl mx-auto">
-              <EditForm slide={currentSlide} onChange={handleSlideChange} />
+              {/* 조건부 렌더링: 전역 설정 vs 개별 슬라이드 편집 */}
+              {selectedSlideIndex === -1 ? (
+                /* 전역 슬라이드 설정 패널 */
+                <GlobalSettingsPanel />
+              ) : currentSlide ? (
+                /* 개별 슬라이드 편집 폼 */
+                <EditForm slide={currentSlide} onChange={handleSlideChange} />
+              ) : (
+                /* 슬라이드를 찾을 수 없는 경우 */
+                <div className="text-center py-12 text-gray-500">
+                  슬라이드를 선택해주세요
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* 우측: 실시간 미리보기 */}
         <div className="hidden md:block flex-1 bg-white overflow-hidden">
-          <SlidePreview
-            slide={currentSlide}
-            templateId={currentPresentation.templateId}
-          />
+          {currentSlide ? (
+            <SlidePreview
+              slide={currentSlide}
+              templateId={currentPresentation.templateId}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+              <div className="text-center p-8">
+                <Settings className="w-16 h-16 mx-auto mb-4 text-purple-600" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">전역 설정 모드</h3>
+                <p className="text-gray-600">
+                  모든 슬라이드에 일괄 적용할 스타일을 설정하고 있어요
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

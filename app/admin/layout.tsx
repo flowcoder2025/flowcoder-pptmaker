@@ -23,7 +23,7 @@ export default async function AdminLayout({
   // 관리자 권한 체크
   try {
     await requireAdmin(session.user.id)
-  } catch (error) {
+  } catch {
     // 관리자 권한이 없으면 메인 페이지로 리다이렉트
     redirect('/')
   }

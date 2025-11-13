@@ -21,7 +21,7 @@ import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
  *   creditTypeDistribution: Array<{type: string, count: number}>
  * }
  */
-export async function GET(req: Request) {
+export async function GET() {
   try {
     // 1. 인증 체크
     const session = await getSession();

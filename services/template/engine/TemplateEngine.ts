@@ -9,7 +9,7 @@ import { TemplateRegistry } from './TemplateRegistry';
 import { TossDefaultTemplate } from '../base/toss-default/TossDefaultTemplate';
 import type { SlideTemplate, TemplateContext } from './types';
 import type { Slide, HTMLSlide, UnifiedPPTJSON } from '@/types/slide';
-import { COLOR_PRESETS, type ColorPreset } from '@/constants/design';
+import { COLOR_PRESETS } from '@/constants/design';
 import {
   isTitleSlide,
   isSectionSlide,

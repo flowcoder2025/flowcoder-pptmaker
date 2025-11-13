@@ -155,7 +155,7 @@ export function usePortOnePayment() {
 
         // 2. 포트원 SDK로 결제창 열기
         // channelKey 설정 (옵션으로 제공되면 사용, 아니면 기본값)
-        const finalPaymentRequest: PortOnePaymentRequest = {
+        const finalPaymentRequest = {
           ...paymentRequest,
           channelKey: options.channelKey || paymentRequest.channelKey,
         };

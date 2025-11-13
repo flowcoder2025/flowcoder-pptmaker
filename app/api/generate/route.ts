@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateMultimodalSlideContent } from '@/services/gemini/multimodal-generator';
 import { researchTopic } from '@/services/perplexity/researcher';
-import type { MultimodalRequest, ResearchMode } from '@/types/research';
+import type { MultimodalRequest } from '@/types/research';
 import { PLAN_LIMITS, isFileCountAllowed, isFileSizeAllowed } from '@/constants/multimodal';
 
 /**
