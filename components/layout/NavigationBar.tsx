@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem } from 'lucide-react';
+import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem, Receipt } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BUTTON_TEXT } from '@/lib/text-config';
 
@@ -191,6 +191,13 @@ export default function NavigationBar() {
                   >
                     <Gem size={16} className="mr-2" />
                     크레딧
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push('/usage')}
+                    className="cursor-pointer hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary transition-colors"
+                  >
+                    <Receipt size={16} className="mr-2" />
+                    사용내역
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { User, Mail, Calendar, CreditCard, FileText, Star, Phone, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, CreditCard, Star, Phone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -32,12 +32,8 @@ export default function ProfilePage() {
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   const [stats, setStats] = useState({
-    presentationsCount: 0,
-    totalSlides: 0,
     creditsBalance: 0,
-    creditsUsed: 0,
     subscriptionTier: 'FREE',
-    recentPresentations: [] as any[],
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -105,12 +101,8 @@ export default function ProfilePage() {
 
       const data = await res.json();
       setStats({
-        presentationsCount: data.presentationsCount || 0,
-        totalSlides: data.totalSlides || 0,
         creditsBalance: data.creditsBalance || 0,
-        creditsUsed: data.creditsUsed || 0,
         subscriptionTier: data.subscriptionTier || 'FREE',
-        recentPresentations: data.recentPresentations || [],
       });
     } catch (error) {
       console.error('사용자 통계 조회 실패:', error);
@@ -320,62 +312,6 @@ export default function ProfilePage() {
                 )}
               </div>
             </Card>
-
-            {/* 최근 프리젠테이션 */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-foreground">
-                  <FileText className="inline mr-2" size={24} />
-                  최근 프리젠테이션
-                </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/history')}
-                >
-                  전체 보기 →
-                </Button>
-              </div>
-
-              {stats.recentPresentations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="mb-4">아직 생성한 프리젠테이션이 없어요</p>
-                  <Button
-                    onClick={() => router.push('/input')}
-                    className="bg-primary text-white"
-                  >
-                    ✨ 첫 프리젠테이션 만들기
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {stats.recentPresentations.map((presentation: any) => (
-                    <div
-                      key={presentation.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-primary/5 hover:border-primary/30 cursor-pointer transition-all duration-200"
-                      onClick={() => router.push(`/viewer?id=${presentation.id}`)}
-                    >
-                      <div className="flex-1">
-                        <h4 className="font-semibold mb-1 text-foreground">
-                          {presentation.title}
-                        </h4>
-                        {presentation.description && (
-                          <p className="text-sm line-clamp-1 text-muted-foreground">
-                            {presentation.description}
-                          </p>
-                        )}
-                        <p className="text-xs mt-1 text-muted-foreground">
-                          {new Date(presentation.updatedAt).toLocaleDateString('ko-KR')}
-                        </p>
-                      </div>
-                      <div className="text-sm font-medium text-primary">
-                        {presentation.metadata?.slideCount || 0}슬라이드
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
           </div>
 
           {/* 오른쪽: 통계 카드 */}
@@ -429,42 +365,6 @@ export default function ProfilePage() {
               >
                 {BUTTON_TEXT.purchaseCredits}
               </Button>
-            </Card>
-
-            {/* 통계 */}
-            <Card className="p-6">
-              <h3 className="text-lg font-bold mb-4 text-foreground">
-                📊 사용 통계
-              </h3>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    생성한 프리젠테이션
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {stats.presentationsCount}개
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    총 슬라이드
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {stats.totalSlides}개
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    사용한 크레딧
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {stats.creditsUsed.toLocaleString()}
-                  </span>
-                </div>
-              </div>
             </Card>
           </div>
         </div>
