@@ -444,6 +444,7 @@ export interface ReportA4Slide extends BaseSlide {
     subtitle: string;
     // 이미지: 최대 2개까지 반응형 그리드 지원
     images?: string[];  // 1개: 100% width, 2개: 50% width grid
+    imageCaption?: string;
     sections: Array<{
       subtitle?: string;
       body?: string;

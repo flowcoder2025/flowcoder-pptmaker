@@ -63,6 +63,16 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
     });
   };
 
+  const handleImageCaptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        imageCaption: e.target.value,
+      },
+    });
+  };
+
   const handleSectionChange = (index: number, field: 'subtitle' | 'body' | 'bullets', value: string | string[]) => {
     const newSections = [...slide.props.sections];
     newSections[index] = {
@@ -319,6 +329,14 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
             );
           })}
         </div>
+
+        <input
+          type="text"
+          value={slide.props.imageCaption || ''}
+          onChange={handleImageCaptionChange}
+          className="w-full mt-3 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="이미지 설명 (예: [그림 1] 3분기 매출 및 유료 전환율)"
+        />
 
         <p className="text-xs text-gray-500 mt-2">
           제목과 부제목 하단에 표시될 이미지예요. 2개인 경우 그리드로 배치돼요.

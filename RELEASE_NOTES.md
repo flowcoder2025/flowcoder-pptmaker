@@ -23,6 +23,15 @@
 
 ### ✨ Features
 
+#### 2025-11-15
+- **ReportA4 슬라이드 폼에 이미지 제목 입력 필드 추가** (065e2e5)
+  - ReportA4SlideForm에 imageCaption 입력 필드 추가
+    - handleImageCaptionChange 핸들러 구현
+    - 이미지 업로더 아래 imageCaption input 추가
+  - types/slide.ts ReportA4Slide 타입에 imageCaption 속성 추가
+  - ReportTwoColumnSlideForm과 동일한 패턴 적용
+  - 이제 두 원페이지 보고서 타입 모두 이미지 설명 기능 지원
+
 #### 2025-11-12
 - **PortOne V2 결제 시스템 통합 완료 (Phase 5)** (1c8b542)
   - Phase 5-1: usePortOnePayment 커스텀 훅 생성
