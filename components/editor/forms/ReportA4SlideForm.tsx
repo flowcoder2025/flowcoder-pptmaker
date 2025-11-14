@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Plus, Trash2, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, FileText, Image as ImageIcon, BarChart3, Table as TableIcon } from 'lucide-react';
 import type { ReportA4Slide } from '@/types/slide';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '../ImageUploader';
@@ -113,6 +113,114 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
       .filter(line => line.length > 0);
 
     handleSectionChange(index, 'bullets', bulletsArray);
+  };
+
+  const handleAddChart = () => {
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        chart: {
+          type: 'bar',
+          data: [
+            { label: '항목 1', value: 100 },
+            { label: '항목 2', value: 80 },
+            { label: '항목 3', value: 120 },
+          ],
+          title: '차트 제목',
+        },
+      },
+    });
+  };
+
+  const handleRemoveChart = () => {
+    const { chart, ...restProps } = slide.props;
+    onChange({
+      ...slide,
+      props: restProps,
+    });
+  };
+
+  const handleChartChange = (field: string, value: any) => {
+    if (!slide.props.chart) return;
+
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        chart: {
+          ...slide.props.chart,
+          [field]: value,
+        },
+      },
+    });
+  };
+
+  const handleChartDataChange = (dataText: string) => {
+    if (!slide.props.chart) return;
+
+    const lines = dataText.split('\n').filter(line => line.trim());
+    const data = lines.map(line => {
+      const [label, value] = line.split(':').map(s => s.trim());
+      return { label, value: parseFloat(value) || 0 };
+    });
+
+    handleChartChange('data', data);
+  };
+
+  const handleAddTable = () => {
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        table: {
+          headers: ['열 1', '열 2', '열 3'],
+          rows: [
+            ['데이터 1-1', '데이터 1-2', '데이터 1-3'],
+            ['데이터 2-1', '데이터 2-2', '데이터 2-3'],
+          ],
+          title: '표 제목',
+        },
+      },
+    });
+  };
+
+  const handleRemoveTable = () => {
+    const { table, ...restProps } = slide.props;
+    onChange({
+      ...slide,
+      props: restProps,
+    });
+  };
+
+  const handleTableChange = (field: string, value: any) => {
+    if (!slide.props.table) return;
+
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        table: {
+          ...slide.props.table,
+          [field]: value,
+        },
+      },
+    });
+  };
+
+  const handleTableHeadersChange = (headersText: string) => {
+    if (!slide.props.table) return;
+    const headers = headersText.split(',').map(h => h.trim()).filter(h => h);
+    handleTableChange('headers', headers);
+  };
+
+  const handleTableRowsChange = (rowsText: string) => {
+    if (!slide.props.table) return;
+    const rows = rowsText
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => line.split(',').map(cell => cell.trim()));
+    handleTableChange('rows', rows);
   };
 
   const currentImages = slide.props.images || [];
@@ -341,6 +449,152 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 옵션: 차트 */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+            <BarChart3 className="w-4 h-4" />
+            차트 (선택사항)
+          </label>
+          {!slide.props.chart ? (
+            <Button
+              onClick={handleAddChart}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              차트 추가
+            </Button>
+          ) : (
+            <button
+              onClick={handleRemoveChart}
+              className="text-red-600 hover:text-red-700 p-1"
+              title="차트 삭제"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {slide.props.chart && (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                차트 제목
+              </label>
+              <input
+                type="text"
+                value={slide.props.chart.title || ''}
+                onChange={(e) => handleChartChange('title', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="예: 3분기 매출 추이"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                차트 타입
+              </label>
+              <select
+                value={slide.props.chart.type}
+                onChange={(e) => handleChartChange('type', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="bar">막대 그래프</option>
+                <option value="line">선 그래프</option>
+                <option value="pie">원 그래프</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                데이터 (레이블:값 형식, 한 줄에 하나씩)
+              </label>
+              <textarea
+                value={slide.props.chart.data.map(d => `${d.label}:${d.value}`).join('\n')}
+                onChange={(e) => handleChartDataChange(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm font-mono"
+                placeholder={'1분기:100\n2분기:150\n3분기:120'}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 옵션: 표 */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+            <TableIcon className="w-4 h-4" />
+            표 (선택사항)
+          </label>
+          {!slide.props.table ? (
+            <Button
+              onClick={handleAddTable}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              표 추가
+            </Button>
+          ) : (
+            <button
+              onClick={handleRemoveTable}
+              className="text-red-600 hover:text-red-700 p-1"
+              title="표 삭제"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {slide.props.table && (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                표 제목
+              </label>
+              <input
+                type="text"
+                value={slide.props.table.title || ''}
+                onChange={(e) => handleTableChange('title', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="예: 분기별 성과 지표"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                헤더 (쉼표로 구분)
+              </label>
+              <input
+                type="text"
+                value={slide.props.table.headers.join(', ')}
+                onChange={(e) => handleTableHeadersChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="예: 분기, 매출, 증가율"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                행 데이터 (각 행을 쉼표로 구분, 한 줄에 하나씩)
+              </label>
+              <textarea
+                value={slide.props.table.rows.map(row => row.join(', ')).join('\n')}
+                onChange={(e) => handleTableRowsChange(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm font-mono"
+                placeholder={'1분기, 1000만원, 25%\n2분기, 1200만원, 30%\n3분기, 1100만원, 20%'}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

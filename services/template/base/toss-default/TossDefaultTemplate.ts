@@ -2553,25 +2553,21 @@ export class TossDefaultTemplate implements SlideTemplate {
       })
       .join('');
 
-    // 이미지 그리드 HTML 생성 (최대 2개, 반응형)
+    // 이미지 HTML 생성 (최대 2개, 상하 배치)
     let imagesHtml = '';
     if (images && images.length > 0) {
       const imageCount = Math.min(images.length, 2);
-      const gridStyle = imageCount === 1 ? 'display: block;' : `
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      `;
 
       imagesHtml = `
-        <div style="${gridStyle} margin-bottom: 12px;">
-          ${images.slice(0, 2).map((img: string) => `
+        <div style="display: block; margin-bottom: 12px;">
+          ${images.slice(0, 2).map((img: string, index: number) => `
             <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(imageCaption || '')}" style="
               width: 100%;
               height: auto;
               object-fit: cover;
               border-radius: ${this.ctx.borderRadius.medium}px;
               background: ${this.ctx.colors.lightBg};
+              margin-bottom: ${index < imageCount - 1 ? '12px' : '0'};
             ">
           `).join('')}
         </div>
