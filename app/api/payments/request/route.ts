@@ -66,7 +66,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. PortOne 결제 요청 객체 생성
+    // 5. DB에서 최신 사용자 정보 조회 (전화번호 포함)
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        name: true,
+        email: true,
+        phoneNumber: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: '사용자 정보를 찾을 수 없어요' },
+        { status: 404 }
+      );
+    }
+
+    // 6. PortOne 결제 요청 객체 생성
     // channelKey가 없으면 기본값으로 토스페이 사용
     const defaultChannelKey = 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742';
     const finalChannelKey = channelKey || defaultChannelKey;
@@ -78,7 +95,7 @@ export async function POST(request: NextRequest) {
       if (finalChannelKey.includes('ac45bcb3') || finalChannelKey.includes('b67c5e30') || finalChannelKey.includes('5bf9403e')) {
         finalPayMethod = 'EASY_PAY';
       }
-      // 이니시스는 CARD (기본값)
+      // 이니시스는 CARD (EASY_PAY 시 easyPayProvider 필수)
       else if (finalChannelKey.includes('7b85a467') || finalChannelKey.includes('2d471aaa')) {
         finalPayMethod = 'CARD';
       }
@@ -88,6 +105,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 이니시스 채널인 경우 전화번호 필수 검증
+    const isInicis = finalChannelKey.includes('7b85a467') || finalChannelKey.includes('2d471aaa');
+    if (isInicis && !user.phoneNumber) {
+      return NextResponse.json(
+        { success: false, error: '이니시스 V2 일반 결제의 경우 구매자 휴대폰 번호는 필수 입력입니다. 프로필에서 전화번호를 입력해주세요.' },
+        { status: 400 }
+      );
+    }
+
+    // 6. PortOne 결제 요청 객체 생성
+    // 이니시스 V2: payMethod='CARD' 사용 (EASY_PAY는 easyPayProvider 필수)
+    // easyPay 객체는 나이스페이먼츠, NHN KCP, KSNET 전용
     const paymentRequest: PortOnePaymentRequest = {
       storeId,
       paymentId,
@@ -98,8 +127,9 @@ export async function POST(request: NextRequest) {
       payMethod: finalPayMethod,  // 필수 파라미터
       customer: {
         customerId: session.user.id,
-        fullName: session.user.name || undefined,
-        email: session.user.email || undefined,
+        fullName: user.name || undefined,
+        email: user.email || undefined,
+        phoneNumber: user.phoneNumber || undefined,  // DB에서 조회한 최신 전화번호
       },
       customData: {
         purpose,
@@ -109,9 +139,23 @@ export async function POST(request: NextRequest) {
       },
       redirectUrl: `${process.env.NEXTAUTH_URL}/payments/result`,
       noticeUrls: [`${process.env.NEXTAUTH_URL}/api/payments/webhook`],
-    };
+    } as PortOnePaymentRequest;
 
-    // 6. Payment 레코드 DB에 저장 (PENDING 상태)
+    // 디버깅: 이니시스 결제 요청 내용 로그
+    if (isInicis) {
+      console.log('[Inicis Payment Debug]', {
+        channelKey: finalChannelKey,
+        payMethod: finalPayMethod,
+        hasPhoneNumber: !!user.phoneNumber,
+        phoneNumber: user.phoneNumber,
+        hasEmail: !!user.email,
+        email: user.email,
+        hasFullName: !!user.name,
+        fullName: user.name,
+      });
+    }
+
+    // 7. Payment 레코드 DB에 저장 (PENDING 상태)
     await prisma.payment.create({
       data: {
         paymentId,
@@ -129,12 +173,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 7. 응답 반환
+    // 8. 응답 반환
     const response: CreatePaymentRequestResponse = {
       success: true,
       paymentId,
       paymentRequest,
     };
+
+    // 디버깅: 서버 응답 객체 로그
+    console.log('[Server Response]', JSON.stringify(response, null, 2));
 
     return NextResponse.json(response);
   } catch (error) {
