@@ -67,6 +67,13 @@ ${pageFormat === 'one-page' ? `
 ${aspectRatio === 'A4-portrait' ? `
 **원페이지 모드 전용 슬라이드 타입: reportA4** (세로 A4 보고서 형식)
 
+**구조 규칙:**
+1. **이미지**: 최대 2개까지 배열로 제공 가능 (images)
+2. **섹션**: 각 섹션은 **소제목-본문** 또는 **소제목-불릿** 중 하나의 형식만 사용
+   - 소제목-본문: subtitle + body (bullets 없음 또는 빈 배열)
+   - 소제목-불릿: subtitle + bullets (body 없음 또는 빈 문자열)
+3. **차트/표**: 선택사항 (필요시 추가)
+
 \`\`\`json
 {
   "slides": [
@@ -74,22 +81,31 @@ ${aspectRatio === 'A4-portrait' ? `
       "type": "reportA4",
       "props": {
         "title": "보고서 제목",
-        "subtitle": "부제목",
-        "image": "https://example.com/image.jpg",
+        "subtitle": "부제목 (예: 경영 전략팀 | 2024.12.01)",
+        "images": [
+          "https://example.com/image1.jpg",
+          "https://example.com/image2.jpg"
+        ],
         "sections": [
           {
-            "subtitle": "섹션 1 제목",
-            "body": "섹션 1 본문 내용 (여러 단락 가능)...",
-            "bullets": ["핵심 포인트 1", "핵심 포인트 2"]
+            "subtitle": "주요 성과",
+            "body": "3분기 매출은 전년 대비 25% 증가하여 목표를 초과 달성했습니다. 신규 고객 유입이 35% 증가했으며..."
           },
           {
-            "subtitle": "섹션 2 제목",
-            "body": "섹션 2 본문 내용..."
+            "subtitle": "핵심 지표",
+            "bullets": [
+              "매출 목표 달성률 125%",
+              "고객 만족도 4.8/5.0",
+              "신규 고객 유입 35% 증가"
+            ]
           },
           {
-            "subtitle": "섹션 3 제목",
-            "body": "섹션 3 본문 내용...",
-            "bullets": ["핵심 포인트 3"]
+            "subtitle": "향후 계획",
+            "bullets": [
+              "4분기 리텐션 마케팅 전략 수립",
+              "신규 고객 유입 채널별 CAC 재분석",
+              "고객 여정 개선 프로젝트 착수"
+            ]
           }
         ]
       },
@@ -98,8 +114,17 @@ ${aspectRatio === 'A4-portrait' ? `
   ]
 }
 \`\`\`
+
+**⚠️ 중요: 각 섹션은 body 또는 bullets 중 하나만 사용하세요!**
 ` : `
 **원페이지 모드 전용 슬라이드 타입: reportTwoColumn** (2단 보고서 형식)
+
+**구조 규칙:**
+1. **이미지**: 최대 2개까지 배열로 제공 가능 (images)
+2. **섹션**: 각 섹션은 **소제목-본문** 또는 **소제목-불릿** 중 하나의 형식만 사용
+   - 소제목-본문: subtitle + body (bullets 없음 또는 빈 배열)
+   - 소제목-불릿: subtitle + bullets (body 없음 또는 빈 문자열)
+3. **차트/표**: 선택사항 (필요시 추가)
 
 \`\`\`json
 {
@@ -107,31 +132,34 @@ ${aspectRatio === 'A4-portrait' ? `
     {
       "type": "reportTwoColumn",
       "props": {
-        "title": "보고서 제목",
+        "title": "3분기 실적 분석 보고서",
+        "images": [
+          "https://example.com/chart1.jpg",
+          "https://example.com/chart2.jpg"
+        ],
+        "imageCaption": "[그림 1] 3분기 매출 및 유료 전환율",
         "sections": [
           {
-            "subtitle": "섹션 1 제목",
-            "body": "섹션 1 본문 내용 (여러 단락 가능)...",
-            "bullets": ["핵심 포인트 1", "핵심 포인트 2"]
+            "subtitle": "주요 성과 및 개선 영역",
+            "body": "3분기 매출은 전년 대비 25% 증가하며 목표 대비 110%를 달성했습니다. 신규 고객 유입은 35% 증가했으며, 특히 모바일 채널에서의 전환율이 큰 폭으로 개선되었습니다."
           },
           {
-            "subtitle": "섹션 2 제목",
-            "body": "섹션 2 본문 내용..."
-          },
-          {
-            "subtitle": "섹션 3 제목",
-            "body": "섹션 3 본문 내용...",
-            "bullets": ["핵심 포인트 3"]
+            "subtitle": "핵심 지표",
+            "bullets": [
+              "매출 목표 달성률 125%",
+              "고객 만족도 4.8/5.0",
+              "신규 고객 유입 35% 증가"
+            ]
           }
-        ],
-        "image": "https://example.com/image.jpg",
-        "imageCaption": "이미지 캡션"
+        ]
       },
       "style": {}
     }
   ]
 }
 \`\`\`
+
+**⚠️ 중요: 각 섹션은 body 또는 bullets 중 하나만 사용하세요!**
 `}
 
 ⚠️ **다시 한번 강조: 원페이지 모드에서는 ${aspectRatio === 'A4-portrait' ? 'reportA4' : 'reportTwoColumn'} 타입만 사용하고, 반드시 1장만 생성하세요!**

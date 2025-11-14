@@ -2478,7 +2478,11 @@ export class TossDefaultTemplate implements SlideTemplate {
    * 우측: 이미지 + 캡션 (flex: 1)
    */
   renderReportTwoColumn(slide: ReportTwoColumnSlide): HTMLSlide {
-    const { title, sections, image, imageCaption } = slide.props;
+    // Backward compatibility: image -> images
+    const props = slide.props as any;
+    const imagesArray = props.images || (props.image ? [props.image] : undefined);
+    const { title, sections, imageCaption, chart, table } = slide.props;
+    const images = imagesArray;
 
     // sections 배열을 HTML로 변환
     const sectionsHtml = (sections || [])
@@ -2549,6 +2553,73 @@ export class TossDefaultTemplate implements SlideTemplate {
       })
       .join('');
 
+    // 이미지 그리드 HTML 생성 (최대 2개, 반응형)
+    let imagesHtml = '';
+    if (images && images.length > 0) {
+      const imageCount = Math.min(images.length, 2);
+      const gridStyle = imageCount === 1 ? 'display: block;' : `
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      `;
+
+      imagesHtml = `
+        <div style="${gridStyle} margin-bottom: 12px;">
+          ${images.slice(0, 2).map((img: string) => `
+            <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(imageCaption || '')}" style="
+              width: 100%;
+              height: auto;
+              object-fit: cover;
+              border-radius: ${this.ctx.borderRadius.medium}px;
+              background: ${this.ctx.colors.lightBg};
+            ">
+          `).join('')}
+        </div>
+        ${imageCaption ? `
+          <figcaption style="
+            font-size: ${this.ctx.fonts.size.caption}px;
+            color: ${this.ctx.colors.textSecondary};
+            text-align: center;
+            margin-bottom: 12px;
+          ">${this.escapeHtml(imageCaption)}</figcaption>
+        ` : ''}
+      `;
+    }
+
+    // 차트 HTML (옵션)
+    const chartHtml = chart ? `
+      <div style="
+        padding: 16px;
+        background: ${this.ctx.colors.lightBg};
+        border-radius: ${this.ctx.borderRadius.medium}px;
+        margin-bottom: 12px;
+      ">
+        ${chart.title ? `<h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
+        <p style="font-size: 12px; color: ${this.ctx.colors.textSecondary};">[차트: ${chart.type}]</p>
+      </div>
+    ` : '';
+
+    // 표 HTML (옵션)
+    const tableHtml = table ? `
+      <div style="margin-bottom: 12px;">
+        ${table.title ? `<h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(table.title)}</h5>` : ''}
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead>
+            <tr style="background: ${this.ctx.colors.lightBg};">
+              ${table.headers.map(h => `<th style="padding: 8px; text-align: left; border-bottom: 2px solid ${this.ctx.colors.border};">${this.escapeHtml(h)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${table.rows.map(row => `
+              <tr>
+                ${row.map(cell => `<td style="padding: 8px; border-bottom: 1px solid ${this.ctx.colors.border};">${this.escapeHtml(cell)}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
+
     const html = `
 <div style="
   width: 100%;
@@ -2591,26 +2662,15 @@ export class TossDefaultTemplate implements SlideTemplate {
       </div>
     </div>
 
-    <!-- Image Column (Right) -->
-    <div style="flex: 1; display: flex; flex-direction: column;">
-      ${image ? `
-        <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(imageCaption)}" style="
-          width: 100%;
-          height: auto;
-          object-fit: contain;
-          border-radius: ${this.ctx.borderRadius.medium}px;
-          background: ${this.ctx.colors.lightBg};
-          margin-bottom: 12px;
-        ">
-        <figcaption style="
-          font-size: ${this.ctx.fonts.size.caption}px;
-          color: ${this.ctx.colors.textSecondary};
-          text-align: center;
-        ">${this.escapeHtml(imageCaption)}</figcaption>
-      ` : `
+    <!-- Visual Column (Right) - Images, Chart, Table -->
+    <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+      ${imagesHtml}
+      ${chartHtml}
+      ${tableHtml}
+      ${!images && !chart && !table ? `
         <div style="
           width: 100%;
-          height: 100%;
+          flex: 1;
           border: 2px dashed ${this.ctx.colors.border};
           border-radius: ${this.ctx.borderRadius.medium}px;
           display: flex;
@@ -2624,7 +2684,7 @@ export class TossDefaultTemplate implements SlideTemplate {
             margin: 0;
           ">이미지를 추가하세요</p>
         </div>
-      `}
+      ` : ''}
     </div>
   </div>
 </div>
@@ -2641,7 +2701,11 @@ export class TossDefaultTemplate implements SlideTemplate {
    * 16:9 비율: 회색 배경 + 중앙 정렬된 A4 용지 시뮬레이션
    */
   renderReportA4(slide: ReportA4Slide): HTMLSlide {
-    const { title, subtitle, image, sections } = slide.props;
+    // Backward compatibility: image -> images
+    const props = slide.props as any;
+    const imagesArray = props.images || (props.image ? [props.image] : undefined);
+    const { title, subtitle, sections, chart, table } = slide.props;
+    const images = imagesArray;
     const { width, height } = this.ctx.slideSize;
 
     // A4-portrait 비율 확인 (height/width ≈ 1.414, 여유를 두어 1.3 이상)
@@ -2716,6 +2780,65 @@ export class TossDefaultTemplate implements SlideTemplate {
       })
       .join('');
 
+    // 이미지 그리드 HTML 생성 (최대 2개, 반응형)
+    let imagesHtml = '';
+    if (images && images.length > 0) {
+      const imageCount = Math.min(images.length, 2);
+      const gridStyle = imageCount === 1 ? 'display: block;' : `
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      `;
+
+      imagesHtml = `
+        <div style="${gridStyle} margin-bottom: ${this.ctx.spacing.gapSmall}px;">
+          ${images.slice(0, 2).map((img: string) => `
+            <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(title)}" style="
+              width: 100%;
+              height: auto;
+              max-height: ${isA4Portrait ? '300px' : '180px'};
+              object-fit: cover;
+              border-radius: ${this.ctx.borderRadius.medium}px;
+            ">
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // 차트 HTML (옵션)
+    const chartHtml = chart ? `
+      <div style="
+        padding: 12px;
+        background: ${this.ctx.colors.lightBg};
+        border-radius: ${this.ctx.borderRadius.medium}px;
+        margin-bottom: ${this.ctx.spacing.gapSmall}px;
+      ">
+        ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
+        <p style="font-size: 10px; color: ${this.ctx.colors.textSecondary};">[차트: ${chart.type}]</p>
+      </div>
+    ` : '';
+
+    // 표 HTML (옵션)
+    const tableHtml = table ? `
+      <div style="margin-bottom: ${this.ctx.spacing.gapSmall}px;">
+        ${table.title ? `<h5 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(table.title)}</h5>` : ''}
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: ${this.ctx.colors.lightBg};">
+              ${table.headers.map(h => `<th style="padding: 6px; text-align: left; border-bottom: 2px solid ${this.ctx.colors.border};">${this.escapeHtml(h)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${table.rows.map(row => `
+              <tr>
+                ${row.map(cell => `<td style="padding: 6px; border-bottom: 1px solid ${this.ctx.colors.border};">${this.escapeHtml(cell)}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
+
     let html: string;
 
     if (isA4Portrait) {
@@ -2755,24 +2878,19 @@ export class TossDefaultTemplate implements SlideTemplate {
     margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
   ">${this.escapeHtml(subtitle)}</h2>
 
-  <!-- Image -->
-  ${image ? `
-    <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="
-      width: 100%;
-      height: auto;
-      border-radius: ${this.ctx.borderRadius.medium}px;
-      margin-bottom: ${this.ctx.spacing.gapSmall}px;
-    ">
-  ` : ''}
+  <!-- Images (반응형 그리드: 1개=100%, 2개=50% grid) -->
+  ${imagesHtml}
 
   <!-- Scrollable Content Area -->
   <div style="flex: 1; overflow-y: auto; min-height: 0;">
     ${sectionsHtml}
+    ${chartHtml}
+    ${tableHtml}
   </div>
 </div>
       `.trim();
     } else {
-      // 16:9 비율: 회색 배경 + 중앙 정렬된 A4 용지 시뮬레이션 (기존 방식)
+      // 16:9 비율: 회색 배경 + 중앙 정렬된 A4 용지 시뮬레이션
       html = `
 <div style="
   width: 100%;
@@ -2821,19 +2939,14 @@ export class TossDefaultTemplate implements SlideTemplate {
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
     ">${this.escapeHtml(subtitle)}</h2>
 
-    <!-- Image -->
-    ${image ? `
-      <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="
-        width: 100%;
-        height: auto;
-        border-radius: ${this.ctx.borderRadius.medium}px;
-        margin-bottom: ${this.ctx.spacing.gapSmall}px;
-      ">
-    ` : ''}
+    <!-- Images (반응형 그리드: 1개=100%, 2개=50% grid) -->
+    ${imagesHtml}
 
     <!-- Scrollable Content Area -->
     <div style="flex: 1; overflow-y: auto; min-height: 0;">
       ${sectionsHtml}
+      ${chartHtml}
+      ${tableHtml}
     </div>
   </div>
 </div>

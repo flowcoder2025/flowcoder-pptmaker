@@ -5,7 +5,7 @@
 
 'use client';
 
-import { Plus, Trash2, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, FileText, Image as ImageIcon, BarChart3, Table as TableIcon } from 'lucide-react';
 import type { ReportTwoColumnSlide } from '@/types/slide';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '../ImageUploader';
@@ -26,12 +26,42 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
     });
   };
 
-  const handleImageChange = (imageUrl: string) => {
+  const handleImageChange = (index: number, imageUrl: string) => {
+    const currentImages = slide.props.images || [];
+    const newImages = [...currentImages];
+    newImages[index] = imageUrl;
+
     onChange({
       ...slide,
       props: {
         ...slide.props,
-        image: imageUrl,
+        images: newImages.filter(img => img && img.trim() !== ''),
+      },
+    });
+  };
+
+  const handleAddImage = () => {
+    const currentImages = slide.props.images || [];
+    if (currentImages.length < 2) {
+      // 빈 문자열 추가하지 않고 UI만 표시
+      onChange({
+        ...slide,
+        props: {
+          ...slide.props,
+        },
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const currentImages = slide.props.images || [];
+    const newImages = currentImages.filter((_, i) => i !== index);
+
+    onChange({
+      ...slide,
+      props: {
+        ...slide.props,
+        images: newImages.length > 0 ? newImages : undefined,
       },
     });
   };
@@ -90,7 +120,6 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
   };
 
   const handleBulletsChange = (index: number, bulletsText: string) => {
-    // 줄바꿈으로 구분된 텍스트를 배열로 변환
     const bulletsArray = bulletsText
       .split('\n')
       .map(line => line.trim())
@@ -98,6 +127,9 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
 
     handleSectionChange(index, 'bullets', bulletsArray);
   };
+
+  const currentImages = slide.props.images || [];
+  const canAddImage = currentImages.length < 2;
 
   return (
     <div className="space-y-6">
@@ -107,7 +139,7 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
           원페이지 보고서 (2단) 편집
         </h3>
         <p className="text-sm text-gray-600">
-          왼쪽에는 텍스트 섹션, 오른쪽에는 이미지를 배치하는 보고서 형식이에요
+          왼쪽에는 텍스트 섹션, 오른쪽에는 이미지(최대 2개)를 배치하는 보고서 형식이에요
         </p>
       </div>
 
@@ -127,21 +159,61 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
         />
       </div>
 
-      {/* 이미지 */}
+      {/* 이미지 (최대 2개) */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5">
-          <ImageIcon className="w-4 h-4" />
-          이미지 (우측 컬럼)
-        </label>
-        <ImageUploader
-          currentImage={slide.props.image}
-          onImageChange={handleImageChange}
-        />
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+            <ImageIcon className="w-4 h-4" />
+            이미지 (우측 컬럼, 최대 2개)
+          </label>
+          {canAddImage && (
+            <Button
+              onClick={handleAddImage}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              이미지 추가
+            </Button>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          {[0, 1].map((index) => {
+            const hasImage = currentImages[index];
+            if (!hasImage && index > 0 && !currentImages[index - 1]) {
+              return null; // 이전 이미지가 없으면 표시 안 함
+            }
+
+            return (
+              <div key={index} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-gray-700">이미지 {index + 1}</span>
+                  {hasImage && (
+                    <button
+                      onClick={() => handleRemoveImage(index)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                      title="이미지 삭제"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <ImageUploader
+                  currentImage={currentImages[index]}
+                  onImageChange={(url) => handleImageChange(index, url)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
         <input
           type="text"
-          value={slide.props.imageCaption}
+          value={slide.props.imageCaption || ''}
           onChange={handleImageCaptionChange}
-          className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full mt-3 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="이미지 설명 (예: [그림 1] 3분기 매출 및 유료 전환율)"
         />
       </div>
@@ -180,10 +252,45 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
               </div>
 
               <div className="space-y-3">
+                {/* 섹션 타입 선택 */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    섹션 형식
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSectionChange(index, 'bullets', []);
+                      }}
+                      className={`flex-1 px-3 py-2 text-sm rounded-lg border ${
+                        !section.bullets || section.bullets.length === 0
+                          ? 'bg-blue-50 border-blue-500 text-blue-700'
+                          : 'bg-white border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      📝 소제목-본문
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSectionChange(index, 'body', '');
+                      }}
+                      className={`flex-1 px-3 py-2 text-sm rounded-lg border ${
+                        section.bullets && section.bullets.length > 0
+                          ? 'bg-blue-50 border-blue-500 text-blue-700'
+                          : 'bg-white border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      📋 소제목-불릿
+                    </button>
+                  </div>
+                </div>
+
                 {/* 소제목 */}
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    소제목 (선택)
+                    소제목 <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -191,39 +298,46 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
                     onChange={(e) => handleSectionChange(index, 'subtitle', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="예: 주요 성과 및 개선 영역"
+                    required
                   />
                 </div>
 
-                {/* 본문 */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    본문
-                  </label>
-                  <textarea
-                    value={section.body || ''}
-                    onChange={(e) => handleSectionChange(index, 'body', e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-                    placeholder="본문 내용을 입력하세요. 여러 문단을 작성할 수 있어요."
-                  />
-                </div>
+                {/* 본문 (소제목-본문 타입인 경우) */}
+                {(!section.bullets || section.bullets.length === 0) && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                      본문 <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={section.body || ''}
+                      onChange={(e) => handleSectionChange(index, 'body', e.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                      placeholder="본문 내용을 입력하세요. 여러 문단을 작성할 수 있어요."
+                      required
+                    />
+                  </div>
+                )}
 
-                {/* 불릿 포인트 */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    불릿 포인트 (선택)
-                  </label>
-                  <textarea
-                    value={section.bullets?.join('\n') || ''}
-                    onChange={(e) => handleBulletsChange(index, e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm font-mono"
-                    placeholder={'한 줄에 하나씩 입력하세요:\n4분기 리텐션 마케팅 전략 수립\n신규 고객 유입 채널별 CAC 재분석'}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    각 줄이 하나의 불릿 포인트로 표시돼요
-                  </p>
-                </div>
+                {/* 불릿 포인트 (소제목-불릿 타입인 경우) */}
+                {section.bullets && section.bullets.length >= 0 && (section.bullets.length > 0 || !section.body) && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                      불릿 포인트 <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={section.bullets?.join('\n') || ''}
+                      onChange={(e) => handleBulletsChange(index, e.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm font-mono"
+                      placeholder={'한 줄에 하나씩 입력하세요:\n4분기 리텐션 마케팅 전략 수립\n신규 고객 유입 채널별 CAC 재분석\n고객 여정 개선 프로젝트 착수'}
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      각 줄이 하나의 불릿 포인트로 표시돼요
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -234,7 +348,7 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
         <p className="flex items-center gap-1.5 text-xs text-blue-700">
           <FileText className="w-3.5 h-3.5 flex-shrink-0" />
           <span>
-            왼쪽 컬럼(flex: 1.5)에는 텍스트 섹션들이 스크롤 가능하게 표시되고, 오른쪽 컬럼(flex: 1)에는 이미지가 표시돼요
+            왼쪽 컬럼에는 텍스트 섹션들이 스크롤 가능하게 표시되고, 오른쪽 컬럼에는 이미지(최대 2개)가 그리드로 표시돼요
           </span>
         </p>
       </div>

@@ -74,23 +74,31 @@ export default function SlidePreview({ slide, templateId = 'toss', aspectRatio =
   }, [slide, aspectRatio, slideSize]);
 
   // TemplateEngine으로 HTML 생성 (useMemo로 최적화)
+  // slide.props를 JSON.stringify해서 깊은 비교
+  const slidePropsJson = JSON.stringify(slide.props);
+
   const htmlSlide = useMemo(() => {
     console.log('🔄 [SlidePreview] useMemo 재계산 중...', {
       type: slide.type,
       propsKeys: Object.keys(slide.props),
       aspectRatio,
+      timestamp: Date.now(),
     });
 
     try {
       const engine = new TemplateEngine();
       const result = engine.generateSlide(slide, templateId, aspectRatio);
-      console.log('✅ [SlidePreview] HTML 생성 완료', { aspectRatio });
+      console.log('✅ [SlidePreview] HTML 생성 완료', {
+        aspectRatio,
+        slideType: slide.type,
+        timestamp: Date.now(),
+      });
       return result;
     } catch (error) {
       console.error('❌ [SlidePreview] 슬라이드 HTML 생성 실패:', error);
       return null;
     }
-  }, [slide, templateId, aspectRatio]);
+  }, [slide.type, slidePropsJson, templateId, aspectRatio]);
 
   // 스케일 계산 (ViewerContent와 동일한 방식)
   const [scale, setScale] = useState(1);

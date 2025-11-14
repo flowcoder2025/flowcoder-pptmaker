@@ -419,8 +419,20 @@ export interface ReportTwoColumnSlide extends BaseSlide {
       body?: string;
       bullets?: string[];
     }>;
-    image: string;
-    imageCaption: string;
+    // 이미지: 최대 2개까지 반응형 그리드 지원
+    images?: string[];  // 1개: 100% width, 2개: 50% width grid
+    imageCaption?: string;
+    // 옵션: 차트 또는 표 추가 가능
+    chart?: {
+      type: 'bar' | 'line' | 'pie';
+      data: Array<{ label: string; value: number }>;
+      title?: string;
+    };
+    table?: {
+      headers: string[];
+      rows: string[][];
+      title?: string;
+    };
   };
 }
 
@@ -430,12 +442,24 @@ export interface ReportA4Slide extends BaseSlide {
   props: {
     title: string;
     subtitle: string;
-    image: string;
+    // 이미지: 최대 2개까지 반응형 그리드 지원
+    images?: string[];  // 1개: 100% width, 2개: 50% width grid
     sections: Array<{
       subtitle?: string;
       body?: string;
       bullets?: string[];
     }>;
+    // 옵션: 차트 또는 표 추가 가능
+    chart?: {
+      type: 'bar' | 'line' | 'pie';
+      data: Array<{ label: string; value: number }>;
+      title?: string;
+    };
+    table?: {
+      headers: string[];
+      rows: string[][];
+      title?: string;
+    };
   };
 }
 
