@@ -560,29 +560,51 @@ export default function ViewerContent() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
-          maxWidth: '100vw', // 화면 너비 제한
-          maxHeight: '100vh', // 화면 높이 제한
         }}>
-          <div style={{
-            aspectRatio: `${slideSize.width} / ${slideSize.height}`, // 슬라이드 비율 유지
-            maxWidth: '90vw', // 화면 너비의 90%
-            maxHeight: '90vh', // 화면 높이의 90%
-            background: '#FFFFFF',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-          }}>
-            <iframe
-              srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                display: 'block',
-              }}
-              title={`슬라이드 ${currentIndex + 1}`}
-            />
-          </div>
+          {(() => {
+            // 화면 크기 기준 스케일 계산
+            const maxWidth = typeof window !== 'undefined' ? window.innerWidth * 0.9 : slideSize.width;
+            const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.9 : slideSize.height;
+
+            // 너비/높이 기준으로 스케일 계산하여 더 작은 값 사용
+            const scaleByWidth = maxWidth / slideSize.width;
+            const scaleByHeight = maxHeight / slideSize.height;
+            const scale = Math.min(scaleByWidth, scaleByHeight, 1); // 최대 1배 (확대 방지)
+
+            // 스케일 적용된 크기
+            const scaledWidth = slideSize.width * scale;
+            const scaledHeight = slideSize.height * scale;
+
+            return (
+              <div style={{
+                width: `${scaledWidth}px`,
+                height: `${scaledHeight}px`,
+                position: 'relative',
+              }}>
+                <div style={{
+                  width: `${slideSize.width}px`,
+                  height: `${slideSize.height}px`,
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  overflow: 'hidden',
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                }}>
+                  <iframe
+                    srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      display: 'block',
+                    }}
+                    title={`슬라이드 ${currentIndex + 1}`}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
