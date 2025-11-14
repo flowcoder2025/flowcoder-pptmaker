@@ -80,13 +80,8 @@
   --letter-spacing-wide: 0.025em;
 
   /* ===== 간격 시스템 ===== */
-  --spacing-xs: 0.25rem;   /* 4px */
-  --spacing-sm: 0.5rem;    /* 8px */
-  --spacing-md: 1rem;      /* 16px */
-  --spacing-lg: 1.5rem;    /* 24px */
-  --spacing-xl: 2rem;      /* 32px */
-  --spacing-2xl: 3rem;     /* 48px */
-  --spacing-3xl: 4rem;     /* 64px */
+  /* Tailwind CSS 기본 spacing 시스템 사용 */
+  /* 커스텀 spacing이 필요한 경우 Tailwind 설정에서 확장 */
 
   /* ===== 모서리 (Border Radius) ===== */
   --radius: 0.5rem;        /* 기본값 (shadcn/ui 호환성) */

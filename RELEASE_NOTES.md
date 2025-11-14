@@ -70,6 +70,12 @@
 ### 🐛 Fixes
 
 #### 2025-11-14
+- **Tailwind CSS spacing 변수 충돌 해결**
+  - globals.css의 `--spacing-*` CSS 변수가 Tailwind의 `max-w-*` 유틸리티 클래스와 충돌하여 텍스트가 세로로 배치되던 문제 수정
+  - `max-w-2xl` 클래스가 672px 대신 48px로 적용되던 버그 해결
+  - 커스텀 spacing 변수를 제거하고 Tailwind 기본 spacing 시스템 사용
+  - 영향받던 페이지: 홈, input, viewer, editor 등 모든 페이지
+
 - **스타일 테마 완전 적용 시스템 구현 (Typography, Radius, Shadows)** (7f62912)
   - TossDefaultTemplate.generateCSSVariables() 확장: 9개 → 75개 CSS 변수
   - Typography (26개), Spacing (7개), Border Radius (7개), Shadows (7개)
