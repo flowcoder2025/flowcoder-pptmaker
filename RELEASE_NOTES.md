@@ -70,15 +70,16 @@
 ### 🐛 Fixes
 
 #### 2025-11-14
-- **viewer에서 aspectRatio 동적 적용 완료** (c285b2f, f2a523d, e805b7b, e099388)
+- **viewer에서 aspectRatio 동적 적용 완료** (c285b2f, f2a523d, e805b7b, e099388, de1db10)
   - calculateSlideSize로 aspectRatio에 따른 슬라이드 크기 계산
   - 모바일: 스케일 계산 시 동적 slideSize.width 사용
   - 모바일 iframe: hardcoded 1200×675 → slideSize 기반
   - 데스크톱: transform scale 방식으로 완전 개선
     - 원본 크기로 렌더링 후 scale() 적용 (모바일과 동일한 방식)
-    - 화면 크기(90vw, 90vh)에 맞춰 스케일 자동 계산
+    - vh 기반 반응형 레이아웃: 90vw × 75vh (픽셀 하드코딩 제거)
     - 내부 콘텐츠도 동일 비율로 정확히 축소
     - A4-portrait 오버플로우 완전 해결
+    - 네비게이션 항상 표시되면서도 슬라이드 충분한 크기 확보
   - 이제 4:3, 16:9, A4-portrait 모두 정확한 크기와 비율로 표시됨
 
 - **Tailwind CSS spacing 변수 충돌 해결**
