@@ -555,16 +555,18 @@ export default function ViewerContent() {
         // 데스크톱: 페이지네이션 레이아웃
         <div style={{
           flex: 1,
-          minHeight: `min(${minHeightDesktop}px, 90vh)`, // 슬라이드 높이 + padding(40px) 보장, 화면 높이로 제한
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
+          overflow: 'hidden', // 컨테이너 크기 제한
         }}>
           {(() => {
             // 화면 크기 기준 스케일 계산
+            // 너비: 화면의 90%
             const maxWidth = typeof window !== 'undefined' ? window.innerWidth * 0.9 : slideSize.width;
-            const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.9 : slideSize.height;
+            // 높이: 화면의 75% (헤더, 광고, 네비게이션 공간 고려)
+            const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.75 : slideSize.height;
 
             // 너비/높이 기준으로 스케일 계산하여 더 작은 값 사용
             const scaleByWidth = maxWidth / slideSize.width;
