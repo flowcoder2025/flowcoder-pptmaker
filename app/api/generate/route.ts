@@ -45,6 +45,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1-1. A4-portrait 비율 검증 (원페이지 모드 전용)
+    if (aspectRatio === 'A4-portrait' && pageFormat !== 'one-page') {
+      return NextResponse.json(
+        { error: 'A4 비율은 원페이지 모드에서만 사용할 수 있어요' },
+        { status: 400 }
+      );
+    }
+
     // 2. 플랜별 제한 검증
     const limits = PLAN_LIMITS[plan];
 

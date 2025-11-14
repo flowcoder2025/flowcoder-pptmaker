@@ -456,7 +456,13 @@ export default function InputPage() {
                   </button>
 
                   <button
-                    onClick={() => setAspectRatio('A4-portrait')}
+                    onClick={() => {
+                      setAspectRatio('A4-portrait');
+                      // A4-portrait는 원페이지 모드 전용이므로 자동 전환
+                      if (pageFormat !== 'one-page') {
+                        setPageFormat('one-page');
+                      }
+                    }}
                     className={`p-2.5 rounded-lg border-2 text-center transition-all ${
                       aspectRatio === 'A4-portrait'
                         ? 'border-blue-500 bg-blue-50'
@@ -467,6 +473,16 @@ export default function InputPage() {
                     <div className="text-xs text-gray-500 mt-0.5">세로</div>
                   </button>
                 </div>
+
+                {/* A4 비율 안내 */}
+                {aspectRatio === 'A4-portrait' && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-1.5">
+                    <FileType className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
+                    <p className="text-xs text-blue-800">
+                      A4 비율은 원페이지 모드 전용이에요
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* 페이지 형식 */}
