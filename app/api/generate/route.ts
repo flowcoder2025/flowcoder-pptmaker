@@ -115,9 +115,16 @@ export async function POST(request: NextRequest) {
     const slideData = JSON.parse(cleanedJson);
 
     // ✅ 화면 비율 및 페이지 형식 설정
-    slideData.aspectRatio = aspectRatio;
+    // reportA4 슬라이드가 있으면 자동으로 A4-portrait 비율로 설정
+    const hasReportA4 = slideData.slides.some((slide: any) => slide.type === 'reportA4');
+    if (hasReportA4) {
+      slideData.aspectRatio = 'A4-portrait';
+      console.log(`🔄 reportA4 슬라이드 감지 - AspectRatio를 'A4-portrait'로 자동 설정`);
+    } else {
+      slideData.aspectRatio = aspectRatio;
+    }
     slideData.pageFormat = pageFormat;
-    console.log(`📐 AspectRatio: ${aspectRatio}, PageFormat: ${pageFormat}`);
+    console.log(`📐 AspectRatio: ${slideData.aspectRatio}, PageFormat: ${pageFormat}`);
 
     // ✅ 원페이지 모드 슬라이드 타입 검증
     if (pageFormat === 'one-page') {

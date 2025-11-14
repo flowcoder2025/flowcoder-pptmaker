@@ -2635,15 +2635,19 @@ export class TossDefaultTemplate implements SlideTemplate {
   }
 
   /**
-   * 24. Report A4 Slide (원페이지 보고서 - A4 용지 시뮬레이션)
+   * 24. Report A4 Slide (원페이지 보고서 - A4 용지)
    *
-   * 회색 배경 + 중앙 정렬된 A4 용지
-   * 용지 내부: Accent Bar + Title + Subtitle + Image + 스크롤 가능한 섹션
+   * A4-portrait 비율: 전체 슬라이드를 A4 용지로 사용
+   * 16:9 비율: 회색 배경 + 중앙 정렬된 A4 용지 시뮬레이션
    */
   renderReportA4(slide: ReportA4Slide): HTMLSlide {
     const { title, subtitle, image, sections } = slide.props;
+    const { width, height } = this.ctx.slideSize;
 
-    // sections 배열을 HTML로 변환
+    // A4-portrait 비율 확인 (height/width ≈ 1.414, 여유를 두어 1.3 이상)
+    const isA4Portrait = height / width > 1.3;
+
+    // sections 배열을 HTML로 변환 (공통)
     const sectionsHtml = (sections || [])
       .map((section) => {
         let html = '';
@@ -2712,7 +2716,64 @@ export class TossDefaultTemplate implements SlideTemplate {
       })
       .join('');
 
-    const html = `
+    let html: string;
+
+    if (isA4Portrait) {
+      // A4-portrait 비율: 전체 슬라이드를 A4 용지로 사용
+      html = `
+<div style="
+  width: ${width}px;
+  height: ${height}px;
+  background: ${this.ctx.colors.white};
+  padding: 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: ${this.ctx.fonts.main};
+">
+  <!-- Accent Bar -->
+  <div style="
+    width: ${this.ctx.spacing.accentBar.width}px;
+    height: ${this.ctx.spacing.accentBar.height}px;
+    background-color: ${this.ctx.colors.primary};
+    margin-bottom: ${this.ctx.spacing.gapSmall}px;
+  "></div>
+
+  <!-- Title -->
+  <h1 style="
+    font-size: 32px;
+    font-weight: 700;
+    color: ${this.ctx.colors.text};
+    margin: 0 0 10px 0;
+  ">${this.escapeHtml(title)}</h1>
+
+  <!-- Subtitle -->
+  <h2 style="
+    font-size: 20px;
+    font-weight: 500;
+    color: ${this.ctx.colors.textSecondary};
+    margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+  ">${this.escapeHtml(subtitle)}</h2>
+
+  <!-- Image -->
+  ${image ? `
+    <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="
+      width: 100%;
+      height: auto;
+      border-radius: ${this.ctx.borderRadius.medium}px;
+      margin-bottom: ${this.ctx.spacing.gapSmall}px;
+    ">
+  ` : ''}
+
+  <!-- Scrollable Content Area -->
+  <div style="flex: 1; overflow-y: auto; min-height: 0;">
+    ${sectionsHtml}
+  </div>
+</div>
+      `.trim();
+    } else {
+      // 16:9 비율: 회색 배경 + 중앙 정렬된 A4 용지 시뮬레이션 (기존 방식)
+      html = `
 <div style="
   width: 100%;
   height: 100%;
@@ -2776,7 +2837,8 @@ export class TossDefaultTemplate implements SlideTemplate {
     </div>
   </div>
 </div>
-    `.trim();
+      `.trim();
+    }
 
     const css = this.generateCSSVariables();
     return { html, css };
