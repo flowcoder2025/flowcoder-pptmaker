@@ -70,6 +70,14 @@
 ### 🐛 Fixes
 
 #### 2025-11-14
+- **viewer에서 aspectRatio 동적 적용 완료** (b7b8aa6)
+  - calculateSlideSize로 aspectRatio에 따른 슬라이드 크기 계산
+  - 모바일: 스케일 계산 시 동적 slideSize.width 사용
+  - 모바일 iframe: hardcoded 1200×675 → slideSize 기반
+  - 데스크톱: minHeight를 slideSize.height + 40px로 동적 계산
+  - 데스크톱 컨테이너: hardcoded 1200×675 → slideSize 기반
+  - 이제 4:3, 16:9, A4-portrait 모두 정확한 비율로 표시됨
+
 - **Tailwind CSS spacing 변수 충돌 해결**
   - globals.css의 `--spacing-*` CSS 변수가 Tailwind의 `max-w-*` 유틸리티 클래스와 충돌하여 텍스트가 세로로 배치되던 문제 수정
   - `max-w-2xl` 클래스가 672px 대신 48px로 적용되던 버그 해결

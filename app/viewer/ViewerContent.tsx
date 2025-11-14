@@ -23,6 +23,7 @@ import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import DownloadProgressModal from '@/components/DownloadProgressModal';
+import { calculateSlideSize } from '@/services/template/engine/types';
 
 export default function ViewerContent() {
   const router = useRouter();
@@ -55,6 +56,11 @@ export default function ViewerContent() {
   // 워터마크 표시 여부 및 광고 표시 여부
   const { hasWatermark, plan } = useSubscriptionStore();
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
+
+  // 슬라이드 크기 계산 (aspectRatio에 따라 동적)
+  const aspectRatio = currentPresentation?.slideData?.aspectRatio || '16:9';
+  const slideSize = calculateSlideSize(aspectRatio);
+  const minHeightDesktop = slideSize.height + 40; // padding(20px * 2)
 
   // 모바일 감지
   useEffect(() => {
@@ -510,10 +516,10 @@ export default function ViewerContent() {
             {slides.map((slide, index) => {
               // 모바일 화면 너비 계산 (padding 제외)
               const mobileWidth = typeof window !== 'undefined' ? window.innerWidth - 24 : 400;
-              // 1200px 기준으로 스케일 계산
-              const scale = mobileWidth / 1200;
+              // aspectRatio에 따른 스케일 계산
+              const scale = mobileWidth / slideSize.width;
               // 스케일된 높이 계산
-              const scaledHeight = 675 * scale;
+              const scaledHeight = slideSize.height * scale;
 
               return (
                 <div
@@ -531,8 +537,8 @@ export default function ViewerContent() {
                   <iframe
                     srcDoc={createSlideDocument(slide.html, slide.css)}
                     style={{
-                      width: '1200px',
-                      height: '675px',
+                      width: `${slideSize.width}px`,
+                      height: `${slideSize.height}px`,
                       border: 'none',
                       display: 'block',
                       transform: `scale(${scale})`,
@@ -549,15 +555,15 @@ export default function ViewerContent() {
         // 데스크톱: 페이지네이션 레이아웃
         <div style={{
           flex: 1,
-          minHeight: '715px', // 슬라이드 높이(675px) + padding(40px) 보장
+          minHeight: `${minHeightDesktop}px`, // 슬라이드 높이 + padding(40px) 보장
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
         }}>
           <div style={{
-            width: '1200px', // 고정 너비
-            height: '675px', // 고정 높이 (16:9 비율)
+            width: `${slideSize.width}px`, // aspectRatio에 따른 너비
+            height: `${slideSize.height}px`, // aspectRatio에 따른 높이
             maxWidth: '90vw', // 화면보다 크면 축소
             maxHeight: '90vh', // 화면보다 크면 축소
             background: '#FFFFFF',
