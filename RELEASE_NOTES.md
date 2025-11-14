@@ -70,6 +70,13 @@
 ### 🐛 Fixes
 
 #### 2025-11-14
+- **viewer 슬라이드 뷰어 섹션에 내부 스크롤 추가 - 광고 대응** (8a1495f)
+  - 광고 영역으로 인해 슬라이드가 세로로 잘리는 문제 해결
+  - overflow: 'hidden' → 'auto'로 변경
+  - 공간 부족 시 슬라이드 뷰어 섹션 내부에 스크롤 생성
+  - transform scale 유지하여 슬라이드 비율과 크기 정확히 보존
+  - 광고가 있어도 슬라이드 전체를 스크롤하여 확인 가능
+
 - **viewer에서 aspectRatio 동적 적용 완료** (c285b2f, f2a523d, e805b7b, e099388, de1db10)
   - calculateSlideSize로 aspectRatio에 따른 슬라이드 크기 계산
   - 모바일: 스케일 계산 시 동적 slideSize.width 사용

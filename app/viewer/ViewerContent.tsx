@@ -559,7 +559,7 @@ export default function ViewerContent() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
-          overflow: 'hidden', // 컨테이너 크기 제한
+          overflow: 'auto', // 광고로 인해 공간 부족 시 스크롤
         }}>
           {(() => {
             // 화면 크기 기준 스케일 계산
