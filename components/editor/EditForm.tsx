@@ -31,6 +31,9 @@ import ImageTextSlideForm from './forms/ImageTextSlideForm';
 import AgendaSlideForm from './forms/AgendaSlideForm';
 import TestimonialSlideForm from './forms/TestimonialSlideForm';
 import GallerySlideForm from './forms/GallerySlideForm';
+// 원페이지 보고서 폼 컴포넌트들
+import ReportTwoColumnSlideForm from './forms/ReportTwoColumnSlideForm';
+import ReportA4SlideForm from './forms/ReportA4SlideForm';
 
 interface EditFormProps {
   slide: Slide;
@@ -110,6 +113,13 @@ export default function EditForm({ slide, onChange }: EditFormProps) {
 
     case 'gallery':
       return <GallerySlideForm slide={slide as any} onChange={onChange as any} />;
+
+    // 원페이지 보고서 타입
+    case 'reportTwoColumn':
+      return <ReportTwoColumnSlideForm slide={slide as any} onChange={onChange as any} />;
+
+    case 'reportA4':
+      return <ReportA4SlideForm slide={slide as any} onChange={onChange as any} />;
 
     default:
       return (
