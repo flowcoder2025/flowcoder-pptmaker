@@ -11,6 +11,8 @@ import type {
   TemplateContext,
 } from '../../engine/types';
 import { DEFAULT_TEMPLATE_CONTEXT } from '../../engine/types';
+import type { StyleTheme } from '@/constants/themes';
+import { DEFAULT_THEME } from '@/constants/themes';
 import type {
   TitleSlide,
   SectionSlide,
@@ -59,35 +61,111 @@ export class TossDefaultTemplate implements SlideTemplate {
   private ctx: TemplateContext;
 
   /**
-   * 생성자
-   * @param customContext - 커스텀 템플릿 컨텍스트 (색상 오버라이드 등)
+   * 스타일 테마 (Typography, Radius, Shadows 포함)
    */
-  constructor(customContext?: Partial<TemplateContext>) {
-    this.ctx = customContext
-      ? {
-          ...DEFAULT_TEMPLATE_CONTEXT,
-          colors: {
-            ...DEFAULT_TEMPLATE_CONTEXT.colors,
-            ...(customContext.colors || {}),
-          },
-          fonts: {
-            ...DEFAULT_TEMPLATE_CONTEXT.fonts,
-            ...(customContext.fonts || {}),
-          },
-          spacing: {
-            ...DEFAULT_TEMPLATE_CONTEXT.spacing,
-            ...(customContext.spacing || {}),
-          },
-          borderRadius: {
-            ...DEFAULT_TEMPLATE_CONTEXT.borderRadius,
-            ...(customContext.borderRadius || {}),
-          },
-          slideSize: {
-            ...DEFAULT_TEMPLATE_CONTEXT.slideSize,
-            ...(customContext.slideSize || {}),
-          },
-        }
-      : DEFAULT_TEMPLATE_CONTEXT;
+  private theme: StyleTheme;
+
+  /**
+   * 생성자
+   * @param themeOrContext - StyleTheme 또는 기존 TemplateContext (하위 호환성)
+   */
+  constructor(themeOrContext?: StyleTheme | Partial<TemplateContext>) {
+    // StyleTheme인지 확인 (typography 속성이 있으면 StyleTheme)
+    if (themeOrContext && 'typography' in themeOrContext) {
+      // StyleTheme으로 전달된 경우
+      this.theme = themeOrContext as StyleTheme;
+      this.ctx = this.convertThemeToContext(this.theme);
+    } else {
+      // 기존 TemplateContext 또는 없음 (하위 호환성)
+      this.theme = DEFAULT_THEME;
+      this.ctx = themeOrContext
+        ? {
+            ...DEFAULT_TEMPLATE_CONTEXT,
+            colors: {
+              ...DEFAULT_TEMPLATE_CONTEXT.colors,
+              ...(themeOrContext.colors || {}),
+            },
+            fonts: {
+              ...DEFAULT_TEMPLATE_CONTEXT.fonts,
+              ...(themeOrContext.fonts || {}),
+            },
+            spacing: {
+              ...DEFAULT_TEMPLATE_CONTEXT.spacing,
+              ...(themeOrContext.spacing || {}),
+            },
+            borderRadius: {
+              ...DEFAULT_TEMPLATE_CONTEXT.borderRadius,
+              ...(themeOrContext.borderRadius || {}),
+            },
+            slideSize: {
+              ...DEFAULT_TEMPLATE_CONTEXT.slideSize,
+              ...(themeOrContext.slideSize || {}),
+            },
+          }
+        : DEFAULT_TEMPLATE_CONTEXT;
+    }
+  }
+
+  /**
+   * StyleTheme을 TemplateContext로 변환
+   * @param theme - StyleTheme
+   * @returns TemplateContext
+   */
+  private convertThemeToContext(theme: StyleTheme): TemplateContext {
+    // rem 문자열을 픽셀로 변환하는 헬퍼
+    const remToPx = (remStr: string): number => {
+      return parseFloat(remStr) * 16;
+    };
+
+    return {
+      colors: {
+        primary: theme.colors.primary,
+        dark: theme.colors.secondary,
+        text: theme.colors.text,
+        textSecondary: theme.colors.textSecondary,
+        gray: theme.colors.textMuted,
+        bg: theme.colors.background,
+        white: '#FFFFFF',
+        lightBg: theme.colors.surface,
+        border: theme.colors.border,
+      },
+      fonts: {
+        main: theme.typography.fontFamily.primary,
+        serif: 'Georgia, serif',
+        size: {
+          title: remToPx(theme.typography.fontSize['4xl']), // 48px
+          subtitle: remToPx(theme.typography.fontSize['2xl']), // 24px
+          heading: remToPx(theme.typography.fontSize['3xl']), // 32px
+          body: remToPx(theme.typography.fontSize.base), // 18px
+          quote: remToPx(theme.typography.fontSize['2xl']), // 24px
+          stats: 56, // 고정값
+          section: 44, // 고정값
+          thankYou: 56, // 고정값
+          caption: remToPx(theme.typography.fontSize.sm), // 16px
+          small: remToPx(theme.typography.fontSize.xs), // 14px
+        },
+      },
+      spacing: {
+        padding: remToPx(theme.spacing.lg), // 60px
+        accentBar: {
+          width: 60,
+          height: 4,
+        },
+        gap: remToPx(theme.spacing.md), // 40px
+        gapSmall: remToPx(theme.spacing.sm), // 20px
+        listGap: 20,
+        chartGap: 25,
+        iconSize: 24,
+        timelineNodeSize: 60,
+      },
+      borderRadius: {
+        small: remToPx(theme.radius.sm),
+        medium: remToPx(theme.radius.md),
+        large: remToPx(theme.radius.lg),
+        circle: '50%',
+      },
+      slideSize: DEFAULT_TEMPLATE_CONTEXT.slideSize,
+    };
   }
 
   /**
@@ -2406,24 +2484,111 @@ export class TossDefaultTemplate implements SlideTemplate {
   /**
    * CSS 변수 시스템 생성
    *
-   * TDS 디자인 토큰을 CSS 변수로 변환하여 일관성 있는 스타일링 제공
+   * StyleTheme의 모든 디자인 토큰을 CSS 변수로 변환하여 일관성 있는 스타일링 제공
    */
   private generateCSSVariables(): string {
+    const t = this.theme;
+
     return `
 :root {
-  /* TDS Color System - 일관성을 위해 CSS 변수로 유지 */
-  --color-primary: ${this.ctx.colors.primary};
-  --color-text-primary: ${this.ctx.colors.text};
-  --color-text-secondary: ${this.ctx.colors.textSecondary};
-  --color-text-tertiary: #6b7280;
-  --color-background: ${this.ctx.colors.white};
-  --color-background-light: ${this.ctx.colors.lightBg};
-  --color-background-card: #f9fafb;
-  --color-border: ${this.ctx.colors.border};
-  --color-accent: ${this.ctx.colors.primary};
+  /* ===== 색상 시스템 (19 variables) ===== */
+  --color-primary: ${t.colors.primary};
+  --color-secondary: ${t.colors.secondary};
+  --color-accent: ${t.colors.accent};
+  --color-background: ${t.colors.background};
+  --color-surface: ${t.colors.surface};
+  --color-surface-elevated: ${t.colors.surfaceElevated};
+  --color-text: ${t.colors.text};
+  --color-text-secondary: ${t.colors.textSecondary};
+  --color-text-muted: ${t.colors.textMuted};
+  --color-error: ${t.colors.error};
+  --color-success: ${t.colors.success};
+  --color-warning: ${t.colors.warning};
+  --color-info: ${t.colors.info};
+  --color-border: ${t.colors.border};
+  --color-border-light: ${t.colors.borderLight};
+  --color-input: ${t.colors.input};
+  --color-ring: ${t.colors.ring};
+  --color-highlight: ${t.colors.highlight};
+  --color-overlay: ${t.colors.overlay};
 
-  /* Font Family - 일관성을 위해 CSS 변수로 유지 */
-  --font-family-base: ${this.ctx.fonts.main};
+  /* ===== 타이포그래피 (26 variables) ===== */
+  /* Font Family */
+  --font-family-primary: ${t.typography.fontFamily.primary};
+  --font-family-secondary: ${t.typography.fontFamily.secondary || t.typography.fontFamily.primary};
+  --font-family-monospace: ${t.typography.fontFamily.monospace};
+
+  /* Font Size */
+  --font-size-xs: ${t.typography.fontSize.xs};
+  --font-size-sm: ${t.typography.fontSize.sm};
+  --font-size-base: ${t.typography.fontSize.base};
+  --font-size-lg: ${t.typography.fontSize.lg};
+  --font-size-xl: ${t.typography.fontSize.xl};
+  --font-size-2xl: ${t.typography.fontSize['2xl']};
+  --font-size-3xl: ${t.typography.fontSize['3xl']};
+  --font-size-4xl: ${t.typography.fontSize['4xl']};
+
+  /* Font Weight */
+  --font-weight-light: ${t.typography.fontWeight.light};
+  --font-weight-normal: ${t.typography.fontWeight.normal};
+  --font-weight-medium: ${t.typography.fontWeight.medium};
+  --font-weight-semibold: ${t.typography.fontWeight.semibold};
+  --font-weight-bold: ${t.typography.fontWeight.bold};
+
+  /* Line Height */
+  --line-height-tight: ${t.typography.lineHeight.tight};
+  --line-height-normal: ${t.typography.lineHeight.normal};
+  --line-height-relaxed: ${t.typography.lineHeight.relaxed};
+
+  /* Letter Spacing */
+  --letter-spacing-tight: ${t.typography.letterSpacing.tight};
+  --letter-spacing-normal: ${t.typography.letterSpacing.normal};
+  --letter-spacing-wide: ${t.typography.letterSpacing.wide};
+
+  /* ===== 간격 시스템 (7 variables) ===== */
+  --spacing-xs: ${t.spacing.xs};
+  --spacing-sm: ${t.spacing.sm};
+  --spacing-md: ${t.spacing.md};
+  --spacing-lg: ${t.spacing.lg};
+  --spacing-xl: ${t.spacing.xl};
+  --spacing-2xl: ${t.spacing['2xl']};
+  --spacing-3xl: ${t.spacing['3xl']};
+
+  /* ===== 모서리 반경 (7 variables) ===== */
+  --radius-none: ${t.radius.none};
+  --radius-sm: ${t.radius.sm};
+  --radius-md: ${t.radius.md};
+  --radius-lg: ${t.radius.lg};
+  --radius-xl: ${t.radius.xl};
+  --radius-2xl: ${t.radius['2xl']};
+  --radius-full: ${t.radius.full};
+
+  /* ===== 그림자 (7 variables) ===== */
+  --shadow-none: ${t.shadows.none};
+  --shadow-sm: ${t.shadows.sm};
+  --shadow-md: ${t.shadows.md};
+  --shadow-lg: ${t.shadows.lg};
+  --shadow-xl: ${t.shadows.xl};
+  --shadow-2xl: ${t.shadows['2xl']};
+  --shadow-inner: ${t.shadows.inner};
+
+  /* ===== 컴포넌트 기본값 (9 variables) ===== */
+  --button-radius: ${t.radius[t.components.button.radius]};
+  --button-shadow: ${t.shadows[t.components.button.shadow]};
+  --button-font-size: ${t.typography.fontSize[t.components.button.fontSize]};
+
+  --card-radius: ${t.radius[t.components.card.radius]};
+  --card-shadow: ${t.shadows[t.components.card.shadow]};
+  --card-padding: ${t.spacing[t.components.card.padding]};
+
+  --input-radius: ${t.radius[t.components.input.radius]};
+  --input-border-width: ${t.components.input.borderWidth};
+  --input-font-size: ${t.typography.fontSize[t.components.input.fontSize]};
+
+  /* ===== 하위 호환성 (기존 변수명 유지) ===== */
+  --color-text-primary: ${t.colors.text};
+  --color-background-light: ${t.colors.surface};
+  --font-family-base: ${t.typography.fontFamily.primary};
 }
     `.trim();
   }

@@ -15,6 +15,7 @@ import { RESEARCH_MODE_CONFIG } from '@/types/research';
 import type { UnifiedPPTJSON, Slide, SlideType, GlobalSlideSettings } from '@/types/slide';
 import type { AttachmentFile } from '@/types/research';
 import { createDefaultSlide } from '@/utils/slideDefaults';
+import { DEFAULT_THEME, getThemeById } from '@/constants/themes';
 
 interface PresentationState {
   // 현재 프리젠테이션
@@ -25,8 +26,8 @@ interface PresentationState {
   generationStep: GenerationStep;
   generationError: string | null;
 
-  // 색상 프리셋
-  selectedColorPresetId: string;
+  // 스타일 테마
+  selectedThemeId: string;
 
   // 자료 조사 모드
   researchMode: ResearchMode; // 'none' | 'fast' | 'deep'
@@ -45,7 +46,7 @@ interface PresentationState {
 
   // 액션
   setCurrentPresentation: (presentation: Presentation | null) => void;
-  setSelectedColorPreset: (presetId: string) => void;
+  setSelectedTheme: (themeId: string) => void;
   setResearchMode: (mode: ResearchMode) => void;
   setUseProContentModel: (usePro: boolean) => void;
   setUseProHtmlModel: (usePro: boolean) => void;
@@ -75,7 +76,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   isGenerating: false,
   generationStep: 'idle',
   generationError: null,
-  selectedColorPresetId: 'toss', // 기본값: 토스
+  selectedThemeId: DEFAULT_THEME.id, // 기본값: Toss 테마
   researchMode: 'none', // 기본값: 자료 조사 안함
   useProContentModel: false, // 기본값: Flash (빠른속도)
   useProHtmlModel: true, // 기본값: Pro (고품질 HTML) - A/B 테스트 후 변경 고려
@@ -87,7 +88,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
   setCurrentPresentation: (presentation) => set({ currentPresentation: presentation }),
 
-  setSelectedColorPreset: (presetId) => set({ selectedColorPresetId: presetId }),
+  setSelectedTheme: (themeId) => set({ selectedThemeId: themeId }),
 
   setResearchMode: (mode) => set({ researchMode: mode }),
 
@@ -187,9 +188,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     };
 
     // HTML 재생성
-    const { selectedColorPresetId } = get();
+    const { selectedThemeId } = get();
+    const theme = getThemeById(selectedThemeId) || DEFAULT_THEME;
     const engine = new TemplateEngine();
-    const updatedHtmlSlides = engine.generateAll(updatedSlideData, selectedColorPresetId);
+    const updatedHtmlSlides = engine.generateAll(updatedSlideData, theme.id); // ✅ theme.id 사용
 
     // 프리젠테이션 업데이트
     const updatedPresentation: Presentation = {
@@ -225,7 +227,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       await creditStore.fetchBalance();
       console.log('✅ 크레딧 정보 동기화 완료');
 
-      const { selectedColorPresetId, researchMode, useProContentModel, targetSlideCount } = get();
+      const { selectedThemeId, researchMode, useProContentModel, targetSlideCount } = get();
 
       // 💳 크레딧 차감 로직
       // 1. 깊은 조사 사용 시
@@ -305,9 +307,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         set({ generationStep: 'generating' });
 
         // HTML 생성 (TemplateEngine)
-        console.log(`🎨 HTML 슬라이드 생성 중... (템플릿: ${selectedColorPresetId})`);
+        const theme = getThemeById(selectedThemeId) || DEFAULT_THEME;
+        console.log(`🎨 HTML 슬라이드 생성 중... (테마: ${theme.name}, 템플릿: ${theme.id})`);
         const engine = new TemplateEngine();
-        const htmlSlides = engine.generateAll(slideData, selectedColorPresetId);
+        const htmlSlides = engine.generateAll(slideData, theme.id); // ✅ theme.id 사용
         console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
 
         // Presentation 객체 생성
@@ -322,7 +325,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           title: presentationTitle || '무제',
           slides: htmlSlides,
           slideData: slideData,
-          templateId: selectedColorPresetId,
+          templateId: selectedThemeId,
           createdAt: Date.now(),
           updatedAt: Date.now(),
           metadata: metadata || {},
@@ -465,9 +468,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       set({ generationStep: 'generating' });
 
       // 3단계: HTML 생성 (TemplateEngine)
-      console.log(`🎨 3️⃣ HTML 슬라이드 생성 중... (템플릿: ${selectedColorPresetId})`);
+      const theme = getThemeById(selectedThemeId) || DEFAULT_THEME;
+      console.log(`🎨 3️⃣ HTML 슬라이드 생성 중... (테마: ${theme.name}, 템플릿: ${theme.id})`);
       const engine = new TemplateEngine();
-      const htmlSlides = engine.generateAll(slideJSON, selectedColorPresetId);
+      const htmlSlides = engine.generateAll(slideJSON, theme.id); // ✅ theme.id 사용
       console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
 
       // 4단계: 프리젠테이션 객체 생성
@@ -482,7 +486,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         title: presentationTitle || '무제',
         slides: htmlSlides,
         slideData: slideJSON,              // Phase 1: 편집용 구조화 데이터 저장
-        templateId: selectedColorPresetId,  // Phase 1: 사용된 템플릿 ID (색상 프리셋)
+        templateId: selectedThemeId,  // Phase 1: 사용된 템플릿 ID (스타일 테마)
         createdAt: Date.now(),
         updatedAt: Date.now(),             // Phase 1: 마지막 수정 시간
       };

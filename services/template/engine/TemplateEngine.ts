@@ -9,7 +9,7 @@ import { TemplateRegistry } from './TemplateRegistry';
 import { TossDefaultTemplate } from '../base/toss-default/TossDefaultTemplate';
 import type { SlideTemplate, TemplateContext } from './types';
 import type { Slide, HTMLSlide, UnifiedPPTJSON } from '@/types/slide';
-import { COLOR_PRESETS } from '@/constants/design';
+import { STYLE_THEMES } from '@/constants/themes';
 import {
   isTitleSlide,
   isSectionSlide,
@@ -218,38 +218,24 @@ export class TemplateEngine {
    * 기본 템플릿 등록
    *
    * TossDefaultTemplate을 자동으로 등록
-   * 모든 COLOR_PRESETS에 대한 템플릿도 등록
+   * 모든 STYLE_THEMES에 대한 템플릿도 등록 (Typography, Radius, Shadows 포함)
    */
   private registerBuiltInTemplates(): void {
     // 기본 템플릿 등록 (하위 호환성)
     this.registry.register(new TossDefaultTemplate());
 
-    // 각 색상 프리셋에 대한 템플릿 등록
-    COLOR_PRESETS.forEach((preset) => {
-      const colorContext: Partial<TemplateContext> = {
-        colors: {
-          primary: preset.primary,
-          dark: preset.secondary,
-          text: preset.text,
-          textSecondary: preset.textSecondary,
-          gray: preset.muted,
-          bg: preset.background,
-          white: '#FFFFFF',
-          lightBg: preset.surface,
-          border: preset.muted,
-        },
-      };
+    // 각 스타일 테마에 대한 템플릿 등록
+    STYLE_THEMES.forEach((theme) => {
+      // StyleTheme을 직접 전달하여 모든 디자인 토큰 활용
+      const template = new TossDefaultTemplate(theme);
 
-      // 색상 프리셋별 템플릿 생성
-      const template = new TossDefaultTemplate(colorContext);
-
-      // 템플릿 ID와 이름을 프리셋에 맞게 오버라이드
-      template.id = preset.id;
-      template.name = preset.name;
-      template.description = preset.description;
+      // 템플릿 ID와 이름을 테마에 맞게 오버라이드
+      template.id = theme.id; // ✅ UI theme ID 사용 (vercel, twitter 등)
+      template.name = theme.name;
+      template.description = theme.description;
 
       this.registry.register(template);
-      console.log(`✅ 템플릿 등록 완료: ${preset.id} (${preset.name})`);
+      console.log(`✅ 템플릿 등록 완료: ${theme.id} (${theme.name} - ${theme.tone})`);
     });
   }
 

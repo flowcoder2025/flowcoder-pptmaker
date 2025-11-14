@@ -23,7 +23,8 @@ import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { TEMPLATE_EXAMPLES, COLOR_PRESETS } from '@/constants/design';
+import { TEMPLATE_EXAMPLES } from '@/constants/design';
+import { STYLE_THEMES } from '@/constants/themes';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
 import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
 import type { AttachmentFile } from '@/types/research';
@@ -44,8 +45,8 @@ export default function InputPage() {
     generationStep,
     generationError,
     clearError,
-    selectedColorPresetId,
-    setSelectedColorPreset,
+    selectedThemeId,
+    setSelectedTheme,
     researchMode,
     setResearchMode,
     useProContentModel,
@@ -359,37 +360,52 @@ export default function InputPage() {
               </div>
             )}
 
-            {/* 색상 테마 */}
+            {/* 스타일 테마 */}
             <div>
               <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
                 <Palette className="w-4 h-4" />
-                <h3>색상 테마</h3>
+                <h3>스타일 테마</h3>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {COLOR_PRESETS.slice(0, 6).map((preset) => {
-                  const isSelected = selectedColorPresetId === preset.id;
+                {STYLE_THEMES.map((theme) => {
+                  const isSelected = selectedThemeId === theme.id;
+                  // 폰트 계열 추출 (첫 번째 폰트만)
+                  const fontHint = theme.typography.fontFamily.primary.split(',')[0].trim().replace(/['"]/g, '');
+
                   return (
                     <button
-                      key={preset.id}
-                      onClick={() => setSelectedColorPreset(preset.id)}
+                      key={theme.id}
+                      onClick={() => setSelectedTheme(theme.id)}
                       className={`p-3 rounded-lg border-2 text-left transition-all ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 bg-white hover:border-gray-300'
                       }`}
                     >
-                      <div className="flex items-center gap-2 mb-2">
+                      {/* 색상 프리뷰 (3개: primary, accent, background) */}
+                      <div className="flex items-center gap-1.5 mb-2">
                         <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ background: preset.primary }}
+                          className="w-6 h-6 rounded-full border border-gray-200"
+                          style={{ background: theme.colors.primary }}
                         />
                         <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ background: preset.secondary }}
+                          className="w-6 h-6 rounded-full border border-gray-200"
+                          style={{ background: theme.colors.accent }}
+                        />
+                        <div
+                          className="w-6 h-6 rounded-full border border-gray-200"
+                          style={{ background: theme.colors.background }}
                         />
                       </div>
-                      <div className="text-xs font-semibold text-gray-900">
-                        {preset.name}
+
+                      {/* 테마 이름 */}
+                      <div className="text-sm font-semibold text-gray-900 mb-1">
+                        {theme.name}
+                      </div>
+
+                      {/* 폰트 + 톤 */}
+                      <div className="text-xs text-gray-500 line-clamp-1">
+                        {fontHint} • {theme.tone}
                       </div>
                     </button>
                   );

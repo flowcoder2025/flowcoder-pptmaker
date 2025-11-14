@@ -67,6 +67,18 @@
   - 슬라이드 없으면 이모지 placeholder 표시
   - 성능 최적화: 카드가 화면에 보일 때만 렌더링
 
+### 🐛 Fixes
+
+#### 2025-11-14
+- **스타일 테마 완전 적용 시스템 구현 (Typography, Radius, Shadows)** (7f62912)
+  - TossDefaultTemplate.generateCSSVariables() 확장: 9개 → 75개 CSS 변수
+  - Typography (26개), Spacing (7개), Border Radius (7개), Shadows (7개)
+  - TemplateEngine 및 presentationStore에서 theme.id 사용으로 통일
+  - theme.templateId ('toss') → theme.id ('vercel' 등) 전환 (5곳)
+  - constants/themes.ts 생성: 7개 StyleTheme 정의 (Toss, Twitter, Vercel, Supabase, Claude, Cyberpunk, Mono)
+  - lib/theme-manager.ts 생성: CSS 변수 동적 업데이트
+  - Editor에서 선택한 테마 올바르게 표시
+
 ### 🎨 UI/UX
 
 #### 2025-11-13
