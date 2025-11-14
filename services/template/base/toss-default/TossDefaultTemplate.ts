@@ -2733,7 +2733,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     // Backward compatibility: image -> images
     const props = slide.props as any;
     const imagesArray = props.images || (props.image ? [props.image] : undefined);
-    const { title, subtitle, sections, chart, table } = slide.props;
+    const { title, subtitle, sections, chart, table, imageCaption } = slide.props;
     const images = imagesArray;
     const { width, height } = this.ctx.slideSize;
 
@@ -2742,7 +2742,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     // sections 배열을 HTML로 변환 (공통)
     const sectionsHtml = (sections || [])
-      .map((section) => {
+      .map((section, index) => {
         let html = '';
 
         // Subtitle
@@ -2752,7 +2752,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               font-size: 16px;
               font-weight: 700;
               color: ${this.ctx.colors.text};
-              margin: ${this.ctx.spacing.gapSmall}px 0 ${this.ctx.spacing.gapSmall}px 0;
+              margin: ${index > 0 ? '24px' : this.ctx.spacing.gapSmall + 'px'} 0 ${this.ctx.spacing.gapSmall}px 0;
             ">${this.escapeHtml(section.subtitle)}</h3>
           `;
         }
@@ -2795,7 +2795,7 @@ export class TossDefaultTemplate implements SlideTemplate {
             <ul style="
               list-style: none;
               padding: 0;
-              margin: 0;
+              margin: 0 0 16px 0;
               font-size: 14px;
               color: ${this.ctx.colors.textSecondary};
               line-height: 1.6;
@@ -2820,16 +2820,27 @@ export class TossDefaultTemplate implements SlideTemplate {
       `;
 
       imagesHtml = `
-        <div style="${gridStyle} margin-bottom: ${this.ctx.spacing.gapSmall}px;">
-          ${images.slice(0, 2).map((img: string) => `
-            <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(title)}" style="
-              width: 100%;
-              height: auto;
-              max-height: ${isA4Portrait ? '300px' : '180px'};
-              object-fit: cover;
-              border-radius: ${this.ctx.borderRadius.medium}px;
-            ">
-          `).join('')}
+        <div style="margin-bottom: ${this.ctx.spacing.gapSmall}px;">
+          <div style="${gridStyle} margin-bottom: ${imageCaption ? '8px' : '0'};">
+            ${images.slice(0, 2).map((img: string) => `
+              <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(title)}" style="
+                width: 100%;
+                height: auto;
+                max-height: ${isA4Portrait ? '300px' : '180px'};
+                object-fit: cover;
+                border-radius: ${this.ctx.borderRadius.medium}px;
+              ">
+            `).join('')}
+          </div>
+          ${imageCaption ? `
+            <p style="
+              font-size: 12px;
+              color: ${this.ctx.colors.textSecondary};
+              margin: 0;
+              font-style: italic;
+              text-align: center;
+            ">${this.escapeHtml(imageCaption)}</p>
+          ` : ''}
         </div>
       `;
     }
@@ -2932,7 +2943,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     font-size: 20px;
     font-weight: 500;
     color: ${this.ctx.colors.textSecondary};
-    margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+    margin: 0 0 32px 0;
   ">${this.escapeHtml(subtitle)}</h2>
 
   <!-- Images (반응형 그리드: 1개=100%, 2개=50% grid) -->
@@ -2993,7 +3004,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       font-size: 18px;
       font-weight: 500;
       color: ${this.ctx.colors.textSecondary};
-      margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+      margin: 0 0 28px 0;
     ">${this.escapeHtml(subtitle)}</h2>
 
     <!-- Images (반응형 그리드: 1개=100%, 2개=50% grid) -->

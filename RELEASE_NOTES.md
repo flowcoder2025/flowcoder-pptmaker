@@ -24,6 +24,17 @@
 ### ✨ Features
 
 #### 2025-11-15
+- **ReportA4 슬라이드 imageCaption 렌더링 및 가독성 개선** (910ee19)
+  - imageCaption 렌더링 추가
+    - 이미지 그리드 아래에 이탤릭체 캡션 표시
+    - 12px 폰트, 가운데 정렬, textSecondary 색상
+  - 부제목 아래 간격 확대
+    - A4-portrait: 32px (gapSmall에서 증가)
+    - 16:9: 28px (gapSmall에서 증가)
+  - 섹션 간 간격 개선
+    - 첫 번째 섹션 이후: 상단 margin 24px로 증가
+    - 가독성 향상을 위한 시각적 분리 강화
+
 - **ReportA4 슬라이드 폼에 이미지 제목 입력 필드 추가** (065e2e5)
   - ReportA4SlideForm에 imageCaption 입력 필드 추가
     - handleImageCaptionChange 핸들러 구현
