@@ -22,9 +22,10 @@ import { calculateBalance, consumeCredits } from '@/lib/credits'
  *
  * @auth Required
  * @permission viewer (본인의 프레젠테이션만 조회)
+ * @query page - 페이지 번호 (기본값: 1)
+ * @query limit - 페이지당 아이템 수 (기본값: 12)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // NextAuth 세션에서 userId 가져오기
     const userId = await getCurrentUserId()
@@ -36,31 +37,56 @@ export async function GET(_request: NextRequest) {
       )
     }
 
-    // 본인의 프레젠테이션만 조회 (소프트 삭제 제외)
-    const presentations = await prisma.presentation.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        slides: true,      // 썸네일 렌더링용 (HTMLSlide[] - 렌더링된 HTML)
-        slideData: true,   // 편집용 (UnifiedPPTJSON - 구조화된 데이터)
-        metadata: true,
-        isPublic: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    })
+    // 쿼리 파라미터 파싱
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = parseInt(searchParams.get('limit') || '12', 10)
+
+    // 페이지네이션 계산
+    const skip = (page - 1) * limit
+
+    // 병렬 쿼리: 프레젠테이션 목록 + 전체 개수
+    const [presentations, totalCount] = await Promise.all([
+      prisma.presentation.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          slides: true,      // 썸네일 렌더링용 (HTMLSlide[] - 렌더링된 HTML)
+          slideData: true,   // 편집용 (UnifiedPPTJSON - 구조화된 데이터)
+          metadata: true,
+          isPublic: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.presentation.count({
+        where: {
+          userId,
+          deletedAt: null,
+        },
+      }),
+    ])
+
+    // 총 페이지 수 계산
+    const totalPages = Math.ceil(totalCount / limit)
 
     return NextResponse.json({
       presentations,
       count: presentations.length,
+      totalCount,
+      totalPages,
+      currentPage: page,
+      limit,
     })
   } catch (error) {
     console.error('프레젠테이션 목록 조회 실패:', error)

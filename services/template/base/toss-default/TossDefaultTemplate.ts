@@ -378,7 +378,7 @@ export class TossDefaultTemplate implements SlideTemplate {
   </div>
 
   <!-- Bullet List -->
-  <div style="flex: 1; display: flex; align-items: center;">
+  <div style="flex: 1; display: flex; align-items: center; overflow: hidden;">
     <ul style="
       list-style: none;
       padding: 0;
@@ -498,6 +498,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       border-radius: ${this.ctx.borderRadius.medium}px;
       border-left: 4px solid var(--color-primary);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
     ">
       <h4 style="
         color: var(--color-text-primary);
@@ -525,6 +526,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       border-radius: ${this.ctx.borderRadius.medium}px;
       border-left: 4px solid var(--color-text-secondary);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
     ">
       <h4 style="
         color: var(--color-text-primary);
@@ -1000,8 +1002,8 @@ export class TossDefaultTemplate implements SlideTemplate {
   </div>
 
   <!-- Chart Content -->
-  <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-    <div style="width: 100%; ${chartType === 'bar' ? `display: flex; flex-direction: column; gap: ${this.ctx.spacing.chartGap}px;` : 'display: flex; align-items: center; justify-content: center;'}">
+  <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+    <div style="width: 100%; max-height: 100%; ${chartType === 'bar' ? `display: flex; flex-direction: column; gap: ${this.ctx.spacing.chartGap}px;` : 'display: flex; align-items: center; justify-content: center;'}">
       ${chartContent}
     </div>
   </div>
@@ -1088,7 +1090,7 @@ export class TossDefaultTemplate implements SlideTemplate {
   </div>
 
   <!-- Semantic Table -->
-  <div style="flex: 1; display: flex; align-items: center;">
+  <div style="flex: 1; display: flex; align-items: center; overflow: hidden;">
     <table style="
       width: 100%;
       border-collapse: collapse;
@@ -1352,6 +1354,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       padding: 30px;
       border-radius: 8px;
       border-top: 4px solid var(--color-primary);
+      overflow: hidden;
     ">
       ${leftLabel ? `
       <h4 style="
@@ -1416,6 +1419,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       padding: 30px;
       border-radius: 8px;
       border-top: 4px solid var(--color-text-secondary);
+      overflow: hidden;
     ">
       ${rightLabel ? `
       <h4 style="
@@ -1629,7 +1633,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -1709,7 +1713,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -1784,7 +1788,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -1864,7 +1868,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -1878,7 +1882,7 @@ export class TossDefaultTemplate implements SlideTemplate {
   </div>
 
   <!-- Roadmap Timeline -->
-  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; padding: ${this.ctx.spacing.gap}px; padding-top: 0;">
+  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: ${this.ctx.spacing.gap}px; padding-top: 0;">
     <div style="width: 100%; max-width: 900px;">
       ${roadmapItems}
     </div>
@@ -1925,7 +1929,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           .join('');
 
         return `
-      <div style="flex: 1; min-height: 420px; border-radius: ${this.ctx.borderRadius.large}px; border: 2px solid ${borderColor}; background: ${this.ctx.colors.white}; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+      <div style="flex: 1; min-height: 420px; border-radius: ${this.ctx.borderRadius.large}px; border: 2px solid ${borderColor}; background: ${this.ctx.colors.lightBg}; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
         <div style="padding: 20px; text-align: center; background: ${headerBg}; color: ${headerColor}; border-radius: 10px 10px 0 0;">
           <h4 style="font-size: 22px; font-weight: 700; margin: 0; color: inherit;">${this.escapeHtml(tier.name)}</h4>
         </div>
@@ -1948,7 +1952,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -2006,7 +2010,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -2118,12 +2122,13 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
   box-sizing: border-box;
   font-family: ${this.ctx.fonts.main};
+  overflow: hidden;
 ">
   <!-- Accent Bar + Title -->
   <div style="margin-bottom: ${useGrid ? this.ctx.spacing.gap : 50}px;">
@@ -2158,7 +2163,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -2313,7 +2318,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;
@@ -2365,7 +2370,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;

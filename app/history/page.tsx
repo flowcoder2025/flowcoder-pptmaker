@@ -10,7 +10,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2, FileCode, FileText, Presentation } from 'lucide-react';
+import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2, FileCode, FileText, Presentation, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -54,6 +54,12 @@ export default function HistoryPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [presentationToDelete, setPresentationToDelete] = useState<string | null>(null);
 
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const ITEMS_PER_PAGE = 12;
+
   // 다운로드 진행 상태 관리
   const [showDownloadProgress, setShowDownloadProgress] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState<'downloading' | 'success' | 'error'>('downloading');
@@ -83,9 +89,10 @@ export default function HistoryPage() {
     }
   }, [searchQuery, presentations]);
 
-  const fetchPresentations = async () => {
+  const fetchPresentations = async (page: number = 1) => {
     try {
-      const res = await fetch('/api/presentations');
+      setIsLoading(true);
+      const res = await fetch(`/api/presentations?page=${page}&limit=${ITEMS_PER_PAGE}`);
 
       if (!res.ok) {
         throw new Error('Failed to fetch presentations');
@@ -94,6 +101,9 @@ export default function HistoryPage() {
       const data = await res.json();
       setPresentations(data.presentations || []);
       setFilteredPresentations(data.presentations || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalCount(data.totalCount || 0);
+      setCurrentPage(data.currentPage || 1);
     } catch (error) {
       console.error('프리젠테이션 조회 실패:', error);
       toast.error('프리젠테이션을 불러오는 중 문제가 발생했어요');
@@ -122,7 +132,9 @@ export default function HistoryPage() {
       }
 
       toast.success('삭제했어요');
-      setPresentations((prev) => prev.filter((p) => p.id !== presentationToDelete));
+
+      // 현재 페이지 다시 로드 (삭제 후 목록 갱신)
+      await fetchPresentations(currentPage);
     } catch {
       toast.error('삭제 중 문제가 발생했어요');
     } finally {
@@ -223,7 +235,7 @@ export default function HistoryPage() {
               내 프리젠테이션
             </h1>
             <p className="text-base lg:text-lg text-muted-foreground">
-              {presentations.length}개의 프리젠테이션을 만들었어요
+              {totalCount}개의 프리젠테이션을 만들었어요
             </p>
           </div>
 
@@ -293,18 +305,66 @@ export default function HistoryPage() {
             )}
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-            {filteredPresentations.map((presentation) => (
-              <PresentationCard
-                key={presentation.id}
-                presentation={presentation}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onDownload={handleDownloadClick}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+              {filteredPresentations.map((presentation) => (
+                <PresentationCard
+                  key={presentation.id}
+                  presentation={presentation}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onDownload={handleDownloadClick}
+                />
+              ))}
+            </div>
+
+            {/* 페이지네이션 (검색어가 없을 때만 표시) */}
+            {!searchQuery && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-12">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => fetchPresentations(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronLeft size={20} />
+                  이전
+                </Button>
+
+                <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-lg">
+                  <span className="text-sm font-medium text-foreground">
+                    {currentPage}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    /
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {totalPages}
+                  </span>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => fetchPresentations(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2"
+                >
+                  다음
+                  <ChevronRight size={20} />
+                </Button>
+              </div>
+            )}
+
+            {/* 검색 결과 안내 (검색 중일 때) */}
+            {searchQuery && (
+              <div className="mt-8 text-center text-sm text-muted-foreground">
+                현재 페이지({currentPage}/{totalPages})에서 검색 중이에요
+              </div>
+            )}
+          </>
         )}
       </MaxWidthContainer>
 

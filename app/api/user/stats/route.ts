@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { calculateBalance } from '@/lib/credits';
 
 /**
  * GET /api/user/stats
@@ -41,13 +42,6 @@ export async function GET() {
         where: { userId, deletedAt: null },
       }),
 
-      // 크레딧 잔액 (최신 거래의 balance)
-      prisma.creditTransaction.findFirst({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        select: { balance: true },
-      }),
-
       // 활성 구독
       prisma.subscription.findFirst({
         where: {
@@ -82,14 +76,12 @@ export async function GET() {
 
     // 결과 추출 (실패 시 기본값 사용 및 로그 기록)
     const presentationsCount = results[0].status === 'fulfilled' ? results[0].value : 0;
-    const latestCreditTransaction = results[1].status === 'fulfilled' ? results[1].value : null;
-    const subscription = results[2].status === 'fulfilled' ? results[2].value : null;
-    const recentPresentations = results[3].status === 'fulfilled' ? results[3].value : [];
+    const subscription = results[1].status === 'fulfilled' ? results[1].value : null;
+    const recentPresentations = results[2].status === 'fulfilled' ? results[2].value : [];
 
     // 실패한 쿼리 로그 기록
     const queryNames = [
       'presentationsCount',
-      'latestCreditTransaction',
       'subscription',
       'recentPresentations',
     ];
@@ -105,10 +97,20 @@ export async function GET() {
       return sum + slideCount;
     }, 0);
 
-    // 4. 사용한 크레딧은 나중에 추가 (현재는 0으로 반환)
+    // 4. 크레딧 잔액 계산 (calculateBalance 사용 - 정확한 잔액)
+    let creditsBalance = 0;
+    try {
+      const balanceResult = await calculateBalance(userId);
+      creditsBalance = balanceResult.balance;
+    } catch (balanceError) {
+      console.error('⚠️ 크레딧 잔액 계산 실패:', balanceError);
+      // 실패 시 0으로 fallback
+    }
+
+    // 5. 사용한 크레딧은 나중에 추가 (현재는 0으로 반환)
     const creditsUsed = 0;
 
-    // 5. 구독 플랜 결정
+    // 6. 구독 플랜 결정
     let subscriptionTier: 'FREE' | 'PRO' | 'PREMIUM' = 'FREE';
     if (subscription) {
       if (subscription.tier === 'PREMIUM') {
@@ -118,11 +120,11 @@ export async function GET() {
       }
     }
 
-    // 6. 응답 반환
+    // 7. 응답 반환
     return NextResponse.json({
       presentationsCount,
       totalSlides,
-      creditsBalance: latestCreditTransaction?.balance || 0,
+      creditsBalance,
       creditsUsed,
       subscriptionTier,
       recentPresentations,

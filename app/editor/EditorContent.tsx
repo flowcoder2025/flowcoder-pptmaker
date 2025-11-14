@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb, Settings } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 import SlideList from '@/components/editor/SlideList';
 import EditForm from '@/components/editor/EditForm';
 import SlidePreview from '@/components/editor/SlidePreview';
@@ -28,6 +30,7 @@ export default function EditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentPresentation, updateSlide, reorderSlides, addSlide, deleteSlide, duplicateSlide, changeTemplate, undo, redo, canUndo, canRedo, savePresentation, fetchPresentation } = usePresentationStore();
+  const { plan } = useSubscriptionStore();
   const [selectedSlideIndex, setSelectedSlideIndex] = useState(0);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -37,6 +40,9 @@ export default function EditorContent() {
   const [showSaveErrorDialog, setShowSaveErrorDialog] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
   const [showDeleteWarningDialog, setShowDeleteWarningDialog] = useState(false);
+
+  // 광고 표시 여부 (Pro/Premium 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   // 변경사항 추적 및 종료 확인 모달
   const [isDirty, setIsDirty] = useState(false);
@@ -438,10 +444,12 @@ export default function EditorContent() {
         </div>
       </header>
 
-      {/* 광고 - 상단 */}
-      <div className="border-b border-gray-200 bg-white px-4 py-3 flex justify-center">
-        <KakaoAdMobileThick />
-      </div>
+      {/* 광고 - 상단 (무료 플랜만) */}
+      {showAds && (
+        <div className="border-b border-gray-200 bg-white px-4 py-3 flex justify-center">
+          <KakaoAdMobileThick />
+        </div>
+      )}
 
       {/* 메인 컨텐츠 영역 */}
       <div className="flex-1 flex overflow-hidden">
@@ -480,7 +488,7 @@ export default function EditorContent() {
           {currentSlide ? (
             <SlidePreview
               slide={currentSlide}
-              templateId={currentPresentation.templateId}
+              templateId={currentPresentation.templateId || 'toss'}
             />
           ) : (
             <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
@@ -504,10 +512,12 @@ export default function EditorContent() {
         </p>
       </div>
 
-      {/* 광고 - 하단 */}
-      <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-center">
-        <KakaoAdBanner />
-      </div>
+      {/* 광고 - 하단 (무료 플랜만) */}
+      {showAds && (
+        <div className="border-t border-gray-200 bg-white px-4 py-3 flex justify-center">
+          <KakaoAdBanner />
+        </div>
+      )}
 
       {/* 슬라이드 추가 다이얼로그 */}
       <AddSlideDialog

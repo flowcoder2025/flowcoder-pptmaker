@@ -55,7 +55,7 @@ function createSlideDocument(html: string, css: string): string {
   `;
 }
 
-export default function SlidePreview({ slide, templateId = 'toss-default' }: SlidePreviewProps) {
+export default function SlidePreview({ slide, templateId = 'toss' }: SlidePreviewProps) {
   // 🔍 DEBUG: slide prop 변경 감지
   useEffect(() => {
     console.log('🔍 [SlidePreview] slide prop 변경됨:', {
