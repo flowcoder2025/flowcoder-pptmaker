@@ -70,12 +70,13 @@
 ### 🐛 Fixes
 
 #### 2025-11-14
-- **viewer에서 aspectRatio 동적 적용 완료** (b7b8aa6)
+- **viewer에서 aspectRatio 동적 적용 완료** (c285b2f, 6da6c98)
   - calculateSlideSize로 aspectRatio에 따른 슬라이드 크기 계산
   - 모바일: 스케일 계산 시 동적 slideSize.width 사용
   - 모바일 iframe: hardcoded 1200×675 → slideSize 기반
   - 데스크톱: minHeight를 slideSize.height + 40px로 동적 계산
   - 데스크톱 컨테이너: hardcoded 1200×675 → slideSize 기반
+  - A4-portrait 오버플로우 해결: minHeight를 min(계산값, 90vh)로 제한
   - 이제 4:3, 16:9, A4-portrait 모두 정확한 비율로 표시됨
 
 - **Tailwind CSS spacing 변수 충돌 해결**

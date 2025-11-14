@@ -555,7 +555,7 @@ export default function ViewerContent() {
         // 데스크톱: 페이지네이션 레이아웃
         <div style={{
           flex: 1,
-          minHeight: `${minHeightDesktop}px`, // 슬라이드 높이 + padding(40px) 보장
+          minHeight: `min(${minHeightDesktop}px, 90vh)`, // 슬라이드 높이 + padding(40px) 보장, 화면 높이로 제한
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
