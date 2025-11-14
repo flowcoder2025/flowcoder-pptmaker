@@ -41,7 +41,12 @@ export default function Footer() {
             로 연락해주세요
           </div>
 
-          {/* 추가 링크 (선택) */}
+          {/* 연락처 */}
+          <div className="text-xs text-gray-500">
+            연락처: 010-5444-8597
+          </div>
+
+          {/* 추가 링크 */}
           <div className="flex gap-4 text-xs text-gray-500">
             <a href="https://www.flow-coder.com/terms/external/privacy-policy" className="hover:text-gray-700 hover:underline">
               개인정보 처리방침
@@ -49,6 +54,10 @@ export default function Footer() {
             <span>•</span>
             <a href="https://www.flow-coder.com/terms/external/ppt-maker" className="hover:text-gray-700 hover:underline">
               서비스 이용약관
+            </a>
+            <span>•</span>
+            <a href="https://www.flow-coder.com/terms/external/refund-policy" className="hover:text-gray-700 hover:underline">
+              환불약관
             </a>
           </div>
         </div>
