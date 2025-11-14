@@ -645,8 +645,20 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       const presentation = data.presentation as Presentation;
 
       if (presentation) {
-        set({ currentPresentation: presentation });
-        console.log(`✅ 프리젠테이션 로드: ${presentation.title}`);
+        // metadata.templateId를 최상위로 매핑 (Prisma 스키마에 templateId 컬럼이 없음)
+        const templateId = (presentation.metadata as any)?.templateId || 'toss';
+
+        const mappedPresentation = {
+          ...presentation,
+          templateId: templateId,
+        };
+
+        // selectedThemeId도 함께 동기화 (편집기에서 템플릿 선택기가 올바른 테마를 표시하도록)
+        set({
+          currentPresentation: mappedPresentation,
+          selectedThemeId: templateId,
+        });
+        console.log(`✅ 프리젠테이션 로드: ${presentation.title} (테마: ${templateId})`);
       }
     } catch (error) {
       console.error('❌ 프리젠테이션 조회 실패:', error);
