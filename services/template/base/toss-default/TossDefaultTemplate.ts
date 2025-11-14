@@ -2505,11 +2505,11 @@ export class TossDefaultTemplate implements SlideTemplate {
         if (section.body) {
           html += `
             <div style="
-              font-size: 16px;
+              font-size: 15px;
               color: ${this.ctx.colors.textSecondary};
-              line-height: 1.7;
-              margin-bottom: 16px;
-            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 16px 0;">')}</div>
+              line-height: 1.6;
+              margin-bottom: 14px;
+            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 14px 0;">')}</div>
           `;
         }
 
@@ -2521,11 +2521,11 @@ export class TossDefaultTemplate implements SlideTemplate {
                 <li style="
                   display: flex;
                   align-items: flex-start;
-                  margin-bottom: 12px;
+                  margin-bottom: 10px;
                 ">
                   <span style="
                     color: ${this.ctx.colors.primary};
-                    margin-right: 12px;
+                    margin-right: 10px;
                     font-size: ${this.ctx.spacing.iconSize}px;
                     line-height: 1.4;
                   ">→</span>
@@ -2540,9 +2540,9 @@ export class TossDefaultTemplate implements SlideTemplate {
               list-style: none;
               padding: 0;
               margin: 0;
-              font-size: 16px;
+              font-size: 15px;
               color: ${this.ctx.colors.textSecondary};
-              line-height: 1.7;
+              line-height: 1.6;
             ">
               ${bulletsHtml}
             </ul>
@@ -2553,21 +2553,26 @@ export class TossDefaultTemplate implements SlideTemplate {
       })
       .join('');
 
-    // 이미지 HTML 생성 (최대 2개, 상하 배치)
+    // 이미지 HTML 생성 (최대 2개, 좌우 그리드 배치)
     let imagesHtml = '';
     if (images && images.length > 0) {
       const imageCount = Math.min(images.length, 2);
+      const gridStyle = imageCount === 1 ? 'display: block;' : `
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      `;
 
       imagesHtml = `
-        <div style="display: block; margin-bottom: 12px;">
-          ${images.slice(0, 2).map((img: string, index: number) => `
+        <div style="${gridStyle} margin-bottom: 12px;">
+          ${images.slice(0, 2).map((img: string) => `
             <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(imageCaption || '')}" style="
               width: 100%;
               height: auto;
+              max-height: 200px;
               object-fit: cover;
               border-radius: ${this.ctx.borderRadius.medium}px;
               background: ${this.ctx.colors.lightBg};
-              margin-bottom: ${index < imageCount - 1 ? '12px' : '0'};
             ">
           `).join('')}
         </div>
@@ -2593,17 +2598,17 @@ export class TossDefaultTemplate implements SlideTemplate {
 
       return `
         <div style="
-          padding: 16px;
+          padding: 14px;
           background: ${this.ctx.colors.lightBg};
           border-radius: ${this.ctx.borderRadius.medium}px;
           margin-bottom: 12px;
         ">
-          ${chart.title ? `<h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
-          <div style="display: flex; flex-direction: column; gap: 6px;">
+          ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+          <div style="display: flex; flex-direction: column; gap: 7px;">
             ${validData.map(item => `
-              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
-                <span style="min-width: 60px; color: ${this.ctx.colors.textSecondary};">${this.escapeHtml(item.label)}</span>
-                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 20px; border-radius: 4px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                <span style="min-width: 65px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
+                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 22px; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                   <div style="
                     width: ${(item.value / maxValue) * 100}%;
                     height: 100%;
@@ -2611,8 +2616,9 @@ export class TossDefaultTemplate implements SlideTemplate {
                     display: flex;
                     align-items: center;
                     padding-left: 6px;
+                    transition: width 0.3s ease;
                   ">
-                    <span style="color: white; font-size: 11px; font-weight: 600;">${item.value}</span>
+                    <span style="color: white; font-size: 12px; font-weight: 600;">${item.value}</span>
                   </div>
                 </div>
               </div>
@@ -2844,12 +2850,12 @@ export class TossDefaultTemplate implements SlideTemplate {
           border-radius: ${this.ctx.borderRadius.medium}px;
           margin-bottom: ${this.ctx.spacing.gapSmall}px;
         ">
-          ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
-          <div style="display: flex; flex-direction: column; gap: 4px;">
+          ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+          <div style="display: flex; flex-direction: column; gap: 5px;">
             ${validData.map(item => `
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 10px;">
-                <span style="min-width: 50px; color: ${this.ctx.colors.textSecondary};">${this.escapeHtml(item.label)}</span>
-                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 16px; border-radius: 3px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                <span style="min-width: 55px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
+                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 18px; border-radius: 3px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                   <div style="
                     width: ${(item.value / maxValue) * 100}%;
                     height: 100%;
@@ -2857,8 +2863,9 @@ export class TossDefaultTemplate implements SlideTemplate {
                     display: flex;
                     align-items: center;
                     padding-left: 4px;
+                    transition: width 0.3s ease;
                   ">
-                    <span style="color: white; font-size: 9px; font-weight: 600;">${item.value}</span>
+                    <span style="color: white; font-size: 10px; font-weight: 600;">${item.value}</span>
                   </div>
                 </div>
               </div>
