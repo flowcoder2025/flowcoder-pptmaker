@@ -489,6 +489,7 @@ export default function EditorContent() {
             <SlidePreview
               slide={currentSlide}
               templateId={currentPresentation.templateId || 'toss'}
+              aspectRatio={currentPresentation.slideData.aspectRatio}
             />
           ) : (
             <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">

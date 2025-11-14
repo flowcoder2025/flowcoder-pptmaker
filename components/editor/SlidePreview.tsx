@@ -7,11 +7,14 @@
 
 import { useMemo, useState, useEffect, useRef } from 'react';
 import type { Slide } from '@/types/slide';
+import type { AspectRatio } from '@/types/presentation';
 import { TemplateEngine } from '@/services/template';
+import { calculateSlideSize } from '@/services/template/engine/types';
 
 interface SlidePreviewProps {
   slide: Slide;
   templateId?: string;
+  aspectRatio?: AspectRatio;
 }
 
 /**
@@ -55,52 +58,63 @@ function createSlideDocument(html: string, css: string): string {
   `;
 }
 
-export default function SlidePreview({ slide, templateId = 'toss' }: SlidePreviewProps) {
+export default function SlidePreview({ slide, templateId = 'toss', aspectRatio = '16:9' }: SlidePreviewProps) {
+  // aspectRatio에 따른 슬라이드 크기 계산
+  const slideSize = calculateSlideSize(aspectRatio);
+
   // 🔍 DEBUG: slide prop 변경 감지
   useEffect(() => {
     console.log('🔍 [SlidePreview] slide prop 변경됨:', {
       type: slide.type,
       propsKeys: Object.keys(slide.props),
+      aspectRatio,
+      slideSize,
       timestamp: Date.now()
     });
-  }, [slide]);
+  }, [slide, aspectRatio, slideSize]);
 
   // TemplateEngine으로 HTML 생성 (useMemo로 최적화)
   const htmlSlide = useMemo(() => {
     console.log('🔄 [SlidePreview] useMemo 재계산 중...', {
       type: slide.type,
       propsKeys: Object.keys(slide.props),
+      aspectRatio,
     });
 
     try {
       const engine = new TemplateEngine();
-      const result = engine.generateSlide(slide, templateId);
-      console.log('✅ [SlidePreview] HTML 생성 완료');
+      const result = engine.generateSlide(slide, templateId, aspectRatio);
+      console.log('✅ [SlidePreview] HTML 생성 완료', { aspectRatio });
       return result;
     } catch (error) {
       console.error('❌ [SlidePreview] 슬라이드 HTML 생성 실패:', error);
       return null;
     }
-  }, [slide, templateId]);
+  }, [slide, templateId, aspectRatio]);
 
-  // 스케일 계산을 위한 ref와 state
-  const containerRef = useRef<HTMLDivElement>(null);
+  // 스케일 계산 (ViewerContent와 동일한 방식)
   const [scale, setScale] = useState(1);
 
-  // 컨테이너 크기에 따라 스케일 계산
   useEffect(() => {
     const updateScale = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const newScale = containerWidth / 1200;
-        setScale(newScale);
-      }
+      // 화면 크기 기준 스케일 계산
+      // 너비: 화면의 90%
+      const maxWidth = window.innerWidth * 0.9;
+      // 높이: 화면의 75% (헤더 등 공간 고려)
+      const maxHeight = window.innerHeight * 0.75;
+
+      // 너비/높이 기준으로 스케일 계산하여 더 작은 값 사용
+      const scaleByWidth = maxWidth / slideSize.width;
+      const scaleByHeight = maxHeight / slideSize.height;
+      const newScale = Math.min(scaleByWidth, scaleByHeight, 1); // 최대 1배 (확대 방지)
+
+      setScale(newScale);
     };
 
     updateScale();
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
-  }, []);
+  }, [slideSize.width, slideSize.height]);
 
   // 에러 처리
   if (!htmlSlide) {
@@ -131,44 +145,51 @@ export default function SlidePreview({ slide, templateId = 'toss' }: SlidePrevie
 
   // HTML 문서 생성
   const slideDocument = createSlideDocument(htmlSlide.html, htmlSlide.css);
-  const scaledHeight = 675 * scale;
+
+  // 스케일 적용된 크기
+  const scaledWidth = slideSize.width * scale;
+  const scaledHeight = slideSize.height * scale;
 
   return (
     <div style={{
       width: '100%',
-      minHeight: '100%',
+      height: '100%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: '#F9FAFB',
       padding: '40px 20px',
+      overflow: 'auto',
     }}>
-      <div
-        ref={containerRef}
-        style={{
-          width: '90%',
-          maxWidth: '1200px',
-          height: `${scaledHeight}px`,
+      {/* 외부 컨테이너: 스케일된 크기 (레이아웃 공간 차지) */}
+      <div style={{
+        width: `${scaledWidth}px`,
+        height: `${scaledHeight}px`,
+        position: 'relative',
+      }}>
+        {/* 슬라이드 컨테이너: 원본 크기 + transform scale */}
+        <div style={{
+          width: `${slideSize.width}px`,
+          height: `${slideSize.height}px`,
           background: '#FFFFFF',
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        <iframe
-          srcDoc={slideDocument}
-          style={{
-            width: '1200px',
-            height: '675px',
-            border: 'none',
-            display: 'block',
-            transform: `scale(${scale})`,
-            transformOrigin: 'top left',
-          }}
-          title="슬라이드 미리보기"
-          sandbox="allow-same-origin allow-scripts"
-        />
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+        }}>
+          <iframe
+            srcDoc={slideDocument}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block',
+            }}
+            title="슬라이드 미리보기"
+            sandbox="allow-same-origin allow-scripts"
+          />
+        </div>
       </div>
     </div>
   );

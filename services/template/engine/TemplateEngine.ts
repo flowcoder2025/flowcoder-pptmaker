@@ -9,6 +9,7 @@ import { TemplateRegistry } from './TemplateRegistry';
 import { TossDefaultTemplate } from '../base/toss-default/TossDefaultTemplate';
 import type { SlideTemplate, TemplateContext } from './types';
 import type { Slide, HTMLSlide, UnifiedPPTJSON } from '@/types/slide';
+import type { AspectRatio } from '@/types/presentation';
 import { STYLE_THEMES } from '@/constants/themes';
 import {
   isTitleSlide,
@@ -61,11 +62,12 @@ export class TemplateEngine {
    *
    * @param slide - 변환할 슬라이드
    * @param templateId - 사용할 템플릿 ID
+   * @param aspectRatio - 화면 비율 (선택)
    * @returns HTML 슬라이드
    * @throws {Error} - 템플릿을 찾을 수 없을 경우
    * @throws {Error} - 지원하지 않는 슬라이드 타입일 경우
    */
-  generateSlide(slide: Slide, templateId: string): HTMLSlide {
+  generateSlide(slide: Slide, templateId: string, aspectRatio?: AspectRatio): HTMLSlide {
     // 템플릿 조회
     const template = this.registry.get(templateId);
 
@@ -73,8 +75,15 @@ export class TemplateEngine {
       throw new Error(`템플릿을 찾을 수 없습니다: ${templateId}`);
     }
 
+    // AspectRatio 적용
+    let effectiveTemplate = template;
+    if (aspectRatio && aspectRatio !== '16:9' && 'withAspectRatio' in template) {
+      effectiveTemplate = (template as any).withAspectRatio(aspectRatio);
+      console.log(`📐 [generateSlide] AspectRatio 적용: ${aspectRatio}`);
+    }
+
     // 슬라이드 렌더링
-    return this.renderSlide(slide, template);
+    return this.renderSlide(slide, effectiveTemplate);
   }
 
   /**
