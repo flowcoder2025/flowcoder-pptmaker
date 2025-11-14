@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { Card } from '@/components/ui/card';
-import { Loader2, CreditCard, Heart, RotateCw, Building2 } from 'lucide-react';
+import { Loader2, RotateCw } from 'lucide-react';
 import { PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 
 interface PaymentChannelModalProps {
@@ -49,53 +50,65 @@ export default function PaymentChannelModal({
 
   // 채널별 UI 설정
   const channelUIConfig: Record<string, {
-    icon: React.ReactNode;
-    gradient: string;
+    logoSrc: string;
+    logoAlt: string;
+    logoWidth: number;
+    logoHeight: number;
+    bgColor: string;
     hoverBorder: string;
-    textColor: string;
     label: string;
     badge?: string;
     badgeColor?: string;
   }> = {
     [PAYMENT_CHANNELS.TOSSPAY.key]: {
-      icon: <CreditCard className="w-8 h-8" />,
-      gradient: 'from-blue-50 to-blue-100',
+      logoSrc: '/Toss_Logo_Alternative.png',
+      logoAlt: 'Toss Pay',
+      logoWidth: 120,
+      logoHeight: 60,
+      bgColor: 'bg-white',
       hoverBorder: 'hover:border-blue-500',
-      textColor: 'text-blue-700',
       label: '토스페이',
       // 정기 결제(subscription) 모드일 때만 뱃지 표시
       badge: paymentType === 'subscription' ? '정기' : undefined,
       badgeColor: paymentType === 'subscription' ? 'bg-blue-300 text-blue-900' : undefined,
     },
     [PAYMENT_CHANNELS.KAKAOPAY_ONETIME.key]: {
-      icon: <Heart className="w-8 h-8 fill-yellow-400 text-yellow-400" />,
-      gradient: 'from-yellow-50 to-yellow-100',
+      logoSrc: '/payment_icon_yellow_large.png',
+      logoAlt: 'Kakao Pay',
+      logoWidth: 64,
+      logoHeight: 64,
+      bgColor: 'bg-yellow-50',
       hoverBorder: 'hover:border-yellow-500',
-      textColor: 'text-yellow-800',
       label: '카카오페이',
     },
     [PAYMENT_CHANNELS.KAKAOPAY_SUBSCRIPTION.key]: {
-      icon: <RotateCw className="w-8 h-8" />,
-      gradient: 'from-yellow-100 to-yellow-200',
+      logoSrc: '/payment_icon_yellow_large.png',
+      logoAlt: 'Kakao Pay',
+      logoWidth: 64,
+      logoHeight: 64,
+      bgColor: 'bg-yellow-100',
       hoverBorder: 'hover:border-yellow-600',
-      textColor: 'text-yellow-900',
       label: '카카오페이',
       badge: '정기',
       badgeColor: 'bg-yellow-300 text-yellow-900',
     },
     [PAYMENT_CHANNELS.INICIS_ONETIME.key]: {
-      icon: <Building2 className="w-8 h-8" />,
-      gradient: 'from-gray-50 to-gray-100',
+      logoSrc: '/kg이니시스.svg',
+      logoAlt: 'KG Inicis',
+      logoWidth: 80,
+      logoHeight: 40,
+      bgColor: 'bg-white',
       hoverBorder: 'hover:border-gray-500',
-      textColor: 'text-gray-700',
-      label: '이니시스',
+      label: 'KG이니시스',
     },
     [PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key]: {
-      icon: <RotateCw className="w-8 h-8" />,
-      gradient: 'from-gray-100 to-gray-200',
+      logoSrc: '/kg이니시스.svg',
+      logoAlt: 'KG Inicis',
+      logoWidth: 80,
+      logoHeight: 40,
+      bgColor: 'bg-gray-50',
       hoverBorder: 'hover:border-gray-600',
-      textColor: 'text-gray-800',
-      label: '이니시스',
+      label: 'KG이니시스',
       badge: '정기',
       badgeColor: 'bg-gray-300 text-gray-800',
     },
@@ -157,26 +170,33 @@ export default function PaymentChannelModal({
                 onClick={() => onSelectChannel(channel.key)}
                 disabled={isLoading}
                 className={`
-                  relative h-28 rounded-xl border-2 border-transparent
-                  bg-gradient-to-br ${config.gradient}
+                  relative h-32 rounded-xl border-2 border-gray-200
+                  ${config.bgColor}
                   ${config.hoverBorder}
                   hover:scale-105 transition-all duration-200
                   shadow-sm hover:shadow-md
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
               >
-                <div className="flex flex-col items-center justify-center gap-2 h-full">
-                  <div className={config.textColor}>{config.icon}</div>
-                  <div className="text-center">
-                    <div className={`font-bold text-lg ${config.textColor}`}>
-                      {config.label}
-                    </div>
-                    {config.badge && (
-                      <span className={`text-xs px-2 py-0.5 ${config.badgeColor} rounded-full font-semibold mt-1 inline-block`}>
-                        {config.badge}
-                      </span>
-                    )}
+                <div className="flex flex-col items-center justify-center gap-3 h-full p-4">
+                  {/* 로고 이미지 */}
+                  <div className="flex items-center justify-center h-16">
+                    <Image
+                      src={config.logoSrc}
+                      alt={config.logoAlt}
+                      width={config.logoWidth}
+                      height={config.logoHeight}
+                      className="object-contain max-w-full max-h-full"
+                      priority
+                    />
                   </div>
+
+                  {/* 뱃지 (정기 결제인 경우) */}
+                  {config.badge && (
+                    <span className={`text-xs px-2 py-0.5 ${config.badgeColor} rounded-full font-semibold`}>
+                      {config.badge}
+                    </span>
+                  )}
                 </div>
 
                 {/* 로딩 오버레이 */}
