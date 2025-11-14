@@ -560,12 +560,13 @@ export default function ViewerContent() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '20px',
+          maxWidth: '100vw', // 화면 너비 제한
+          maxHeight: '100vh', // 화면 높이 제한
         }}>
           <div style={{
-            width: `${slideSize.width}px`, // aspectRatio에 따른 너비
-            height: `${slideSize.height}px`, // aspectRatio에 따른 높이
-            maxWidth: '90vw', // 화면보다 크면 축소
-            maxHeight: '90vh', // 화면보다 크면 축소
+            aspectRatio: `${slideSize.width} / ${slideSize.height}`, // 슬라이드 비율 유지
+            maxWidth: '90vw', // 화면 너비의 90%
+            maxHeight: '90vh', // 화면 높이의 90%
             background: '#FFFFFF',
             borderRadius: '12px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
