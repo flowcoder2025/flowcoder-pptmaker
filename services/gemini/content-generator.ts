@@ -73,8 +73,10 @@ ${aspectRatio === 'A4-portrait' ? `
    - 소제목-본문: subtitle + body (bullets 없음 또는 빈 배열)
    - 소제목-불릿: subtitle + bullets (body 없음 또는 빈 문자열)
 3. **차트**: 선택사항 - 수치 데이터가 있는 경우 추가
+   - ⚠️ **절대 준수**: data는 반드시 [{ label: string, value: number }] 형식
+   - ❌ 잘못된 예: [{ name: "...", labels: [...], values: [...] }]
+   - ✅ 올바른 예: [{ label: "1분기", value: 100 }, { label: "2분기", value: 120 }]
    - type: "bar" | "line" | "pie"
-   - data: [{ label: string, value: number }]
    - title: 차트 제목
 4. **표**: 선택사항 - 비교 데이터나 상세 지표가 있는 경우 추가
    - headers: 열 제목 배열
@@ -141,8 +143,10 @@ ${aspectRatio === 'A4-portrait' ? `
    - 소제목-본문: subtitle + body (bullets 없음 또는 빈 배열)
    - 소제목-불릿: subtitle + bullets (body 없음 또는 빈 문자열)
 3. **차트**: 선택사항 - 수치 데이터가 있는 경우 추가
+   - ⚠️ **절대 준수**: data는 반드시 [{ label: string, value: number }] 형식
+   - ❌ 잘못된 예: [{ name: "...", labels: [...], values: [...] }]
+   - ✅ 올바른 예: [{ label: "1분기", value: 100 }, { label: "2분기", value: 120 }]
    - type: "bar" | "line" | "pie"
-   - data: [{ label: string, value: number }]
    - title: 차트 제목
 4. **표**: 선택사항 - 비교 데이터나 상세 지표가 있는 경우 추가
    - headers: 열 제목 배열

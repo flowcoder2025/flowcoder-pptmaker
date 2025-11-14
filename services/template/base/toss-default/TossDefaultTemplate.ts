@@ -2583,17 +2583,44 @@ export class TossDefaultTemplate implements SlideTemplate {
     }
 
     // 차트 HTML (옵션)
-    const chartHtml = chart ? `
-      <div style="
-        padding: 16px;
-        background: ${this.ctx.colors.lightBg};
-        border-radius: ${this.ctx.borderRadius.medium}px;
-        margin-bottom: 12px;
-      ">
-        ${chart.title ? `<h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
-        <p style="font-size: 12px; color: ${this.ctx.colors.textSecondary};">[차트: ${chart.type}]</p>
-      </div>
-    ` : '';
+    const chartHtml = chart && Array.isArray(chart.data) && chart.data.length > 0 ? (() => {
+      // 데이터 유효성 검사 및 정규화
+      const validData = chart.data.filter(item => item && typeof item.label === 'string' && typeof item.value === 'number');
+      if (validData.length === 0) return '';
+
+      const maxValue = Math.max(...validData.map(d => d.value));
+      const chartType = chart.type || 'bar';
+
+      return `
+        <div style="
+          padding: 16px;
+          background: ${this.ctx.colors.lightBg};
+          border-radius: ${this.ctx.borderRadius.medium}px;
+          margin-bottom: 12px;
+        ">
+          ${chart.title ? `<h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${validData.map(item => `
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+                <span style="min-width: 60px; color: ${this.ctx.colors.textSecondary};">${this.escapeHtml(item.label)}</span>
+                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 20px; border-radius: 4px; overflow: hidden;">
+                  <div style="
+                    width: ${(item.value / maxValue) * 100}%;
+                    height: 100%;
+                    background: ${this.ctx.colors.primary};
+                    display: flex;
+                    align-items: center;
+                    padding-left: 6px;
+                  ">
+                    <span style="color: white; font-size: 11px; font-weight: 600;">${item.value}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    })() : '';
 
     // 표 HTML (옵션)
     const tableHtml = table ? `
@@ -2802,17 +2829,44 @@ export class TossDefaultTemplate implements SlideTemplate {
     }
 
     // 차트 HTML (옵션)
-    const chartHtml = chart ? `
-      <div style="
-        padding: 12px;
-        background: ${this.ctx.colors.lightBg};
-        border-radius: ${this.ctx.borderRadius.medium}px;
-        margin-bottom: ${this.ctx.spacing.gapSmall}px;
-      ">
-        ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
-        <p style="font-size: 10px; color: ${this.ctx.colors.textSecondary};">[차트: ${chart.type}]</p>
-      </div>
-    ` : '';
+    const chartHtml = chart && Array.isArray(chart.data) && chart.data.length > 0 ? (() => {
+      // 데이터 유효성 검사 및 정규화
+      const validData = chart.data.filter(item => item && typeof item.label === 'string' && typeof item.value === 'number');
+      if (validData.length === 0) return '';
+
+      const maxValue = Math.max(...validData.map(d => d.value));
+      const chartType = chart.type || 'bar';
+
+      return `
+        <div style="
+          padding: 12px;
+          background: ${this.ctx.colors.lightBg};
+          border-radius: ${this.ctx.borderRadius.medium}px;
+          margin-bottom: ${this.ctx.spacing.gapSmall}px;
+        ">
+          ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(chart.title)}</h5>` : ''}
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            ${validData.map(item => `
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 10px;">
+                <span style="min-width: 50px; color: ${this.ctx.colors.textSecondary};">${this.escapeHtml(item.label)}</span>
+                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 16px; border-radius: 3px; overflow: hidden;">
+                  <div style="
+                    width: ${(item.value / maxValue) * 100}%;
+                    height: 100%;
+                    background: ${this.ctx.colors.primary};
+                    display: flex;
+                    align-items: center;
+                    padding-left: 4px;
+                  ">
+                    <span style="color: white; font-size: 9px; font-weight: 600;">${item.value}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    })() : '';
 
     // 표 HTML (옵션)
     const tableHtml = table ? `
