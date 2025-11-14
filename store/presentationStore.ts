@@ -5,7 +5,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { Presentation, GenerationStep } from '@/types/presentation';
+import type { Presentation, GenerationStep, AspectRatio, PageFormat } from '@/types/presentation';
 import type { ResearchMode } from '@/types/research';
 import { useHistoryStore } from './historyStore';
 import { researchTopic } from '@/services/perplexity/researcher';
@@ -29,6 +29,10 @@ interface PresentationState {
   // 스타일 테마
   selectedThemeId: string;
 
+  // 양식 설정
+  aspectRatio: AspectRatio;     // 화면 비율 ('16:9' | '4:3' | 'A4-portrait')
+  pageFormat: PageFormat;        // 페이지 형식 ('slides' | 'one-page')
+
   // 자료 조사 모드
   researchMode: ResearchMode; // 'none' | 'fast' | 'deep'
 
@@ -47,6 +51,8 @@ interface PresentationState {
   // 액션
   setCurrentPresentation: (presentation: Presentation | null) => void;
   setSelectedTheme: (themeId: string) => void;
+  setAspectRatio: (ratio: AspectRatio) => void;
+  setPageFormat: (format: PageFormat) => void;
   setResearchMode: (mode: ResearchMode) => void;
   setUseProContentModel: (usePro: boolean) => void;
   setUseProHtmlModel: (usePro: boolean) => void;
@@ -77,6 +83,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   generationStep: 'idle',
   generationError: null,
   selectedThemeId: DEFAULT_THEME.id, // 기본값: Toss 테마
+  aspectRatio: '16:9', // 기본값: 16:9 비율
+  pageFormat: 'slides', // 기본값: 여러 슬라이드
   researchMode: 'none', // 기본값: 자료 조사 안함
   useProContentModel: false, // 기본값: Flash (빠른속도)
   useProHtmlModel: true, // 기본값: Pro (고품질 HTML) - A/B 테스트 후 변경 고려
@@ -89,6 +97,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   setCurrentPresentation: (presentation) => set({ currentPresentation: presentation }),
 
   setSelectedTheme: (themeId) => set({ selectedThemeId: themeId }),
+
+  setAspectRatio: (ratio) => set({ aspectRatio: ratio }),
+
+  setPageFormat: (format) => set({ pageFormat: format }),
 
   setResearchMode: (mode) => set({ researchMode: mode }),
 
@@ -293,6 +305,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             model: useProContentModel ? 'pro' : 'flash',
             slideCount: targetSlideCount, // 사용자 설정값 사용
             plan: subscriptionStore.plan,
+            aspectRatio: get().aspectRatio, // 화면 비율 전달
+            pageFormat: get().pageFormat,   // 페이지 형식 전달
           }),
         });
 
@@ -372,6 +386,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             research: researchResult,
             useProModel: useProContentModel,
             maxSlides: targetSlideCount, // 사용자 설정값 사용
+            aspectRatio: get().aspectRatio,
+            pageFormat: get().pageFormat,
           });
           console.log('✅ 슬라이드 콘텐츠 생성 완료');
         }
@@ -382,6 +398,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           userInput: text,
           useProModel: useProContentModel,
           maxSlides: targetSlideCount, // 사용자 설정값 사용
+          aspectRatio: get().aspectRatio,
+          pageFormat: get().pageFormat,
         });
         console.log('✅ 슬라이드 콘텐츠 생성 완료');
       }
@@ -419,10 +437,33 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       try {
         slideJSON = JSON.parse(jsonString) as UnifiedPPTJSON;
 
+        // ✅ 화면 비율 및 페이지 형식 설정
+        slideJSON.aspectRatio = get().aspectRatio;
+        slideJSON.pageFormat = get().pageFormat;
+        console.log(`📐 AspectRatio: ${slideJSON.aspectRatio}, PageFormat: ${slideJSON.pageFormat}`);
+
         // 검증 1: 기본 구조
         if (!slideJSON.slides || !Array.isArray(slideJSON.slides) || slideJSON.slides.length === 0) {
           console.error('❌ 슬라이드 배열이 비어있습니다');
           throw new Error('슬라이드 데이터가 올바르지 않습니다.');
+        }
+
+        // 검증 1-1: 원페이지 모드 슬라이드 타입 검증
+        if (slideJSON.pageFormat === 'one-page') {
+          const validTypes = ['reportTwoColumn', 'reportA4'];
+          const hasValidType = slideJSON.slides.some(slide => validTypes.includes(slide.type));
+
+          if (!hasValidType) {
+            console.error('❌ 원페이지 모드에서 잘못된 슬라이드 타입이 생성됨:', slideJSON.slides.map(s => s.type));
+            throw new Error('원페이지 모드에서는 reportTwoColumn 또는 reportA4 타입만 가능합니다. 다시 시도해주세요.');
+          }
+
+          // 원페이지 모드에서는 첫 번째 슬라이드만 유지
+          const firstValidSlide = slideJSON.slides.find(slide => validTypes.includes(slide.type));
+          if (firstValidSlide) {
+            slideJSON.slides = [firstValidSlide];
+            console.log(`✅ 원페이지 모드: ${firstValidSlide.type} 슬라이드 1장으로 설정`);
+          }
         }
 
         // 🆕 검증 2: 빈 슬라이드 감지

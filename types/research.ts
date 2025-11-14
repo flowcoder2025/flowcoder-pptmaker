@@ -120,4 +120,8 @@ export interface MultimodalRequest {
   model?: 'flash' | 'pro';
   /** 슬라이드 개수 */
   slideCount?: number;
+  /** 화면 비율 */
+  aspectRatio?: '16:9' | '4:3' | 'A4-portrait';
+  /** 페이지 형식 */
+  pageFormat?: 'slides' | 'one-page';
 }

@@ -11,6 +11,8 @@ export interface ContentGenerationOptions {
   research?: ResearchResult;
   useProModel: boolean; // true: Pro (고품질), false: Flash (빠른속도)
   maxSlides?: number; // 슬라이드 수 제한 (플랜별)
+  aspectRatio?: '16:9' | '4:3' | 'A4-portrait'; // 화면 비율
+  pageFormat?: 'slides' | 'one-page'; // 페이지 형식
 }
 
 /**
@@ -30,20 +32,111 @@ async function sleep(ms: number): Promise<void> {
  * - 모두 실패하면 명확한 에러 메시지 반환
  */
 export async function generateSlideContent(options: ContentGenerationOptions): Promise<string> {
-  const { userInput, research, useProModel, maxSlides = 25 } = options;
+  const {
+    userInput,
+    research,
+    useProModel,
+    maxSlides = 25,
+    aspectRatio = '16:9',
+    pageFormat = 'slides'
+  } = options;
 
   const model = useProModel ? geminiPro : geminiFlash;
   const modelName = useProModel ? 'Pro' : 'Flash';
 
   console.log(`📝 [Gemini ${modelName}] 슬라이드 콘텐츠 생성 시작`);
+  console.log(`📐 AspectRatio: ${aspectRatio}, PageFormat: ${pageFormat}`);
 
   // 프롬프트 구성
   let prompt = `당신은 프리젠테이션 콘텐츠 전문가입니다. 주어진 정보를 바탕으로 UnifiedPPTJSON 형식의 슬라이드 데이터를 생성해주세요.
 
-🚨 **중요: 슬라이드 수 목표 = ${maxSlides}장 (±2-3장 오차 허용)**
+📐 **화면 비율 및 형식:**
+- 화면 비율: ${aspectRatio}
+- 페이지 형식: ${pageFormat === 'one-page' ? '원페이지 (1장)' : '여러 슬라이드'}
+
+${pageFormat === 'one-page' ? `
+🚨🚨🚨 **CRITICAL: 원페이지 모드 - 필수 준수사항** 🚨🚨🚨
+
+**절대 규칙 (MANDATORY):**
+1. **반드시 reportTwoColumn 또는 reportA4 타입 중 하나만 사용**
+2. **반드시 1장의 슬라이드만 생성 (slides 배열에 정확히 1개)**
+3. **다른 슬라이드 타입 절대 사용 금지** (title, section, content, bullet, twoColumn, chart 등 모두 금지)
+4. **이 규칙을 위반하면 생성이 실패합니다**
+
+**원페이지 모드 전용 슬라이드 타입 (이 중 하나만 선택):**
+
+**옵션 1 - reportTwoColumn** (2단 보고서 형식):
+\`\`\`json
+{
+  "slides": [
+    {
+      "type": "reportTwoColumn",
+      "props": {
+        "title": "보고서 제목",
+        "sections": [
+          {
+            "subtitle": "섹션 1 제목",
+            "body": "섹션 1 본문 내용 (여러 단락 가능)...",
+            "bullets": ["핵심 포인트 1", "핵심 포인트 2"]
+          },
+          {
+            "subtitle": "섹션 2 제목",
+            "body": "섹션 2 본문 내용..."
+          },
+          {
+            "subtitle": "섹션 3 제목",
+            "body": "섹션 3 본문 내용...",
+            "bullets": ["핵심 포인트 3"]
+          }
+        ],
+        "image": "https://example.com/image.jpg",
+        "imageCaption": "이미지 캡션"
+      },
+      "style": {}
+    }
+  ]
+}
+\`\`\`
+
+**옵션 2 - reportA4** (세로 A4 보고서 형식):
+\`\`\`json
+{
+  "slides": [
+    {
+      "type": "reportA4",
+      "props": {
+        "title": "보고서 제목",
+        "subtitle": "부제목",
+        "image": "https://example.com/image.jpg",
+        "sections": [
+          {
+            "subtitle": "섹션 1 제목",
+            "body": "섹션 1 본문 내용 (여러 단락 가능)...",
+            "bullets": ["핵심 포인트 1", "핵심 포인트 2"]
+          },
+          {
+            "subtitle": "섹션 2 제목",
+            "body": "섹션 2 본문 내용..."
+          },
+          {
+            "subtitle": "섹션 3 제목",
+            "body": "섹션 3 본문 내용...",
+            "bullets": ["핵심 포인트 3"]
+          }
+        ]
+      },
+      "style": {}
+    }
+  ]
+}
+\`\`\`
+
+⚠️ **다시 한번 강조: 원페이지 모드에서는 위 2가지 타입 중 하나만 사용하고, 반드시 1장만 생성하세요!**
+` : `
+🚨 **슬라이드 수 목표 = ${maxSlides}장 (±2-3장 오차 허용)**
 - 목표: ${maxSlides}장
 - 허용 범위: ${maxSlides - 3} ~ ${maxSlides + 3}장
-- AI 특성상 정확히 맞추기 어려울 수 있지만 최대한 목표에 맞춰주세요
+- AI 특성상 정확히 맞추기 어려울 수 있지만 최대한 목표에 맞춰주세요`}
 
 **사용자 요청:**
 ${userInput}

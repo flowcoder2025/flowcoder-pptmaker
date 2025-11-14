@@ -24,7 +24,9 @@ export type SlideType =
   | 'imageText'
   | 'agenda'
   | 'testimonial'
-  | 'gallery';
+  | 'gallery'
+  | 'reportTwoColumn'  // 원페이지 보고서 (2단 레이아웃)
+  | 'reportA4';        // 원페이지 보고서 (A4 용지 시뮬레이션)
 
 // 기본 슬라이드 인터페이스
 export interface BaseSlide {
@@ -407,6 +409,36 @@ export interface GallerySlide extends BaseSlide {
   };
 }
 
+// Report Two Column Slide (원페이지 보고서 - 2단 레이아웃)
+export interface ReportTwoColumnSlide extends BaseSlide {
+  type: 'reportTwoColumn';
+  props: {
+    title: string;
+    sections: Array<{
+      subtitle?: string;
+      body?: string;
+      bullets?: string[];
+    }>;
+    image: string;
+    imageCaption: string;
+  };
+}
+
+// Report A4 Slide (원페이지 보고서 - A4 용지 시뮬레이션)
+export interface ReportA4Slide extends BaseSlide {
+  type: 'reportA4';
+  props: {
+    title: string;
+    subtitle: string;
+    image: string;
+    sections: Array<{
+      subtitle?: string;
+      body?: string;
+      bullets?: string[];
+    }>;
+  };
+}
+
 // Slide Union Type
 export type Slide =
   | TitleSlide
@@ -430,12 +462,16 @@ export type Slide =
   | ImageTextSlide
   | AgendaSlide
   | TestimonialSlide
-  | GallerySlide;
+  | GallerySlide
+  | ReportTwoColumnSlide
+  | ReportA4Slide;
 
 // unified-ppt JSON 규격
 export interface UnifiedPPTJSON {
   title?: string;
   slides: Slide[];
+  aspectRatio?: '16:9' | '4:3' | 'A4-portrait';  // 화면 비율 (기본값: '16:9')
+  pageFormat?: 'slides' | 'one-page';  // 페이지 형식 (기본값: 'slides')
 }
 
 // HTML 슬라이드 (Gemini Pro 생성 결과)

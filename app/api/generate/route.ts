@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
       model = 'flash',
       slideCount = 10,
       plan = 'free',
+      aspectRatio = '16:9',
+      pageFormat = 'slides',
     } = body;
 
     // 1. 입력 검증
@@ -111,6 +113,29 @@ export async function POST(request: NextRequest) {
 
     // 6. JSON 파싱 및 반환
     const slideData = JSON.parse(cleanedJson);
+
+    // ✅ 화면 비율 및 페이지 형식 설정
+    slideData.aspectRatio = aspectRatio;
+    slideData.pageFormat = pageFormat;
+    console.log(`📐 AspectRatio: ${aspectRatio}, PageFormat: ${pageFormat}`);
+
+    // ✅ 원페이지 모드 슬라이드 타입 검증
+    if (pageFormat === 'one-page') {
+      const validTypes = ['reportTwoColumn', 'reportA4'];
+      const hasValidType = slideData.slides.some((slide: any) => validTypes.includes(slide.type));
+
+      if (!hasValidType) {
+        console.error('❌ 원페이지 모드에서 잘못된 슬라이드 타입이 생성됨:', slideData.slides.map((s: any) => s.type));
+        throw new Error('원페이지 모드에서는 reportTwoColumn 또는 reportA4 타입만 가능합니다. 다시 시도해주세요.');
+      }
+
+      // 원페이지 모드에서는 첫 번째 유효한 슬라이드만 유지
+      const firstValidSlide = slideData.slides.find((slide: any) => validTypes.includes(slide.type));
+      if (firstValidSlide) {
+        slideData.slides = [firstValidSlide];
+        console.log(`✅ 원페이지 모드: ${firstValidSlide.type} 슬라이드 1장으로 설정`);
+      }
+    }
 
     return NextResponse.json({
       success: true,

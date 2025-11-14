@@ -10,7 +10,7 @@ import type {
   SlideTemplate,
   TemplateContext,
 } from '../../engine/types';
-import { DEFAULT_TEMPLATE_CONTEXT } from '../../engine/types';
+import { DEFAULT_TEMPLATE_CONTEXT, calculateSlideSize } from '../../engine/types';
 import type { StyleTheme } from '@/constants/themes';
 import { DEFAULT_THEME } from '@/constants/themes';
 import type {
@@ -36,6 +36,8 @@ import type {
   AgendaSlide,
   TestimonialSlide,
   GallerySlide,
+  ReportTwoColumnSlide,
+  ReportA4Slide,
   HTMLSlide,
 } from '@/types/slide';
 
@@ -166,6 +168,25 @@ export class TossDefaultTemplate implements SlideTemplate {
       },
       slideSize: DEFAULT_TEMPLATE_CONTEXT.slideSize,
     };
+  }
+
+  /**
+   * AspectRatio를 적용한 새 템플릿 인스턴스 생성
+   *
+   * @param aspectRatio - 화면 비율 ('16:9' | '4:3' | 'A4-portrait')
+   * @returns 새로운 TossDefaultTemplate 인스턴스
+   */
+  withAspectRatio(aspectRatio: '16:9' | '4:3' | 'A4-portrait'): TossDefaultTemplate {
+    // 새 인스턴스 생성 (현재 테마 유지)
+    const newTemplate = new TossDefaultTemplate(this.theme);
+
+    // slideSize만 aspectRatio에 맞게 조정
+    newTemplate.ctx = {
+      ...newTemplate.ctx,
+      slideSize: calculateSlideSize(aspectRatio),
+    };
+
+    return newTemplate;
   }
 
   /**
@@ -2441,6 +2462,318 @@ export class TossDefaultTemplate implements SlideTemplate {
       ">이미지를 추가하세요</p>
     </div>
     `}
+  </div>
+</div>
+    `.trim();
+
+    const css = this.generateCSSVariables();
+    return { html, css };
+  }
+
+  /**
+   * 23. Report Two Column Slide (원페이지 보고서 - 2단 레이아웃)
+   *
+   * 16:9 비율의 원페이지 보고서 레이아웃
+   * 좌측: 스크롤 가능한 텍스트 영역 (flex: 1.5)
+   * 우측: 이미지 + 캡션 (flex: 1)
+   */
+  renderReportTwoColumn(slide: ReportTwoColumnSlide): HTMLSlide {
+    const { title, sections, image, imageCaption } = slide.props;
+
+    // sections 배열을 HTML로 변환
+    const sectionsHtml = (sections || [])
+      .map((section) => {
+        let html = '';
+
+        // Subtitle
+        if (section.subtitle) {
+          html += `
+            <h4 style="
+              font-size: ${this.ctx.fonts.size.subtitle}px;
+              font-weight: 700;
+              color: ${this.ctx.colors.text};
+              margin: ${this.ctx.spacing.gap}px 0 ${this.ctx.spacing.gapSmall}px 0;
+            ">${this.escapeHtml(section.subtitle)}</h4>
+          `;
+        }
+
+        // Body
+        if (section.body) {
+          html += `
+            <div style="
+              font-size: 16px;
+              color: ${this.ctx.colors.textSecondary};
+              line-height: 1.7;
+              margin-bottom: 16px;
+            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 16px 0;">')}</div>
+          `;
+        }
+
+        // Bullets
+        if (section.bullets && section.bullets.length > 0) {
+          const bulletsHtml = section.bullets
+            .map(
+              (bullet) => `
+                <li style="
+                  display: flex;
+                  align-items: flex-start;
+                  margin-bottom: 12px;
+                ">
+                  <span style="
+                    color: ${this.ctx.colors.primary};
+                    margin-right: 12px;
+                    font-size: ${this.ctx.spacing.iconSize}px;
+                    line-height: 1.4;
+                  ">→</span>
+                  <span>${this.escapeHtml(bullet)}</span>
+                </li>
+              `
+            )
+            .join('');
+
+          html += `
+            <ul style="
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              font-size: 16px;
+              color: ${this.ctx.colors.textSecondary};
+              line-height: 1.7;
+            ">
+              ${bulletsHtml}
+            </ul>
+          `;
+        }
+
+        return html;
+      })
+      .join('');
+
+    const html = `
+<div style="
+  width: 100%;
+  height: 100%;
+  background: ${this.ctx.colors.white};
+  display: flex;
+  flex-direction: column;
+  padding: ${this.ctx.spacing.padding}px;
+  box-sizing: border-box;
+  font-family: ${this.ctx.fonts.main};
+">
+  <!-- Accent Bar + Title -->
+  <div style="margin-bottom: ${this.ctx.spacing.gap}px;">
+    <div style="
+      width: ${this.ctx.spacing.accentBar.width}px;
+      height: ${this.ctx.spacing.accentBar.height}px;
+      background-color: ${this.ctx.colors.primary};
+      margin-bottom: ${this.ctx.spacing.gapSmall}px;
+    "></div>
+    <h3 style="
+      color: ${this.ctx.colors.text};
+      font-size: ${this.ctx.fonts.size.heading}px;
+      font-weight: 700;
+      margin: 0;
+    ">${this.escapeHtml(title)}</h3>
+  </div>
+
+  <!-- Content Area (2-Column Layout) -->
+  <div style="
+    flex: 1;
+    display: flex;
+    gap: ${this.ctx.spacing.gap}px;
+    overflow: hidden;
+    min-height: 0;
+  ">
+    <!-- Text Column (Left) -->
+    <div style="flex: 1.5; display: flex; flex-direction: column; min-height: 0;">
+      <div style="overflow-y: auto; flex: 1;">
+        ${sectionsHtml}
+      </div>
+    </div>
+
+    <!-- Image Column (Right) -->
+    <div style="flex: 1; display: flex; flex-direction: column;">
+      ${image ? `
+        <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(imageCaption)}" style="
+          width: 100%;
+          height: auto;
+          object-fit: contain;
+          border-radius: ${this.ctx.borderRadius.medium}px;
+          background: ${this.ctx.colors.lightBg};
+          margin-bottom: 12px;
+        ">
+        <figcaption style="
+          font-size: ${this.ctx.fonts.size.caption}px;
+          color: ${this.ctx.colors.textSecondary};
+          text-align: center;
+        ">${this.escapeHtml(imageCaption)}</figcaption>
+      ` : `
+        <div style="
+          width: 100%;
+          height: 100%;
+          border: 2px dashed ${this.ctx.colors.border};
+          border-radius: ${this.ctx.borderRadius.medium}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: ${this.ctx.colors.lightBg};
+        ">
+          <p style="
+            color: ${this.ctx.colors.textSecondary};
+            font-size: 18px;
+            margin: 0;
+          ">이미지를 추가하세요</p>
+        </div>
+      `}
+    </div>
+  </div>
+</div>
+    `.trim();
+
+    const css = this.generateCSSVariables();
+    return { html, css };
+  }
+
+  /**
+   * 24. Report A4 Slide (원페이지 보고서 - A4 용지 시뮬레이션)
+   *
+   * 회색 배경 + 중앙 정렬된 A4 용지
+   * 용지 내부: Accent Bar + Title + Subtitle + Image + 스크롤 가능한 섹션
+   */
+  renderReportA4(slide: ReportA4Slide): HTMLSlide {
+    const { title, subtitle, image, sections } = slide.props;
+
+    // sections 배열을 HTML로 변환
+    const sectionsHtml = (sections || [])
+      .map((section) => {
+        let html = '';
+
+        // Subtitle
+        if (section.subtitle) {
+          html += `
+            <h3 style="
+              font-size: 16px;
+              font-weight: 700;
+              color: ${this.ctx.colors.text};
+              margin: ${this.ctx.spacing.gapSmall}px 0 ${this.ctx.spacing.gapSmall}px 0;
+            ">${this.escapeHtml(section.subtitle)}</h3>
+          `;
+        }
+
+        // Body
+        if (section.body) {
+          html += `
+            <div style="
+              font-size: 14px;
+              color: ${this.ctx.colors.text};
+              line-height: 1.6;
+              margin-bottom: 16px;
+            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 16px 0;">')}</div>
+          `;
+        }
+
+        // Bullets
+        if (section.bullets && section.bullets.length > 0) {
+          const bulletsHtml = section.bullets
+            .map(
+              (bullet) => `
+                <li style="
+                  display: flex;
+                  align-items: flex-start;
+                  margin-bottom: 10px;
+                ">
+                  <span style="
+                    color: ${this.ctx.colors.primary};
+                    margin-right: 10px;
+                    font-size: 16px;
+                    line-height: 1.4;
+                  ">•</span>
+                  <span>${this.escapeHtml(bullet)}</span>
+                </li>
+              `
+            )
+            .join('');
+
+          html += `
+            <ul style="
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              font-size: 14px;
+              color: ${this.ctx.colors.textSecondary};
+              line-height: 1.6;
+            ">
+              ${bulletsHtml}
+            </ul>
+          `;
+        }
+
+        return html;
+      })
+      .join('');
+
+    const html = `
+<div style="
+  width: 100%;
+  height: 100%;
+  background: ${this.ctx.colors.textSecondary};
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-family: ${this.ctx.fonts.main};
+">
+  <!-- A4 Paper Simulation -->
+  <div style="
+    width: 460px;
+    height: 650px;
+    background-color: ${this.ctx.colors.white};
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 3px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  ">
+    <!-- Accent Bar -->
+    <div style="
+      width: ${this.ctx.spacing.accentBar.width}px;
+      height: ${this.ctx.spacing.accentBar.height}px;
+      background-color: ${this.ctx.colors.primary};
+      margin-bottom: ${this.ctx.spacing.gapSmall}px;
+    "></div>
+
+    <!-- Title -->
+    <h1 style="
+      font-size: 26px;
+      font-weight: 700;
+      color: ${this.ctx.colors.text};
+      margin: 0 0 5px 0;
+    ">${this.escapeHtml(title)}</h1>
+
+    <!-- Subtitle -->
+    <h2 style="
+      font-size: 18px;
+      font-weight: 500;
+      color: ${this.ctx.colors.textSecondary};
+      margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
+    ">${this.escapeHtml(subtitle)}</h2>
+
+    <!-- Image -->
+    ${image ? `
+      <img src="${this.escapeHtml(image)}" alt="${this.escapeHtml(title)}" style="
+        width: 100%;
+        height: auto;
+        border-radius: ${this.ctx.borderRadius.medium}px;
+        margin-bottom: ${this.ctx.spacing.gapSmall}px;
+      ">
+    ` : ''}
+
+    <!-- Scrollable Content Area -->
+    <div style="flex: 1; overflow-y: auto; min-height: 0;">
+      ${sectionsHtml}
+    </div>
   </div>
 </div>
     `.trim();

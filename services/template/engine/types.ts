@@ -225,6 +225,12 @@ export interface SlideTemplate {
 
   /** 22. Image Slide (이미지 슬라이드) */
   renderImage(slide: ImageSlide): HTMLSlide;
+
+  /** 23. Report Two Column Slide (원페이지 보고서 - 2단 레이아웃) */
+  renderReportTwoColumn(slide: import('@/types/slide').ReportTwoColumnSlide): HTMLSlide;
+
+  /** 24. Report A4 Slide (원페이지 보고서 - A4 용지 시뮬레이션) */
+  renderReportA4(slide: import('@/types/slide').ReportA4Slide): HTMLSlide;
 }
 
 /**
@@ -318,6 +324,49 @@ export function isImageSlide(slide: Slide): slide is ImageSlide {
   return slide.type === 'image';
 }
 
+export function isReportTwoColumnSlide(slide: Slide): slide is import('@/types/slide').ReportTwoColumnSlide {
+  return slide.type === 'reportTwoColumn';
+}
+
+export function isReportA4Slide(slide: Slide): slide is import('@/types/slide').ReportA4Slide {
+  return slide.type === 'reportA4';
+}
+
+/**
+ * AspectRatio에 따른 슬라이드 크기 계산
+ *
+ * @param aspectRatio - 화면 비율 ('16:9' | '4:3' | 'A4-portrait')
+ * @param baseWidth - 기준 너비 (기본값: 1200px)
+ * @returns 계산된 슬라이드 크기
+ */
+export function calculateSlideSize(
+  aspectRatio: '16:9' | '4:3' | 'A4-portrait' = '16:9',
+  baseWidth: number = 1200
+): { width: number; height: number } {
+  switch (aspectRatio) {
+    case '16:9':
+      return {
+        width: baseWidth,
+        height: Math.round(baseWidth * 9 / 16), // 1200 × 9/16 = 675
+      };
+    case '4:3':
+      return {
+        width: baseWidth,
+        height: Math.round(baseWidth * 3 / 4), // 1200 × 3/4 = 900
+      };
+    case 'A4-portrait':
+      return {
+        width: baseWidth,
+        height: Math.round(baseWidth * 297 / 210), // 1200 × 297/210 ≈ 1697 (A4 비율)
+      };
+    default:
+      return {
+        width: baseWidth,
+        height: Math.round(baseWidth * 9 / 16),
+      };
+  }
+}
+
 /**
  * 기본 TemplateContext 값
  */
@@ -368,8 +417,5 @@ export const DEFAULT_TEMPLATE_CONTEXT: TemplateContext = {
     large: 16,
     circle: '50%',
   },
-  slideSize: {
-    width: 1200,
-    height: 675,
-  },
+  slideSize: calculateSlideSize('16:9'), // 기본값: 16:9 비율
 };

@@ -33,6 +33,8 @@ import {
   isTestimonialSlide,
   isGallerySlide,
   isImageSlide,
+  isReportTwoColumnSlide,
+  isReportA4Slide,
 } from './types';
 
 /**
@@ -86,10 +88,20 @@ export class TemplateEngine {
    */
   generateAll(slideData: UnifiedPPTJSON, templateId: string): HTMLSlide[] {
     // 템플릿 조회
-    const template = this.registry.get(templateId);
+    let template = this.registry.get(templateId);
 
     if (!template) {
       throw new Error(`템플릿을 찾을 수 없습니다: ${templateId}`);
+    }
+
+    // AspectRatio 적용 (UnifiedPPTJSON에서 읽기)
+    const aspectRatio = slideData.aspectRatio || '16:9';
+    let effectiveTemplate = template; // Non-null template을 보장
+
+    if (aspectRatio !== '16:9' && 'withAspectRatio' in template) {
+      // TossDefaultTemplate인 경우 AspectRatio를 적용한 새 인스턴스 생성
+      effectiveTemplate = (template as any).withAspectRatio(aspectRatio);
+      console.log(`📐 AspectRatio 적용: ${aspectRatio}`);
     }
 
     // 모든 슬라이드 렌더링
@@ -97,7 +109,7 @@ export class TemplateEngine {
 
     const htmlSlides = slideData.slides.map((slide, index) => {
       try {
-        return this.renderSlide(slide, template);
+        return this.renderSlide(slide, effectiveTemplate);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
         throw new Error(`슬라이드 ${index + 1} 렌더링 실패: ${errorMessage}`);
@@ -107,7 +119,7 @@ export class TemplateEngine {
     const endTime = performance.now();
     const duration = Math.round(endTime - startTime);
 
-    console.log(`✅ ${slideData.slides.length}개 슬라이드 생성 완료 (${duration}ms)`);
+    console.log(`✅ ${slideData.slides.length}개 슬라이드 생성 완료 (${duration}ms, ${aspectRatio})`);
 
     return htmlSlides;
   }
@@ -208,6 +220,14 @@ export class TemplateEngine {
 
     if (isImageSlide(slide)) {
       return template.renderImage(slide);
+    }
+
+    if (isReportTwoColumnSlide(slide)) {
+      return template.renderReportTwoColumn(slide);
+    }
+
+    if (isReportA4Slide(slide)) {
+      return template.renderReportA4(slide);
     }
 
     // 지원하지 않는 타입

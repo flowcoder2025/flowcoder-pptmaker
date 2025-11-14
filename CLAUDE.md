@@ -152,36 +152,6 @@ PERPLEXITY_API_KEY=your_perplexity_key  # 서버 전용
 
 ## ⚠️ 필수 규칙
 
-### 0. 작업 범위 및 코드 보호 (최우선)
-
-**🔒 PPT 생성 관련 코드는 읽기 전용입니다.**
-
-현재 프로젝트에서는 **UI 시스템만 작업**합니다. 다음 영역은 **읽기 권한만** 있고 **쓰기 권한이 없습니다**:
-
-**📖 읽기 전용 (Read-Only) 영역**:
-- `services/gemini/` - Gemini API 통합
-- `services/perplexity/` - Perplexity AI 통합
-- `services/template/` - 템플릿 시스템 (98% 비용 절감 핵심)
-- `services/slide/` - 슬라이드 변환 엔진
-- `types/slide.ts` - 슬라이드 타입 정의 (21개 슬라이드 타입)
-
-**✅ 작업 허용 영역**:
-- `components/` - React UI 컴포넌트 (shadcn/ui)
-- `components/ui/` - shadcn/ui 기본 컴포넌트
-- `app/*/page.tsx` - Next.js 페이지 (UI 부분만)
-- `app/api/` - API Routes (UI 관련만)
-- 스타일링 및 레이아웃 개선
-- UX/UI 개선 작업
-
-**🚫 절대 금지 사항**:
-- ❌ PPT 생성 로직 수정 (services/)
-- ❌ AI 파이프라인 변경 (gemini, perplexity)
-- ❌ 템플릿 시스템 수정 (template/)
-- ❌ 슬라이드 타입 변경 (types/slide.ts)
-- ❌ 슬라이드 변환 로직 수정 (slide/)
-
-**이유**: PPT 생성 시스템은 완성되었으며, 비용 최적화(98% 절감)와 안정성이 검증되었습니다. 현재는 UI/UX 개선에만 집중합니다.
-
 ### 1. 한글 소통 규칙
 
 **최우선 규칙**: 이 프로젝트에서는 **한국어로 모든 커뮤니케이션**을 진행합니다.

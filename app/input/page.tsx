@@ -17,7 +17,9 @@ import {
   BarChart3,
   AlertTriangle,
   Lightbulb,
-  Bot
+  Bot,
+  Layout,
+  FileType
 } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -28,6 +30,7 @@ import { STYLE_THEMES } from '@/constants/themes';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
 import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
 import type { AttachmentFile } from '@/types/research';
+import type { AspectRatio, PageFormat } from '@/types/presentation';
 import FileUploader from '@/components/input/FileUploader';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import KakaoAd from '@/components/ads/KakaoAd';
@@ -47,6 +50,10 @@ export default function InputPage() {
     clearError,
     selectedThemeId,
     setSelectedTheme,
+    aspectRatio,
+    setAspectRatio,
+    pageFormat,
+    setPageFormat,
     researchMode,
     setResearchMode,
     useProContentModel,
@@ -413,6 +420,86 @@ export default function InputPage() {
               </div>
             </div>
 
+            {/* 양식 설정 */}
+            <div>
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
+                <Layout className="w-4 h-4" />
+                <h3>양식 설정</h3>
+              </div>
+
+              {/* 화면 비율 */}
+              <div className="mb-3">
+                <div className="text-xs text-gray-600 mb-2">화면 비율</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setAspectRatio('16:9')}
+                    className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                      aspectRatio === '16:9'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold text-gray-900">16:9</div>
+                    <div className="text-xs text-gray-500 mt-0.5">와이드</div>
+                  </button>
+
+                  <button
+                    onClick={() => setAspectRatio('4:3')}
+                    className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                      aspectRatio === '4:3'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold text-gray-900">4:3</div>
+                    <div className="text-xs text-gray-500 mt-0.5">기본</div>
+                  </button>
+
+                  <button
+                    onClick={() => setAspectRatio('A4-portrait')}
+                    className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                      aspectRatio === 'A4-portrait'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold text-gray-900">A4</div>
+                    <div className="text-xs text-gray-500 mt-0.5">세로</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* 페이지 형식 */}
+              <div>
+                <div className="text-xs text-gray-600 mb-2">페이지 형식</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setPageFormat('slides')}
+                    className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                      pageFormat === 'slides'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold text-gray-900">슬라이드 모드</div>
+                    <div className="text-xs text-gray-500 mt-0.5">여러 페이지</div>
+                  </button>
+
+                  <button
+                    onClick={() => setPageFormat('one-page')}
+                    className={`p-2.5 rounded-lg border-2 text-center transition-all ${
+                      pageFormat === 'one-page'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold text-gray-900">원페이지 모드</div>
+                    <div className="text-xs text-gray-500 mt-0.5">한 페이지</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* 자료 조사 */}
             <div>
               <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-3">
@@ -543,7 +630,7 @@ export default function InputPage() {
             </div>
 
             {/* 슬라이드 분량 */}
-            <div>
+            <div className={pageFormat === 'one-page' ? 'opacity-50 pointer-events-none' : ''}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5">
                   <BarChart3 className="w-4 h-4 text-gray-900" />
@@ -552,7 +639,7 @@ export default function InputPage() {
                   </h3>
                 </div>
                 <span className="text-sm font-bold text-blue-600">
-                  {targetSlideCount}장
+                  {pageFormat === 'one-page' ? '1장 (고정)' : `${targetSlideCount}장`}
                 </span>
               </div>
 
@@ -563,6 +650,7 @@ export default function InputPage() {
                 max={PLAN_BENEFITS[plan].benefits.maxSlides}
                 step={1}
                 className="mb-4"
+                disabled={pageFormat === 'one-page'}
               />
 
               <div className="flex justify-between text-xs text-gray-500 mb-3">
@@ -570,16 +658,25 @@ export default function InputPage() {
                 <span>{PLAN_BENEFITS[plan].benefits.maxSlides}장</span>
               </div>
 
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="flex items-center gap-1.5 text-xs text-yellow-800">
-                  <AlertTriangle className="w-4 h-4" />
-                  AI 특성상 ±2-3장 오차가 있을 수 있어요
-                </p>
-                <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
-                  <Lightbulb className="w-4 h-4" />
-                  {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
-                </p>
-              </div>
+              {pageFormat === 'one-page' ? (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="flex items-center gap-1.5 text-xs text-blue-800">
+                    <FileText className="w-4 h-4" />
+                    원페이지 모드에서는 1장의 슬라이드만 생성돼요
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="flex items-center gap-1.5 text-xs text-yellow-800">
+                    <AlertTriangle className="w-4 h-4" />
+                    AI 특성상 ±2-3장 오차가 있을 수 있어요
+                  </p>
+                  <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
+                    <Lightbulb className="w-4 h-4" />
+                    {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
