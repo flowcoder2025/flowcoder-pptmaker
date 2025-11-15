@@ -24,6 +24,16 @@
 ### ✨ Features
 
 #### 2025-11-15
+- **ReportTwoColumn 슬라이드 오른쪽 섹션 간격 개선**
+  - TossDefaultTemplate.renderReportTwoColumn() 수정
+    - 이미지 컨테이너 margin-bottom: 12px → 20px
+    - 이미지 캡션 margin-bottom: 12px → 20px
+    - 차트(chart) margin-bottom: 12px → 20px
+    - 표(table) margin-bottom: 12px → 20px
+  - 오른쪽 칼럼의 시각 요소 간 간격 안정적으로 확대
+  - 2단 레이아웃에 최적화된 20px 간격 적용
+  - 가독성 및 시각적 분리 향상
+
 - **ReportA4 슬라이드 차트/표 간격 개선**
   - TossDefaultTemplate.renderReportA4() 수정
     - 차트(chart) margin-bottom: 12px → 32px

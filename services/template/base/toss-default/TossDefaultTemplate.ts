@@ -2564,7 +2564,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       `;
 
       imagesHtml = `
-        <div style="${gridStyle} margin-bottom: 12px;">
+        <div style="${gridStyle} margin-bottom: 20px;">
           ${images.slice(0, 2).map((img: string) => `
             <img src="${this.escapeHtml(img)}" alt="${this.escapeHtml(imageCaption || '')}" style="
               width: 100%;
@@ -2581,7 +2581,7 @@ export class TossDefaultTemplate implements SlideTemplate {
             font-size: ${this.ctx.fonts.size.caption}px;
             color: ${this.ctx.colors.textSecondary};
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
           ">${this.escapeHtml(imageCaption)}</figcaption>
         ` : ''}
       `;
@@ -2601,7 +2601,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           padding: 14px;
           background: ${this.ctx.colors.lightBg};
           border-radius: ${this.ctx.borderRadius.medium}px;
-          margin-bottom: 12px;
+          margin-bottom: 20px;
         ">
           ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
           <div style="display: flex; flex-direction: column; gap: 7px;">
@@ -2630,7 +2630,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     // 표 HTML (옵션)
     const tableHtml = table ? `
-      <div style="margin-bottom: 12px;">
+      <div style="margin-bottom: 20px;">
         ${table.title ? `<h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(table.title)}</h5>` : ''}
         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
           <thead>
