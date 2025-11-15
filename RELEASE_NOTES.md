@@ -24,6 +24,14 @@
 ### ✨ Features
 
 #### 2025-11-15
+- **ReportTwoColumn 슬라이드 표 가독성 개선**
+  - TossDefaultTemplate.renderReportTwoColumn() 수정
+    - 표 제목 (h5): `color: text` 추가
+    - 표 헤더 (th): `color: text`, `font-weight: 700` 추가
+    - 표 데이터 (td): `color: textSecondary` 추가
+  - 어두운 배경 테마에서 표 텍스트 가독성 개선
+  - 모든 스타일 테마에서 표 내용 정상 표시
+
 - **ReportTwoColumn 슬라이드 스타일 테마 배경색 적용 및 레이아웃 개선**
   - TossDefaultTemplate.renderReportTwoColumn() 수정
     - 배경색: `white` → `bg` (스타일 테마 적용)

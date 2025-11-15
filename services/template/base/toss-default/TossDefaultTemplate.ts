@@ -2631,17 +2631,17 @@ export class TossDefaultTemplate implements SlideTemplate {
     // 표 HTML (옵션)
     const tableHtml = table ? `
       <div style="margin-bottom: 20px;">
-        ${table.title ? `<h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700;">${this.escapeHtml(table.title)}</h5>` : ''}
+        ${table.title ? `<h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(table.title)}</h5>` : ''}
         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
           <thead>
             <tr style="background: ${this.ctx.colors.lightBg};">
-              ${table.headers.map(h => `<th style="padding: 8px; text-align: left; border-bottom: 2px solid ${this.ctx.colors.border};">${this.escapeHtml(h)}</th>`).join('')}
+              ${table.headers.map(h => `<th style="padding: 8px; text-align: left; border-bottom: 2px solid ${this.ctx.colors.border}; color: ${this.ctx.colors.text}; font-weight: 700;">${this.escapeHtml(h)}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             ${table.rows.map(row => `
               <tr>
-                ${row.map(cell => `<td style="padding: 8px; border-bottom: 1px solid ${this.ctx.colors.border};">${this.escapeHtml(cell)}</td>`).join('')}
+                ${row.map(cell => `<td style="padding: 8px; border-bottom: 1px solid ${this.ctx.colors.border}; color: ${this.ctx.colors.textSecondary};">${this.escapeHtml(cell)}</td>`).join('')}
               </tr>
             `).join('')}
           </tbody>
