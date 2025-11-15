@@ -2486,7 +2486,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     // sections 배열을 HTML로 변환
     const sectionsHtml = (sections || [])
-      .map((section) => {
+      .map((section, index) => {
         let html = '';
 
         // Subtitle
@@ -2496,7 +2496,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               font-size: ${this.ctx.fonts.size.subtitle}px;
               font-weight: 700;
               color: ${this.ctx.colors.text};
-              margin: ${this.ctx.spacing.gap}px 0 ${this.ctx.spacing.gapSmall}px 0;
+              margin: ${index > 0 ? '32px' : '0'} 0 ${this.ctx.spacing.gapSmall}px 0;
             ">${this.escapeHtml(section.subtitle)}</h4>
           `;
         }
@@ -2521,7 +2521,7 @@ export class TossDefaultTemplate implements SlideTemplate {
                 <li style="
                   display: flex;
                   align-items: flex-start;
-                  margin-bottom: 10px;
+                  margin-bottom: 6px;
                 ">
                   <span style="
                     color: ${this.ctx.colors.primary};
@@ -2542,7 +2542,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               margin: 0;
               font-size: 15px;
               color: ${this.ctx.colors.textSecondary};
-              line-height: 1.6;
+              line-height: 1.4;
             ">
               ${bulletsHtml}
             </ul>
@@ -2653,7 +2653,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 <div style="
   width: 100%;
   height: 100%;
-  background: ${this.ctx.colors.white};
+  background: ${this.ctx.colors.bg};
   display: flex;
   flex-direction: column;
   padding: ${this.ctx.spacing.padding}px;

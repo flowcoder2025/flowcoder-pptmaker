@@ -24,6 +24,15 @@
 ### ✨ Features
 
 #### 2025-11-15
+- **ReportTwoColumn 슬라이드 스타일 테마 배경색 적용 및 레이아웃 개선**
+  - TossDefaultTemplate.renderReportTwoColumn() 수정
+    - 배경색: `white` → `bg` (스타일 테마 적용)
+    - 불릿 줄간격: line-height 1.6 → 1.4 (가독성 개선)
+    - 불릿 간 간격: margin-bottom 10px → 6px (타이트한 레이아웃)
+    - 섹션 간 간격: 첫 섹션 이후 상단 margin 32px 적용
+  - 스타일 테마 선택 시 배경색 정상 적용
+  - 텍스트 밀도 및 가독성 최적화
+
 - **ReportTwoColumn 슬라이드 오른쪽 섹션 간격 개선**
   - TossDefaultTemplate.renderReportTwoColumn() 수정
     - 이미지 컨테이너 margin-bottom: 12px → 20px
