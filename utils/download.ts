@@ -6,8 +6,9 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import pptxgen from 'pptxgenjs';
-import type { Presentation } from '@/types/presentation';
+import type { Presentation, AspectRatio } from '@/types/presentation';
 import type { HTMLSlide } from '@/types/slide';
+import { calculateSlideSize } from '@/services/template/engine/types';
 
 /**
  * HTML 다운로드
@@ -48,13 +49,20 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
   try {
     console.log('📄 PDF 다운로드 시작...');
 
-    const { title, slides } = presentation;
+    const { title, slides, slideData } = presentation;
 
-    // jsPDF 인스턴스 생성 (가로 방향, A4 비율에 맞게 조정)
+    // aspectRatio 가져오기 (기본값: 16:9)
+    const aspectRatio = slideData?.aspectRatio || '16:9';
+    const slideSize = calculateSlideSize(aspectRatio);
+    const orientation = aspectRatio === 'A4-portrait' ? 'portrait' : 'landscape';
+
+    console.log(`📐 AspectRatio: ${aspectRatio}, 크기: ${slideSize.width}x${slideSize.height}`);
+
+    // jsPDF 인스턴스 생성 (aspectRatio에 맞게 조정)
     const pdf = new jsPDF({
-      orientation: 'landscape',
+      orientation,
       unit: 'px',
-      format: [1200, 675], // 16:9 비율
+      format: [slideSize.width, slideSize.height],
     });
 
     for (let i = 0; i < slides.length; i++) {
@@ -64,8 +72,8 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
 
       // 임시 div 생성하여 슬라이드 렌더링
       const tempDiv = document.createElement('div');
-      tempDiv.style.width = '1200px';
-      tempDiv.style.height = '675px';
+      tempDiv.style.width = `${slideSize.width}px`;
+      tempDiv.style.height = `${slideSize.height}px`;
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
       tempDiv.innerHTML = `
@@ -76,8 +84,8 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
 
       // HTML을 캔버스로 변환
       const canvas = await html2canvas(tempDiv, {
-        width: 1200,
-        height: 675,
+        width: slideSize.width,
+        height: slideSize.height,
         scale: 2, // 고해상도
         logging: false,
         useCORS: true,
@@ -90,10 +98,10 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
       const imgData = canvas.toDataURL('image/png');
 
       if (i > 0) {
-        pdf.addPage([1200, 675], 'landscape');
+        pdf.addPage([slideSize.width, slideSize.height], orientation);
       }
 
-      pdf.addImage(imgData, 'PNG', 0, 0, 1200, 675);
+      pdf.addImage(imgData, 'PNG', 0, 0, slideSize.width, slideSize.height);
     }
 
     // PDF 다운로드
@@ -114,7 +122,13 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
   try {
     console.log('📊 PPTX 다운로드 시작...');
 
-    const { title, slides } = presentation;
+    const { title, slides, slideData } = presentation;
+
+    // aspectRatio 가져오기 (기본값: 16:9)
+    const aspectRatio = slideData?.aspectRatio || '16:9';
+    const slideSize = calculateSlideSize(aspectRatio);
+
+    console.log(`📐 AspectRatio: ${aspectRatio}, 크기: ${slideSize.width}x${slideSize.height}`);
 
     // PptxGenJS 인스턴스 생성
     const pptx = new pptxgen();
@@ -125,8 +139,20 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
     pptx.title = title;
     pptx.subject = 'AI 생성 프리젠테이션';
 
-    // 슬라이드 크기 설정 (16:9 비율)
-    pptx.layout = 'LAYOUT_16x9';
+    // 슬라이드 크기 설정 (aspectRatio에 맞게)
+    if (aspectRatio === '16:9') {
+      pptx.layout = 'LAYOUT_16x9';
+    } else if (aspectRatio === '4:3') {
+      pptx.layout = 'LAYOUT_4x3';
+    } else if (aspectRatio === 'A4-portrait') {
+      // A4-portrait는 custom layout 정의 필요
+      pptx.defineLayout({
+        name: 'A4_PORTRAIT',
+        width: slideSize.width / 96, // px → inch 변환 (96 DPI 기준)
+        height: slideSize.height / 96,
+      });
+      pptx.layout = 'A4_PORTRAIT';
+    }
 
     for (let i = 0; i < slides.length; i++) {
       console.log(`📊 슬라이드 ${i + 1}/${slides.length} 생성 중...`);
@@ -136,8 +162,8 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
 
       // HTML을 캔버스로 변환
       const tempDiv = document.createElement('div');
-      tempDiv.style.width = '1200px';
-      tempDiv.style.height = '675px';
+      tempDiv.style.width = `${slideSize.width}px`;
+      tempDiv.style.height = `${slideSize.height}px`;
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
       tempDiv.innerHTML = `
@@ -147,8 +173,8 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
       document.body.appendChild(tempDiv);
 
       const canvas = await html2canvas(tempDiv, {
-        width: 1200,
-        height: 675,
+        width: slideSize.width,
+        height: slideSize.height,
         scale: 2,
         logging: false,
         useCORS: true,

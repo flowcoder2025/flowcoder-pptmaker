@@ -185,6 +185,23 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           };
           break;
 
+        case 'reportA4':
+        case 'reportTwoColumn':
+          // ReportA4Slide, ReportTwoColumnSlide: body.fontSize, bullets.fontSize, bullets.iconType 적용
+          updatedSlide.style = {
+            ...updatedSlide.style,
+            body: {
+              ...updatedSlide.style?.body,
+              fontSize: globalSettings.fontSize,
+            },
+            bullets: {
+              ...updatedSlide.style?.bullets,
+              fontSize: globalSettings.fontSize,
+              iconType: globalSettings.iconType,
+            },
+          };
+          break;
+
         // 다른 슬라이드 타입은 변경하지 않음
         default:
           break;

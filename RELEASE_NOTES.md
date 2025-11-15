@@ -89,6 +89,25 @@
 
 ### 🐛 Fixes
 
+#### 2025-11-15
+- **PDF/PPTX 다운로드 시 aspectRatio 자동 적용**
+  - 문제: 모든 슬라이드가 16:9 비율로 다운로드되어 원페이지(A4) 및 4:3 슬라이드가 잘림
+  - utils/download.ts 수정
+    - calculateSlideSize() 함수 import 및 활용
+    - presentation.slideData.aspectRatio 기반 동적 크기 계산
+    - PDF: orientation 자동 선택 (A4-portrait → portrait, 나머지 → landscape)
+    - PPTX: layout 자동 선택 (16:9 → LAYOUT_16x9, 4:3 → LAYOUT_4x3, A4-portrait → custom layout)
+  - 모든 hardcoded 1200x675 값을 동적 slideSize로 교체
+  - 16:9 (1200×675), 4:3 (1200×900), A4-portrait (1200×1697) 정확하게 출력
+
+- **원페이지 슬라이드 타입에 전역 설정 적용**
+  - 문제: reportA4, reportTwoColumn 슬라이드가 전역 폰트/불릿 설정 무시
+  - store/presentationStore.ts의 applyGlobalSettingsToAll() 함수 수정
+    - reportA4, reportTwoColumn 케이스 추가
+    - body.fontSize 적용
+    - bullets.fontSize 및 bullets.iconType 적용
+  - 이제 다른 슬라이드 타입과 동일하게 전역 설정 반영
+
 #### 2025-11-14
 - **ReportA4 슬라이드 타입의 A4 비율 출력 개선**
   - 문제: 16:9 슬라이드 안에 A4 비율 콘텐츠가 들어가 A4 출력 불가
