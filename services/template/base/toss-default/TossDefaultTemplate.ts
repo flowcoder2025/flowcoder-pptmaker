@@ -2859,7 +2859,7 @@ export class TossDefaultTemplate implements SlideTemplate {
           padding: 12px;
           background: ${this.ctx.colors.lightBg};
           border-radius: ${this.ctx.borderRadius.medium}px;
-          margin-bottom: ${this.ctx.spacing.gapSmall}px;
+          margin-bottom: 32px;
         ">
           ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
           <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -2888,7 +2888,7 @@ export class TossDefaultTemplate implements SlideTemplate {
 
     // 표 HTML (옵션)
     const tableHtml = table ? `
-      <div style="margin-bottom: ${this.ctx.spacing.gapSmall}px;">
+      <div style="margin-bottom: 32px;">
         ${table.title ? `<h5 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700;">${this.escapeHtml(table.title)}</h5>` : ''}
         <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
           <thead>

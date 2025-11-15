@@ -24,6 +24,13 @@
 ### ✨ Features
 
 #### 2025-11-15
+- **ReportA4 슬라이드 차트/표 간격 개선**
+  - TossDefaultTemplate.renderReportA4() 수정
+    - 차트(chart) margin-bottom: 12px → 32px
+    - 표(table) margin-bottom: 12px → 32px
+  - 차트와 표 사이 간격 안정적으로 확대
+  - 가독성 및 시각적 분리 향상
+
 - **ReportA4 슬라이드 imageCaption 렌더링 및 가독성 개선** (910ee19)
   - imageCaption 렌더링 추가
     - 이미지 그리드 아래에 이탤릭체 캡션 표시
