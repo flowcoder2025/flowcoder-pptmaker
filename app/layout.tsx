@@ -7,8 +7,20 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 export const metadata: Metadata = {
   title: "PPT Maker by FlowCoder",
   description: "AI 워크플로우 자동화 플랫폼 - 업무 생산성을 10배 향상시키는 혁신",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   verification: {
     google: process.env.NEXT_PUBLIC_SEARCH_CONSOLE_VERIFICATION,
+    other: {
+      'naver-site-verification': '6dcd04f12c9c8e879d5ac4bace964eb74f99548b',
+    },
   },
 };
 
