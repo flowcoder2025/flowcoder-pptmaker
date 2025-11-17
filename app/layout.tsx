@@ -5,8 +5,21 @@ import { logEnvironmentDiagnostics } from "@/utils/env-validator";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "PPT Maker by FlowCoder",
-  description: "AI 워크플로우 자동화 플랫폼 - 업무 생산성을 10배 향상시키는 혁신",
+  metadataBase: new URL('https://pptmaker.flowcoder.co.kr'),
+  title: {
+    default: "PPT Maker by FlowCoder - AI 프리젠테이션 생성",
+    template: "%s | PPT Maker by FlowCoder",
+  },
+  description: "AI 워크플로우 자동화 플랫폼 - 업무 생산성을 10배 향상시키는 혁신. 텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.",
+  keywords: ["AI", "프리젠테이션", "PPT", "자동화", "워크플로우", "생산성", "FlowCoder"],
+  authors: [{ name: "FlowCoder" }],
+  creator: "FlowCoder",
+  publisher: "FlowCoder",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
@@ -15,6 +28,39 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://pptmaker.flowcoder.co.kr',
+    title: "PPT Maker by FlowCoder - AI 프리젠테이션 생성",
+    description: "텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다. 업무 생산성을 10배 향상시키는 혁신적인 플랫폼.",
+    siteName: "PPT Maker by FlowCoder",
+    images: [
+      {
+        url: '/icon.png',
+        width: 192,
+        height: 192,
+        alt: 'PPT Maker Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "PPT Maker by FlowCoder - AI 프리젠테이션 생성",
+    description: "텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.",
+    images: ['/icon.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   verification: {
     google: process.env.NEXT_PUBLIC_SEARCH_CONSOLE_VERIFICATION,
@@ -36,8 +82,34 @@ export default function RootLayout({
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'PPT Maker by FlowCoder',
+    description: 'AI 워크플로우 자동화 플랫폼 - 텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.',
+    url: 'https://pptmaker.flowcoder.co.kr',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    creator: {
+      '@type': 'Organization',
+      name: 'FlowCoder',
+      url: 'https://flowcoder.co.kr',
+    },
+  };
+
   return (
     <html lang="ko">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="antialiased">
         <LayoutWrapper>{children}</LayoutWrapper>
 
