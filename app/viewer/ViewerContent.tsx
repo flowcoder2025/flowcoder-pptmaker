@@ -592,18 +592,26 @@ export default function ViewerContent() {
                     position: 'relative',
                   }}
                 >
-                  <iframe
-                    srcDoc={createSlideDocument(slide.html, slide.css)}
+                  {/* 중간 wrapper: scale 적용 (history 페이지 패턴) */}
+                  <div
                     style={{
-                      width: `${slideSize.width}px`,
-                      height: `${slideSize.height}px`,
-                      border: 'none',
-                      display: 'block',
+                      position: 'absolute',
+                      inset: 0,
                       transform: `scale(${scale})`,
                       transformOrigin: 'top left',
                     }}
-                    title={`슬라이드 ${index + 1}`}
-                  />
+                  >
+                    <iframe
+                      srcDoc={createSlideDocument(slide.html, slide.css)}
+                      style={{
+                        width: `${slideSize.width}px`,
+                        height: `${slideSize.height}px`,
+                        border: 'none',
+                        display: 'block',
+                      }}
+                      title={`슬라이드 ${index + 1}`}
+                    />
+                  </div>
                 </div>
               );
             })}
@@ -627,17 +635,18 @@ export default function ViewerContent() {
             style={{
               width: `${slideSize.width * desktopScale}px`,
               aspectRatio: cssAspectRatio,  // ← 핵심! 비율 강제, height 자동 계산
+              background: '#FFFFFF',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
               position: 'relative',
             }}
           >
+            {/* 중간 wrapper: scale 적용 (history 페이지 패턴) */}
             <div
               style={{
-                width: `${slideSize.width}px`,
-                height: `${slideSize.height}px`,
-                background: '#FFFFFF',
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                overflow: 'hidden',
+                position: 'absolute',
+                inset: 0,
                 transform: `scale(${desktopScale})`,
                 transformOrigin: 'top left',
               }}
@@ -645,8 +654,8 @@ export default function ViewerContent() {
               <iframe
                 srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  width: `${slideSize.width}px`,
+                  height: `${slideSize.height}px`,
                   border: 'none',
                   display: 'block',
                 }}
