@@ -86,7 +86,7 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
       const canvas = await html2canvas(tempDiv, {
         width: slideSize.width,
         height: slideSize.height,
-        scale: 2, // 고해상도
+        scale: 1.5, // 고해상도 (2 → 1.5로 최적화: 용량 44% 감소)
         logging: false,
         useCORS: true,
       });
@@ -94,14 +94,14 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
       // 임시 div 제거
       document.body.removeChild(tempDiv);
 
-      // 캔버스를 이미지로 변환하여 PDF에 추가
-      const imgData = canvas.toDataURL('image/png');
+      // 캔버스를 이미지로 변환하여 PDF에 추가 (JPEG 0.85 품질: 용량 80-90% 감소)
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
 
       if (i > 0) {
         pdf.addPage([slideSize.width, slideSize.height], orientation);
       }
 
-      pdf.addImage(imgData, 'PNG', 0, 0, slideSize.width, slideSize.height);
+      pdf.addImage(imgData, 'JPEG', 0, 0, slideSize.width, slideSize.height);
     }
 
     // PDF 다운로드
@@ -175,15 +175,15 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
       const canvas = await html2canvas(tempDiv, {
         width: slideSize.width,
         height: slideSize.height,
-        scale: 2,
+        scale: 1.5, // 고해상도 (2 → 1.5로 최적화: 용량 44% 감소)
         logging: false,
         useCORS: true,
       });
 
       document.body.removeChild(tempDiv);
 
-      // 캔버스를 이미지로 변환하여 슬라이드에 추가
-      const imgData = canvas.toDataURL('image/png');
+      // 캔버스를 이미지로 변환하여 슬라이드에 추가 (JPEG 0.85 품질: 용량 80-90% 감소)
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
 
       pptxSlide.addImage({
         data: imgData,
