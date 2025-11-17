@@ -90,8 +90,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   useProHtmlModel: true, // 기본값: Pro (고품질 HTML) - A/B 테스트 후 변경 고려
   targetSlideCount: 20, // 기본값: 20장 (10-40 범위)
   globalSettings: {
-    fontSize: 18, // 기본값: 18px
-    iconType: 'arrow', // 기본값: 화살표
+    slideTitleSize: 32, // 기본값: 32px (H3 태그 - 슬라이드 제목)
+    bodyTitleSize: 24,  // 기본값: 24px (H4 태그 - 본문 제목)
+    fontSize: 18,       // 기본값: 18px (p, li 태그 - 본문 텍스트)
+    iconType: 'arrow',  // 기본값: 화살표
   },
 
   setCurrentPresentation: (presentation) => set({ currentPresentation: presentation }),
@@ -128,7 +130,22 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     const updatedSlides = currentPresentation.slideData.slides.map((slide) => {
       const updatedSlide = { ...slide };
 
-      // 슬라이드 타입별로 fontSize 적용
+      // 모든 슬라이드에 공통 적용 (title, section 제외)
+      if (slide.type !== 'title' && slide.type !== 'section') {
+        updatedSlide.style = {
+          ...updatedSlide.style,
+          slideTitle: {
+            ...updatedSlide.style?.slideTitle,
+            fontSize: globalSettings.slideTitleSize,
+          },
+          bodyTitle: {
+            ...updatedSlide.style?.bodyTitle,
+            fontSize: globalSettings.bodyTitleSize,
+          },
+        };
+      }
+
+      // 슬라이드 타입별로 추가 설정 적용
       switch (slide.type) {
         case 'content':
           // ContentSlide: body.fontSize 적용
@@ -202,7 +219,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           };
           break;
 
-        // 다른 슬라이드 타입은 변경하지 않음
+        // title, section 슬라이드는 변경하지 않음
+        // 다른 슬라이드 타입도 slideTitle, bodyTitle만 적용됨 (위에서)
         default:
           break;
       }

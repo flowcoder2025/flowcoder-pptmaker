@@ -51,6 +51,16 @@ export interface SlideStyle {
     fontSize?: number;
     align?: 'left' | 'center' | 'right';
   };
+  slideTitle?: {
+    fontSize?: number;
+    color?: string;
+    fontFamily?: string;
+  };
+  bodyTitle?: {
+    fontSize?: number;
+    color?: string;
+    fontFamily?: string;
+  };
   body?: {
     color?: string;
     fontSize?: number;
@@ -424,7 +434,7 @@ export interface ReportTwoColumnSlide extends BaseSlide {
     imageCaption?: string;
     // 옵션: 차트 또는 표 추가 가능
     chart?: {
-      type: 'bar' | 'line' | 'pie';
+      type: 'bar' | 'line' | 'pie' | 'area';
       data: Array<{ label: string; value: number }>;
       title?: string;
     };
@@ -452,7 +462,7 @@ export interface ReportA4Slide extends BaseSlide {
     }>;
     // 옵션: 차트 또는 표 추가 가능
     chart?: {
-      type: 'bar' | 'line' | 'pie';
+      type: 'bar' | 'line' | 'pie' | 'area';
       data: Array<{ label: string; value: number }>;
       title?: string;
     };
@@ -532,7 +542,11 @@ export interface Presentation {
  * 모든 슬라이드에 일괄 적용할 수 있는 공통 스타일 설정
  */
 export interface GlobalSlideSettings {
-  /** 본문 텍스트 크기 (12-32px, 기본값: 18) */
+  /** 슬라이드 제목 크기 (20-48px, 기본값: 32) - H3 태그에 적용 */
+  slideTitleSize: number;
+  /** 본문 제목 크기 (16-32px, 기본값: 24) - H4 태그에 적용 */
+  bodyTitleSize: number;
+  /** 본문 텍스트 크기 (12-32px, 기본값: 18) - p 태그, li 태그에 적용 */
   fontSize: number;
   /** 불릿 아이콘 타입 (기본값: 'arrow') */
   iconType: 'arrow' | 'dot' | 'check';

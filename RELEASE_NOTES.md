@@ -21,6 +21,27 @@
 
 ## [Unreleased]
 
+### 🐛 Fixes
+
+#### 2025-11-17
+- **Open Graph 이미지 SNS 공유 문제 수정** (20ed592)
+  - app/layout.tsx 메타데이터 수정
+    - 오픈그래프 이미지 경로를 절대 URL로 변경 (`/og-image.png` → `https://pptmaker.flowcoder.co.kr/og-image.png`)
+    - 이미지 타입 명시 추가 (`type: 'image/png'`)
+    - Twitter Card 이미지 경로도 절대 URL로 변경
+  - SNS 크롤러 호환성 개선
+    - Threads, Facebook, Twitter 등에서 이미지 제대로 표시
+    - 상대 경로 처리 문제 해결
+  - 테스트 페이지 추가 (/test-og)
+    - 오픈그래프 이미지 직접 확인
+    - SNS 캐시 클리어 가이드 제공
+
+- **imageText 슬라이드 타입 누락 문제 수정** (b80880e)
+  - utils/slideDefaults.ts에 imageText 케이스 추가
+  - imageText 타입 정의에 맞게 props 수정 (image, bullets)
+  - 에디터에서 '이미지+텍스트' 슬라이드 추가 시 올바른 타입 생성
+  - "이미지+텍스트" 선택 시 "본문 슬라이드"가 추가되던 버그 해결
+
 ### 🔧 Technical
 
 #### 2025-11-17

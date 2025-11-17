@@ -8,7 +8,7 @@ import { MetadataRoute } from 'next';
  * https://your-domain.com/sitemap.xml
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://pptmaker.flowcoder.co.kr';
 
   return [
     {

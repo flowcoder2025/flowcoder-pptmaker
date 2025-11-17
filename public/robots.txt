@@ -1,0 +1,22 @@
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Naver
+User-agent: Yeti
+Allow: /
+
+# Daum
+User-agent: Daumoa
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+
+# All other bots
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://pptmaker.flowcoder.co.kr/sitemap.xml
