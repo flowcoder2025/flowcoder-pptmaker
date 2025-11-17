@@ -304,7 +304,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: 700;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -320,7 +320,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     <div style="
       width: 100%;
       color: var(--color-text-primary);
-      font-size: ${slide.style.body?.fontSize || this.ctx.fonts.size.body}px;
+      font-size: ${slide.style?.body?.fontSize || this.ctx.fonts.size.body}px;
       font-family: var(--font-family-base);
       line-height: 1.6;
     ">${this.escapeHtml(bodyText)}</div>
@@ -391,7 +391,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -406,7 +406,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       margin: 0;
       width: 100%;
       font-family: var(--font-family-base);
-      font-size: ${this.ctx.fonts.size.body}px;
+      font-size: ${slide.style?.bullets?.fontSize || this.ctx.fonts.size.body}px;
       line-height: 1.5;
     ">
       ${bulletItems}
@@ -498,7 +498,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -523,7 +523,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     ">
       <h4 style="
         color: var(--color-text-primary);
-        font-size: ${this.ctx.fonts.size.subtitle}px;
+        font-size: ${slide.style?.bodyTitle?.fontSize || 24}px;
         font-family: var(--font-family-base);
         font-weight: 700;
         margin: 0 0 20px 0;
@@ -551,7 +551,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     ">
       <h4 style="
         color: var(--color-text-primary);
-        font-size: ${this.ctx.fonts.size.subtitle}px;
+        font-size: ${slide.style?.bodyTitle?.fontSize || 24}px;
         font-family: var(--font-family-base);
         font-weight: 700;
         margin: 0 0 20px 0;
@@ -655,14 +655,14 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
     ">${this.escapeHtml(title)}</h3>
   </div>
   <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-    <p style="color: var(--color-text-secondary); font-size: 18px;">차트 데이터가 없어요</p>
+    <p style="color: var(--color-text-secondary); font-size: ${slide.style?.body?.fontSize || this.ctx.fonts.size.body}px;">차트 데이터가 없어요</p>
   </div>
 </div>
       `.trim();
@@ -1015,7 +1015,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -1103,7 +1103,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -1116,7 +1116,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       width: 100%;
       border-collapse: collapse;
       font-family: var(--font-family-base);
-      font-size: 16px;
+      font-size: ${slide.style?.body?.fontSize || this.ctx.fonts.size.body}px;
     ">
       <thead style="background-color: ${this.ctx.colors.bg};">
         <tr>
@@ -1194,7 +1194,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: 700;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -1356,7 +1356,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -1380,7 +1380,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       ${leftLabel ? `
       <h4 style="
         color: var(--color-text-primary);
-        font-size: ${this.ctx.fonts.size.subtitle}px;
+        font-size: ${slide.style?.bodyTitle?.fontSize || 24}px;
         font-family: var(--font-family-base);
         font-weight: bold;
         margin: 0 0 20px 0;
@@ -1445,7 +1445,7 @@ export class TossDefaultTemplate implements SlideTemplate {
       ${rightLabel ? `
       <h4 style="
         color: var(--color-text-primary);
-        font-size: ${this.ctx.fonts.size.subtitle}px;
+        font-size: ${slide.style?.bodyTitle?.fontSize || 24}px;
         font-family: var(--font-family-base);
         font-weight: bold;
         margin: 0 0 20px 0;
@@ -1596,7 +1596,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: var(--color-text-primary);
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-family: var(--font-family-base);
       font-weight: bold;
       margin: 0 0 ${this.ctx.spacing.gapSmall}px 0;
@@ -2484,6 +2484,14 @@ export class TossDefaultTemplate implements SlideTemplate {
     const { title, sections, imageCaption, chart, table } = slide.props;
     const images = imagesArray;
 
+    // 전역 설정(#0) 지원: style 객체에서 fontSize와 iconType 읽기
+    const bodyFontSize = (slide.style?.body as any)?.fontSize || 15;
+    const bulletsFontSize = (slide.style?.bullets as any)?.fontSize || 15;
+    const bulletsIconType = (slide.style?.bullets as any)?.iconType || 'arrow';
+
+    // iconType에 따른 아이콘 선택
+    const bulletIcon = bulletsIconType === 'dot' ? '•' : bulletsIconType === 'check' ? '✓' : '→';
+
     // sections 배열을 HTML로 변환
     const sectionsHtml = (sections || [])
       .map((section, index) => {
@@ -2501,19 +2509,19 @@ export class TossDefaultTemplate implements SlideTemplate {
           `;
         }
 
-        // Body
+        // Body - 전역 설정 fontSize 적용
         if (section.body) {
           html += `
             <div style="
-              font-size: 15px;
+              font-size: ${bodyFontSize}px;
               color: ${this.ctx.colors.textSecondary};
               line-height: 1.6;
               margin-bottom: 14px;
-            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 14px 0;">')}</div>
+            ">${this.escapeHtml(section.body).replace(/\n/g, `</p><p style="margin: 0 0 14px 0; font-size: ${bodyFontSize}px;">`)}</div>
           `;
         }
 
-        // Bullets
+        // Bullets - 전역 설정 fontSize와 iconType 적용
         if (section.bullets && section.bullets.length > 0) {
           const bulletsHtml = section.bullets
             .map(
@@ -2528,8 +2536,8 @@ export class TossDefaultTemplate implements SlideTemplate {
                     margin-right: 10px;
                     font-size: ${this.ctx.spacing.iconSize}px;
                     line-height: 1.4;
-                  ">→</span>
-                  <span>${this.escapeHtml(bullet)}</span>
+                  ">${bulletIcon}</span>
+                  <span style="font-size: ${bulletsFontSize}px;">${this.escapeHtml(bullet)}</span>
                 </li>
               `
             )
@@ -2540,7 +2548,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               list-style: none;
               padding: 0;
               margin: 0;
-              font-size: 15px;
+              font-size: ${bulletsFontSize}px;
               color: ${this.ctx.colors.textSecondary};
               line-height: 1.4;
             ">
@@ -2594,38 +2602,138 @@ export class TossDefaultTemplate implements SlideTemplate {
       if (validData.length === 0) return '';
 
       const maxValue = Math.max(...validData.map(d => d.value));
+      const minValue = Math.min(...validData.map(d => d.value));
       const chartType = chart.type || 'bar';
 
-      return `
-        <div style="
-          padding: 14px;
-          background: ${this.ctx.colors.lightBg};
-          border-radius: ${this.ctx.borderRadius.medium}px;
-          margin-bottom: 20px;
-        ">
-          ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
-          <div style="display: flex; flex-direction: column; gap: 7px;">
-            ${validData.map(item => `
-              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
-                <span style="min-width: 65px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
-                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 22px; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                  <div style="
-                    width: ${(item.value / maxValue) * 100}%;
-                    height: 100%;
-                    background: ${this.ctx.colors.primary};
-                    display: flex;
-                    align-items: center;
-                    padding-left: 6px;
-                    transition: width 0.3s ease;
-                  ">
-                    <span style="color: white; font-size: 12px; font-weight: 600;">${item.value}</span>
+      // 차트 타입별 렌더링 분기
+      if (chartType === 'line' || chartType === 'area') {
+        // Line/Area Chart (간단한 SVG polyline)
+        const svgWidth = 300;
+        const svgHeight = 120;
+        const padding = 30;
+        const chartWidth = svgWidth - padding * 2;
+        const chartHeight = svgHeight - padding * 2;
+
+        const points = validData.map((item, index) => {
+          const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+          const y = padding + chartHeight - ((item.value - minValue) / (maxValue - minValue || 1)) * chartHeight;
+          return `${x},${y}`;
+        }).join(' ');
+
+        return `
+          <div style="
+            padding: 14px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 20px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <svg width="100%" height="120" viewBox="0 0 ${svgWidth} ${svgHeight}">
+              <!-- 그리드 라인 -->
+              ${[0, 0.5, 1].map(ratio => `
+                <line x1="${padding}" y1="${padding + chartHeight * ratio}" x2="${svgWidth - padding}" y2="${padding + chartHeight * ratio}"
+                      stroke="${this.ctx.colors.border}" stroke-width="1" opacity="0.3"/>
+              `).join('')}
+
+              ${chartType === 'area' ? `
+                <!-- Area fill -->
+                <polygon points="${points} ${svgWidth - padding},${svgHeight - padding} ${padding},${svgHeight - padding}"
+                         fill="${this.ctx.colors.primary}" opacity="0.2"/>
+              ` : ''}
+
+              <!-- Line -->
+              <polyline points="${points}" fill="none" stroke="${this.ctx.colors.primary}" stroke-width="2"/>
+
+              <!-- Points -->
+              ${validData.map((item, index) => {
+                const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+                const y = padding + chartHeight - ((item.value - minValue) / (maxValue - minValue || 1)) * chartHeight;
+                return `<circle cx="${x}" cy="${y}" r="3" fill="${this.ctx.colors.primary}"/>`;
+              }).join('')}
+
+              <!-- X축 라벨 -->
+              ${validData.map((item, index) => {
+                const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+                return `<text x="${x}" y="${svgHeight - 5}" text-anchor="middle" fill="${this.ctx.colors.textSecondary}" font-size="10">${this.escapeHtml(item.label)}</text>`;
+              }).join('')}
+            </svg>
+          </div>
+        `;
+      } else if (chartType === 'pie') {
+        // Pie Chart (vertical bar alternative for compact space)
+        return `
+          <div style="
+            padding: 14px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 20px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <div style="display: flex; gap: 8px; align-items: flex-end; height: 100px;">
+              ${validData.map((item, index) => {
+                const colors = ['#3182F6', '#00C896', '#F59E0B', '#EF4444', '#8B5CF6'];
+                const color = colors[index % colors.length];
+                const height = (item.value / maxValue) * 100;
+                return `
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <div style="
+                      width: 100%;
+                      height: ${height}px;
+                      background: ${color};
+                      border-radius: 4px 4px 0 0;
+                      position: relative;
+                    ">
+                      <span style="
+                        position: absolute;
+                        top: -20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: ${this.ctx.colors.text};
+                        white-space: nowrap;
+                      ">${item.value}</span>
+                    </div>
+                    <span style="font-size: 10px; color: ${this.ctx.colors.textSecondary}; text-align: center;">${this.escapeHtml(item.label)}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        // Bar Chart (default - 현재 코드 유지)
+        return `
+          <div style="
+            padding: 14px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 20px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              ${validData.map(item => `
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                  <span style="min-width: 65px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
+                  <div style="flex: 1; background: ${this.ctx.colors.white}; height: 22px; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <div style="
+                      width: ${(item.value / maxValue) * 100}%;
+                      height: 100%;
+                      background: ${this.ctx.colors.primary};
+                      display: flex;
+                      align-items: center;
+                      padding-left: 6px;
+                      transition: width 0.3s ease;
+                    ">
+                      <span style="color: white; font-size: 12px; font-weight: 600;">${item.value}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     })() : '';
 
     // 표 HTML (옵션)
@@ -2670,7 +2778,7 @@ export class TossDefaultTemplate implements SlideTemplate {
     "></div>
     <h3 style="
       color: ${this.ctx.colors.text};
-      font-size: ${this.ctx.fonts.size.heading}px;
+      font-size: ${slide.style?.slideTitle?.fontSize || this.ctx.fonts.size.heading}px;
       font-weight: 700;
       margin: 0;
     ">${this.escapeHtml(title)}</h3>
@@ -2740,6 +2848,14 @@ export class TossDefaultTemplate implements SlideTemplate {
     // A4-portrait 비율 확인 (height/width ≈ 1.414, 여유를 두어 1.3 이상)
     const isA4Portrait = height / width > 1.3;
 
+    // 전역 설정(#0) 지원: style 객체에서 fontSize와 iconType 읽기
+    const bodyFontSize = (slide.style?.body as any)?.fontSize || 14;
+    const bulletsFontSize = (slide.style?.bullets as any)?.fontSize || 14;
+    const bulletsIconType = (slide.style?.bullets as any)?.iconType || 'dot';
+
+    // iconType에 따른 아이콘 선택
+    const bulletIcon = bulletsIconType === 'arrow' ? '→' : bulletsIconType === 'check' ? '✓' : '•';
+
     // sections 배열을 HTML로 변환 (공통)
     const sectionsHtml = (sections || [])
       .map((section, index) => {
@@ -2748,28 +2864,28 @@ export class TossDefaultTemplate implements SlideTemplate {
         // Subtitle
         if (section.subtitle) {
           html += `
-            <h3 style="
-              font-size: 16px;
+            <h4 style="
+              font-size: ${slide.style?.bodyTitle?.fontSize || 24}px;
               font-weight: 700;
               color: ${this.ctx.colors.text};
               margin: ${index > 0 ? '24px' : this.ctx.spacing.gapSmall + 'px'} 0 ${this.ctx.spacing.gapSmall}px 0;
-            ">${this.escapeHtml(section.subtitle)}</h3>
+            ">${this.escapeHtml(section.subtitle)}</h4>
           `;
         }
 
-        // Body
+        // Body - 전역 설정 fontSize 적용
         if (section.body) {
           html += `
             <div style="
-              font-size: 14px;
+              font-size: ${bodyFontSize}px;
               color: ${this.ctx.colors.text};
               line-height: 1.6;
               margin-bottom: 16px;
-            ">${this.escapeHtml(section.body).replace(/\n/g, '</p><p style="margin: 0 0 16px 0;">')}</div>
+            ">${this.escapeHtml(section.body).replace(/\n/g, `</p><p style="margin: 0 0 16px 0; font-size: ${bodyFontSize}px;">`)}</div>
           `;
         }
 
-        // Bullets
+        // Bullets - 전역 설정 fontSize와 iconType 적용
         if (section.bullets && section.bullets.length > 0) {
           const bulletsHtml = section.bullets
             .map(
@@ -2784,8 +2900,8 @@ export class TossDefaultTemplate implements SlideTemplate {
                     margin-right: 10px;
                     font-size: 16px;
                     line-height: 1.4;
-                  ">•</span>
-                  <span>${this.escapeHtml(bullet)}</span>
+                  ">${bulletIcon}</span>
+                  <span style="font-size: ${bulletsFontSize}px;">${this.escapeHtml(bullet)}</span>
                 </li>
               `
             )
@@ -2796,7 +2912,7 @@ export class TossDefaultTemplate implements SlideTemplate {
               list-style: none;
               padding: 0;
               margin: 0 0 16px 0;
-              font-size: 14px;
+              font-size: ${bulletsFontSize}px;
               color: ${this.ctx.colors.textSecondary};
               line-height: 1.6;
             ">
@@ -2852,38 +2968,138 @@ export class TossDefaultTemplate implements SlideTemplate {
       if (validData.length === 0) return '';
 
       const maxValue = Math.max(...validData.map(d => d.value));
+      const minValue = Math.min(...validData.map(d => d.value));
       const chartType = chart.type || 'bar';
 
-      return `
-        <div style="
-          padding: 12px;
-          background: ${this.ctx.colors.lightBg};
-          border-radius: ${this.ctx.borderRadius.medium}px;
-          margin-bottom: 32px;
-        ">
-          ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
-          <div style="display: flex; flex-direction: column; gap: 5px;">
-            ${validData.map(item => `
-              <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
-                <span style="min-width: 55px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
-                <div style="flex: 1; background: ${this.ctx.colors.white}; height: 18px; border-radius: 3px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                  <div style="
-                    width: ${(item.value / maxValue) * 100}%;
-                    height: 100%;
-                    background: ${this.ctx.colors.primary};
-                    display: flex;
-                    align-items: center;
-                    padding-left: 4px;
-                    transition: width 0.3s ease;
-                  ">
-                    <span style="color: white; font-size: 10px; font-weight: 600;">${item.value}</span>
+      // 차트 타입별 렌더링 분기
+      if (chartType === 'line' || chartType === 'area') {
+        // Line/Area Chart (간단한 SVG polyline)
+        const svgWidth = 280;
+        const svgHeight = 110;
+        const padding = 25;
+        const chartWidth = svgWidth - padding * 2;
+        const chartHeight = svgHeight - padding * 2;
+
+        const points = validData.map((item, index) => {
+          const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+          const y = padding + chartHeight - ((item.value - minValue) / (maxValue - minValue || 1)) * chartHeight;
+          return `${x},${y}`;
+        }).join(' ');
+
+        return `
+          <div style="
+            padding: 12px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 32px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <svg width="100%" height="110" viewBox="0 0 ${svgWidth} ${svgHeight}">
+              <!-- 그리드 라인 -->
+              ${[0, 0.5, 1].map(ratio => `
+                <line x1="${padding}" y1="${padding + chartHeight * ratio}" x2="${svgWidth - padding}" y2="${padding + chartHeight * ratio}"
+                      stroke="${this.ctx.colors.border}" stroke-width="1" opacity="0.3"/>
+              `).join('')}
+
+              ${chartType === 'area' ? `
+                <!-- Area fill -->
+                <polygon points="${points} ${svgWidth - padding},${svgHeight - padding} ${padding},${svgHeight - padding}"
+                         fill="${this.ctx.colors.primary}" opacity="0.2"/>
+              ` : ''}
+
+              <!-- Line -->
+              <polyline points="${points}" fill="none" stroke="${this.ctx.colors.primary}" stroke-width="2"/>
+
+              <!-- Points -->
+              ${validData.map((item, index) => {
+                const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+                const y = padding + chartHeight - ((item.value - minValue) / (maxValue - minValue || 1)) * chartHeight;
+                return `<circle cx="${x}" cy="${y}" r="2.5" fill="${this.ctx.colors.primary}"/>`;
+              }).join('')}
+
+              <!-- X축 라벨 -->
+              ${validData.map((item, index) => {
+                const x = padding + (index / Math.max(1, validData.length - 1)) * chartWidth;
+                return `<text x="${x}" y="${svgHeight - 3}" text-anchor="middle" fill="${this.ctx.colors.textSecondary}" font-size="9">${this.escapeHtml(item.label)}</text>`;
+              }).join('')}
+            </svg>
+          </div>
+        `;
+      } else if (chartType === 'pie') {
+        // Pie Chart (vertical bar alternative for compact space)
+        return `
+          <div style="
+            padding: 12px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 32px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <div style="display: flex; gap: 6px; align-items: flex-end; height: 90px;">
+              ${validData.map((item, index) => {
+                const colors = ['#3182F6', '#00C896', '#F59E0B', '#EF4444', '#8B5CF6'];
+                const color = colors[index % colors.length];
+                const height = (item.value / maxValue) * 90;
+                return `
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;">
+                    <div style="
+                      width: 100%;
+                      height: ${height}px;
+                      background: ${color};
+                      border-radius: 3px 3px 0 0;
+                      position: relative;
+                    ">
+                      <span style="
+                        position: absolute;
+                        top: -18px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-size: 10px;
+                        font-weight: 600;
+                        color: ${this.ctx.colors.text};
+                        white-space: nowrap;
+                      ">${item.value}</span>
+                    </div>
+                    <span style="font-size: 9px; color: ${this.ctx.colors.textSecondary}; text-align: center;">${this.escapeHtml(item.label)}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        // Bar Chart (default - 현재 코드 유지)
+        return `
+          <div style="
+            padding: 12px;
+            background: ${this.ctx.colors.lightBg};
+            border-radius: ${this.ctx.borderRadius.medium}px;
+            margin-bottom: 32px;
+          ">
+            ${chart.title ? `<h5 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: ${this.ctx.colors.text};">${this.escapeHtml(chart.title)}</h5>` : ''}
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              ${validData.map(item => `
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+                  <span style="min-width: 55px; color: ${this.ctx.colors.textSecondary}; font-weight: 500;">${this.escapeHtml(item.label)}</span>
+                  <div style="flex: 1; background: ${this.ctx.colors.white}; height: 18px; border-radius: 3px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <div style="
+                      width: ${(item.value / maxValue) * 100}%;
+                      height: 100%;
+                      background: ${this.ctx.colors.primary};
+                      display: flex;
+                      align-items: center;
+                      padding-left: 4px;
+                      transition: width 0.3s ease;
+                    ">
+                      <span style="color: white; font-size: 10px; font-weight: 600;">${item.value}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     })() : '';
 
     // 표 HTML (옵션)

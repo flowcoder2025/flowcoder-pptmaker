@@ -19,6 +19,14 @@ export default function GlobalSettingsPanel() {
     currentPresentation,
   } = usePresentationStore();
 
+  const handleSlideTitleSizeChange = (slideTitleSize: number) => {
+    setGlobalSettings({ slideTitleSize });
+  };
+
+  const handleBodyTitleSizeChange = (bodyTitleSize: number) => {
+    setGlobalSettings({ bodyTitleSize });
+  };
+
   const handleFontSizeChange = (fontSize: number) => {
     setGlobalSettings({ fontSize });
   };
@@ -51,12 +59,34 @@ export default function GlobalSettingsPanel() {
       </p>
 
       <div className="space-y-4">
-        {/* 텍스트 크기 */}
+        {/* 슬라이드 제목 크기 (H3 태그) */}
+        <FontSizeSlider
+          value={globalSettings.slideTitleSize}
+          onChange={handleSlideTitleSizeChange}
+          label="슬라이드 제목"
+          defaultValue={32}
+          min={20}
+          max={48}
+        />
+
+        {/* 본문 제목 크기 (H4 태그) */}
+        <FontSizeSlider
+          value={globalSettings.bodyTitleSize}
+          onChange={handleBodyTitleSizeChange}
+          label="본문 제목"
+          defaultValue={24}
+          min={16}
+          max={32}
+        />
+
+        {/* 텍스트 크기 (p, li 태그) */}
         <FontSizeSlider
           value={globalSettings.fontSize}
           onChange={handleFontSizeChange}
-          label="텍스트 크기"
+          label="본문 텍스트"
           defaultValue={18}
+          min={12}
+          max={32}
         />
 
         {/* 불릿 아이콘 */}
