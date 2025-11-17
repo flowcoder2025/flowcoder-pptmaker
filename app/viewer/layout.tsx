@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: '생성된 프리젠테이션을 확인하고 편집하세요. PDF, PPTX 다운로드 가능합니다.',
     url: 'https://pptmaker.flowcoder.co.kr/viewer',
     siteName: 'PPT Maker by FlowCoder',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '슬라이드 뷰어 - PPT Maker',
     description: '생성된 프리젠테이션을 확인하고 편집하세요. PDF, PPTX 다운로드 가능합니다.',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
   },
 };
 

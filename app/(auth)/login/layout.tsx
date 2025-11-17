@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: 'PPT Maker 서비스를 이용하려면 로그인하세요.',
     url: 'https://pptmaker.flowcoder.co.kr/login',
     siteName: 'PPT Maker by FlowCoder',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
     locale: 'ko_KR',
     type: 'website',
   },

@@ -38,10 +38,10 @@ export const metadata: Metadata = {
     siteName: "PPT Maker by FlowCoder",
     images: [
       {
-        url: '/icon.png',
-        width: 192,
-        height: 192,
-        alt: 'PPT Maker Logo',
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'PPT Maker - AI 프리젠테이션 자동 생성',
       },
     ],
   },
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "PPT Maker by FlowCoder - AI 프리젠테이션 생성",
     description: "텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.",
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,

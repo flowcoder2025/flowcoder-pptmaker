@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: 'PPT Maker에 가입하고 AI 기반 프리젠테이션 자동 생성 서비스를 이용하세요.',
     url: 'https://pptmaker.flowcoder.co.kr/signup',
     siteName: 'PPT Maker by FlowCoder',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
     locale: 'ko_KR',
     type: 'website',
   },

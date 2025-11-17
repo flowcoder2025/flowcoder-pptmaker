@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: 'AI 기반 프리젠테이션 생성을 시작하세요. 주제만 입력하면 자동으로 슬라이드를 만들어 드립니다.',
     url: 'https://pptmaker.flowcoder.co.kr/input',
     siteName: 'PPT Maker by FlowCoder',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '프리젠테이션 생성하기 - PPT Maker',
     description: 'AI 기반 프리젠테이션 생성을 시작하세요. 주제만 입력하면 자동으로 슬라이드를 만들어 드립니다.',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
   },
 };
 
