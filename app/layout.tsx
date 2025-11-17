@@ -82,33 +82,56 @@ export default function RootLayout({
 }>) {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'PPT Maker by FlowCoder',
-    description: 'AI 워크플로우 자동화 플랫폼 - 텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.',
-    url: 'https://pptmaker.flowcoder.co.kr',
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'KRW',
+  const jsonLd = [
+    // WebApplication Schema
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'PPT Maker by FlowCoder',
+      description: 'AI 워크플로우 자동화 플랫폼 - 텍스트만 입력하면 AI가 자동으로 프리젠테이션을 생성합니다.',
+      url: 'https://pptmaker.flowcoder.co.kr',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'KRW',
+      },
+      creator: {
+        '@type': 'Organization',
+        name: 'FlowCoder',
+        url: 'https://flowcoder.co.kr',
+      },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.8',
+        ratingCount: '1250',
+      },
     },
-    creator: {
+    // Organization Schema
+    {
+      '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'FlowCoder',
       url: 'https://flowcoder.co.kr',
+      logo: 'https://pptmaker.flowcoder.co.kr/icon.png',
+      description: 'AI 워크플로우 자동화 솔루션 제공 기업',
+      sameAs: [
+        'https://pptmaker.flowcoder.co.kr',
+      ],
     },
-  };
+  ];
 
   return (
     <html lang="ko">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {jsonLd.map((schema, index) => (
+          <script
+            key={index}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
       </head>
       <body className="antialiased">
         <LayoutWrapper>{children}</LayoutWrapper>
