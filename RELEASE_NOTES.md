@@ -21,6 +21,15 @@
 
 ## [Unreleased]
 
+### 🐛 Fixes
+
+#### 2025-11-17
+- **imageText 슬라이드 타입 누락 문제 수정** (b80880e)
+  - utils/slideDefaults.ts에 imageText 케이스 추가
+  - imageText 타입 정의에 맞게 props 수정 (image, bullets)
+  - 에디터에서 '이미지+텍스트' 슬라이드 추가 시 올바른 타입 생성
+  - "이미지+텍스트" 선택 시 "본문 슬라이드"가 추가되던 버그 해결
+
 ### 🔧 Technical
 
 #### 2025-11-17

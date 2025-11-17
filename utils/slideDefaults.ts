@@ -171,6 +171,22 @@ export function createDefaultSlide(type: SlideType): Slide {
         style: defaultStyle,
       };
 
+    case 'imageText':
+      return {
+        type: 'imageText',
+        props: {
+          title: '이미지+텍스트',
+          image: 'https://via.placeholder.com/600x400',
+          imagePosition: 'left',
+          bullets: [
+            '첫 번째 항목을 입력하세요',
+            '두 번째 항목을 입력하세요',
+            '세 번째 항목을 입력하세요',
+          ],
+        },
+        style: defaultStyle,
+      };
+
     case 'featureGrid':
       return {
         type: 'featureGrid',
