@@ -9,6 +9,7 @@ import { Lightbulb, ImageIcon } from 'lucide-react';
 import type { ImageTextSlide } from '@/types/slide';
 import IconSelector from '../IconSelector';
 import ImageUploader from '../ImageUploader';
+import FontSizeSlider from '../FontSizeSlider';
 
 interface ImageTextSlideFormProps {
   slide: ImageTextSlide;
@@ -95,6 +96,19 @@ export default function ImageTextSlideForm({
         bullets: {
           ...slide.style.bullets,
           iconType,
+        },
+      },
+    });
+  };
+
+  const handleFontSizeChange = (fontSize: number) => {
+    onChange({
+      ...slide,
+      style: {
+        ...slide.style,
+        bullets: {
+          ...slide.style.bullets,
+          fontSize,
         },
       },
     });
@@ -210,6 +224,18 @@ export default function ImageTextSlideForm({
             value={slide.style.bullets?.iconType || 'arrow'}
             onChange={handleIconChange}
             label="불릿 아이콘"
+          />
+        </div>
+
+        {/* 본문 크기 조정 */}
+        <div className="pt-2">
+          <FontSizeSlider
+            value={slide.style.bullets?.fontSize || 16}
+            onChange={handleFontSizeChange}
+            label="본문 크기"
+            min={12}
+            max={24}
+            defaultValue={16}
           />
         </div>
       </div>

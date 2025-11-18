@@ -187,6 +187,7 @@ export default function SlidePreview({ slide, templateId = 'toss', aspectRatio =
           transformOrigin: 'top left',
         }}>
           <iframe
+            key={slidePropsJson}
             srcDoc={slideDocument}
             style={{
               width: '100%',

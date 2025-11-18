@@ -432,17 +432,28 @@ export class TossDefaultTemplate implements SlideTemplate {
     const parseColumnContent = (content: string | undefined) => {
       // 빈 콘텐츠 방어 (에러 방지용, 플레이스홀더는 보여주지 않음)
       if (!content || typeof content !== 'string') {
-        return { columnTitle: '', bulletItems: [] };
+        return { columnTitle: '', bulletItems: [], textParagraphs: [] };
       }
 
       const lines = content.split('\n').filter(line => line.trim());
       const columnTitle = lines[0] || ''; // 첫 줄은 제목
-      const bulletItems = lines
-        .slice(1)
-        .filter(line => line.trim().startsWith('-'))
-        .map(line => line.replace(/^-\s*/, '').trim());
 
-      return { columnTitle, bulletItems };
+      // 불릿 아이템과 일반 텍스트 구분
+      const bulletItems: string[] = [];
+      const textParagraphs: string[] = [];
+
+      lines.slice(1).forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('-')) {
+          // 불릿 아이템
+          bulletItems.push(trimmed.replace(/^-\s*/, '').trim());
+        } else if (trimmed) {
+          // 일반 텍스트 (빈 줄 제외)
+          textParagraphs.push(trimmed);
+        }
+      });
+
+      return { columnTitle, bulletItems, textParagraphs };
     };
 
     // 왼쪽/오른쪽 콘텐츠 파싱
@@ -472,10 +483,24 @@ export class TossDefaultTemplate implements SlideTemplate {
         `).join('');
     };
 
+    // 텍스트 단락 HTML 생성
+    const createTextParagraphs = (paragraphs: string[], fontSize: number) => {
+      return paragraphs.map(para => `
+        <p style="
+          color: var(--color-text-secondary);
+          font-size: ${fontSize}px;
+          line-height: 1.6;
+          margin: 0 0 16px 0;
+        ">${this.escapeHtml(para)}</p>
+      `).join('');
+    };
+
     const leftFontSize = slide.style.leftColumn?.fontSize || this.ctx.fonts.size.body;
     const rightFontSize = slide.style.rightColumn?.fontSize || this.ctx.fonts.size.body;
     const leftBulletList = createBulletList(leftParsed.bulletItems, leftFontSize);
     const rightBulletList = createBulletList(rightParsed.bulletItems, rightFontSize);
+    const leftTextParagraphs = createTextParagraphs(leftParsed.textParagraphs, leftFontSize);
+    const rightTextParagraphs = createTextParagraphs(rightParsed.textParagraphs, rightFontSize);
 
     const html = `
 <div class="slide" style="
@@ -529,6 +554,12 @@ export class TossDefaultTemplate implements SlideTemplate {
         margin: 0 0 20px 0;
       ">${this.escapeHtml(leftParsed.columnTitle)}</h4>
 
+      <!-- 일반 텍스트 단락 -->
+      <div style="font-family: var(--font-family-base);">
+        ${leftTextParagraphs}
+      </div>
+
+      <!-- 불릿 리스트 -->
       <ul style="
         list-style: none;
         padding: 0;
@@ -557,6 +588,12 @@ export class TossDefaultTemplate implements SlideTemplate {
         margin: 0 0 20px 0;
       ">${this.escapeHtml(rightParsed.columnTitle)}</h4>
 
+      <!-- 일반 텍스트 단락 -->
+      <div style="font-family: var(--font-family-base);">
+        ${rightTextParagraphs}
+      </div>
+
+      <!-- 불릿 리스트 -->
       <ul style="
         list-style: none;
         padding: 0;
@@ -2012,13 +2049,17 @@ export class TossDefaultTemplate implements SlideTemplate {
   renderImageText(slide: ImageTextSlide): HTMLSlide {
     const { title, image, imagePosition, bullets } = slide.props;
 
+    // 개별 또는 전역 설정에서 폰트 크기 가져오기 (우선순위: 개별 설정 > 기본값)
+    const slideTitleFontSize = slide.style.slideTitle?.fontSize || this.ctx.fonts.size.heading;
+    const bodyFontSize = slide.style.bullets?.fontSize || this.ctx.fonts.size.body;
+
     // 불릿 리스트 생성 (빈 배열 방어)
     const bulletList = (bullets || [])
       .map(
         (bullet) => `
       <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
         <span style="color: ${this.ctx.colors.primary}; margin-right: 12px; font-size: ${this.ctx.spacing.iconSize}px; line-height: 1.4;">${this.getIcon(slide.style.bullets?.iconType)}</span>
-        <span style="color: ${this.ctx.colors.textSecondary}; font-size: ${this.ctx.fonts.size.body}px; line-height: 1.6;">${this.escapeHtml(bullet)}</span>
+        <span style="color: ${this.ctx.colors.textSecondary}; font-size: ${bodyFontSize}px; line-height: 1.6;">${this.escapeHtml(bullet)}</span>
       </li>
     `
       )
@@ -2041,7 +2082,7 @@ export class TossDefaultTemplate implements SlideTemplate {
   <!-- Accent Bar + Title -->
   <div style="margin-bottom: ${this.ctx.spacing.gapSmall}px;">
     <div style="width: ${this.ctx.spacing.accentBar.width}px; height: ${this.ctx.spacing.accentBar.height}px; background: ${this.ctx.colors.primary}; margin-bottom: 12px;"></div>
-    <h2 style="font-size: ${this.ctx.fonts.size.heading}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
+    <h2 style="font-size: ${slideTitleFontSize}px; font-weight: 700; color: ${this.ctx.colors.text}; margin: 0;">${this.escapeHtml(title)}</h2>
   </div>
 
   <!-- Image + Text Layout -->
