@@ -98,6 +98,34 @@ PERPLEXITY_API_KEY="your-perplexity-api-key"
 
 ---
 
+### 6. 결제 시스템 설정 (포트원 V2)
+
+**카드사 심사 및 테스트 환경**:
+
+```env
+# 결제 시스템 활성화 (프로덕션 환경)
+NEXT_PUBLIC_PAYMENT_ENABLED="true"
+```
+
+**설명**:
+- `true`: 결제 시스템 접근 허용 (카드사 심사 테스트 가능)
+- `false` 또는 미설정: 결제 시스템 차단
+- 개발 환경(`NODE_ENV=development`)에서는 이 변수와 무관하게 항상 허용됨
+
+**주의사항**:
+- 결제 시스템이 활성화되면 사용자에게 "테스트 중" 안내 배너가 자동으로 표시됩니다
+- 실제 결제가 이루어지지 않도록 포트원 테스트 채널을 사용하세요
+- 테스트 완료 후 정식 오픈 시까지 이 변수를 `true`로 유지하세요
+
+**Vercel 환경 변수 설정**:
+1. Vercel 프로젝트 → Settings → Environment Variables
+2. Key: `NEXT_PUBLIC_PAYMENT_ENABLED`
+3. Value: `true`
+4. Environment: Production (또는 필요한 환경)
+5. Save 클릭
+
+---
+
 ## 환경 변수 파일 생성
 
 ### 1. .env.local 파일 생성
@@ -128,6 +156,9 @@ GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxx"
 # AI APIs
 NEXT_PUBLIC_GEMINI_API_KEY="AIzaSyxxxxxxxxxxxxxxxxxxxxxxxx"
 PERPLEXITY_API_KEY="pplx-xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# 결제 시스템 (포트원 V2)
+NEXT_PUBLIC_PAYMENT_ENABLED="true"
 ```
 
 ---
