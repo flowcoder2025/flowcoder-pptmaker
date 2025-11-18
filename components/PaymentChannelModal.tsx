@@ -153,9 +153,19 @@ export default function PaymentChannelModal({
         </h3>
 
         {/* 설명 */}
-        <p className="text-gray-600 mb-6 text-center">
+        <p className="text-gray-600 mb-4 text-center">
           {description}
         </p>
+
+        {/* 결제 테스트 안내 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">ℹ️</span>
+            <p className="text-sm text-blue-800">
+              테스트 중이며 실제 결제가 이루어지지 않습니다
+            </p>
+          </div>
+        </div>
 
         {/* 결제 채널 선택 그리드 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

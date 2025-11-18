@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import PaymentChannelModal from '@/components/PaymentChannelModal';
+import PaymentTestBanner from '@/components/PaymentTestBanner';
 
 /**
  * 구독 관리 페이지
@@ -150,6 +151,9 @@ export default function SubscriptionPage() {
 
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
+      {/* 결제 테스트 안내 배너 */}
+      <PaymentTestBanner />
+
       {/* 광고 - 상단 (무료 플랜만 표시) */}
       {showAds && (
         <div className="mb-8">
