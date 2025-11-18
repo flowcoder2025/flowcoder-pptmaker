@@ -4,6 +4,8 @@ import NavigationBar from './layout/NavigationBar';
 import Footer from './layout/Footer';
 import { SessionProvider } from './auth/SessionProvider';
 import { Toaster } from 'sonner';
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 
 /**
  * LayoutWrapper 컴포넌트
@@ -32,11 +34,17 @@ interface LayoutWrapperProps {
 }
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+  const { plan } = useSubscriptionStore();
+  // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
+
   return (
     <SessionProvider>
       <div className="min-h-screen flex flex-col">
         <NavigationBar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          {children}
+        </main>
         <Footer />
         <Toaster position="top-center" />
       </div>

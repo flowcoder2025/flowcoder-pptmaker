@@ -248,12 +248,14 @@ export default function SubscriptionPage() {
       <div className="text-center mt-10">
         <p className="text-sm text-muted-foreground">
           결제 및 구독 관련 문의는{' '}
-          <button
-            className="underline text-primary"
-            onClick={() => alert('문의 기능 준비 중이에요!')}
+          <a
+            href="https://forms.gle/5MRbsjBYbBBdXNWT9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-primary hover:text-primary/80 transition-colors"
           >
             고객센터
-          </button>
+          </a>
           로 연락해주세요
         </p>
       </div>
@@ -468,20 +470,28 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
         </ul>
 
         {/* 구독 버튼 */}
-        <Button
-          className={`w-full ${recommended && !current && !comingSoon ? 'bg-primary text-white' : ''}`}
-          variant={current || comingSoon || !recommended ? 'outline' : 'default'}
-          disabled={current || comingSoon}
-          onClick={() => onSubscribe(plan)}
-        >
-          {comingSoon
-            ? '출시 알림 받기'
-            : current
-            ? '사용하고 있어요'
-            : plan === 'free'
-            ? BUTTON_TEXT.startFree
-            : BUTTON_TEXT.subscribe}
-        </Button>
+        {comingSoon ? (
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => window.open('https://forms.gle/xW9sUdkiVCQ715Xb8', '_blank', 'noopener,noreferrer')}
+          >
+            출시 알림 받기
+          </Button>
+        ) : (
+          <Button
+            className={`w-full ${recommended && !current ? 'bg-primary text-white' : ''}`}
+            variant={current || !recommended ? 'outline' : 'default'}
+            disabled={current}
+            onClick={() => onSubscribe(plan)}
+          >
+            {current
+              ? '사용하고 있어요'
+              : plan === 'free'
+              ? BUTTON_TEXT.startFree
+              : BUTTON_TEXT.subscribe}
+          </Button>
+        )}
       </div>
     </Card>
   );

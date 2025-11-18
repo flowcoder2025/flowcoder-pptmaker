@@ -5,15 +5,21 @@
  * 전역 푸터 - 라이센스, 회사 정보, 문의 메일 포함
  */
 
+'use client';
+
 import MaxWidthContainer from './MaxWidthContainer'
+import { useSubscriptionStore } from '@/store/subscriptionStore';
+import { PLAN_BENEFITS } from '@/constants/subscription';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { plan } = useSubscriptionStore();
+  const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
 
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 py-8 mt-auto">
+    <footer className={`border-t border-gray-200 bg-gray-50 pt-2 pb-4 mt-auto ${showAds ? 'mb-16 md:mb-28' : ''}`}>
       <MaxWidthContainer>
-        <div className="flex flex-col items-center gap-4 text-center">
+        <div className="flex flex-col items-center gap-1 text-center">
           {/* 회사명 및 저작권 */}
           <div className="text-sm text-gray-600">
             © {currentYear} <span className="font-semibold">FlowCoder</span>. All rights reserved.
@@ -58,6 +64,10 @@ export default function Footer() {
             <span>•</span>
             <a href="https://www.flow-coder.com/terms/external/refund-policy" className="hover:text-gray-700 hover:underline">
               환불약관
+            </a>
+            <span>•</span>
+            <a href="https://forms.gle/5MRbsjBYbBBdXNWT9" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700 hover:underline">
+              고객센터
             </a>
           </div>
         </div>
