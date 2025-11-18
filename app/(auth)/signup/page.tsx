@@ -192,19 +192,23 @@ export default function SignupPage() {
           <div className="text-center mt-6">
             <p className="text-xs text-muted-foreground">
               회원가입 시{' '}
-              <button
-                className="underline text-muted-foreground"
-                onClick={() => toast.info('이용약관 페이지 준비 중이에요')}
+              <a
+                href="https://www.flow-coder.com/terms/external/ppt-maker"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-muted-foreground hover:text-foreground transition-colors"
               >
                 이용약관
-              </button>
+              </a>
               {' '}및{' '}
-              <button
-                className="underline text-muted-foreground"
-                onClick={() => toast.info('개인정보처리방침 페이지 준비 중이에요')}
+              <a
+                href="https://www.flow-coder.com/terms/external/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-muted-foreground hover:text-foreground transition-colors"
               >
                 개인정보처리방침
-              </button>
+              </a>
               에 동의하는 것으로 간주해요
             </p>
           </div>
