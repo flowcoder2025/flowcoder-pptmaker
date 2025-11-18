@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +35,12 @@ export default function ViewerContent() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // 반응형 scale 관리 (모바일 + 데스크톱)
+  const containerRef = useRef<HTMLDivElement>(null);  // 모바일용
+  const slideRef = useRef<HTMLDivElement>(null);      // 데스크톱용
+  const [containerWidth, setContainerWidth] = useState(0);  // 모바일용
+  const [desktopScale, setDesktopScale] = useState(1);      // 데스크톱용
+
   // 다운로드 진행 상태 관리
   const [showDownloadProgress, setShowDownloadProgress] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState<'downloading' | 'success' | 'error'>('downloading');
@@ -62,6 +68,9 @@ export default function ViewerContent() {
   const slideSize = calculateSlideSize(aspectRatio);
   const minHeightDesktop = slideSize.height + 40; // padding(20px * 2)
 
+  // CSS aspectRatio 속성 변환: '16:9' → '16/9'
+  const cssAspectRatio = aspectRatio.replace(':', '/');
+
   // 모바일 감지
   useEffect(() => {
     const checkMobile = () => {
@@ -72,6 +81,56 @@ export default function ViewerContent() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // 모바일: 컨테이너 너비 감지 (ResizeObserver)
+  useEffect(() => {
+    if (!isMobile || !containerRef.current) return;
+
+    const updateWidth = () => {
+      if (containerRef.current) {
+        // padding 제외한 실제 컨테이너 너비 (12px * 2 = 24px)
+        const width = containerRef.current.offsetWidth - 24;
+        setContainerWidth(width);
+      }
+    };
+
+    // 초기 너비 계산
+    updateWidth();
+
+    // ResizeObserver로 컨테이너 크기 변경 감지
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [isMobile]);
+
+  // 데스크톱: 슬라이드 스케일 감지 (ResizeObserver)
+  useEffect(() => {
+    if (isMobile || !slideRef.current) return;
+
+    const updateScale = () => {
+      if (slideRef.current) {
+        const containerWidth = slideRef.current.offsetWidth;
+        const containerHeight = slideRef.current.offsetHeight;
+
+        // 너비/높이 기준으로 스케일 계산하여 더 작은 값 사용
+        const scaleByWidth = containerWidth / slideSize.width;
+        const scaleByHeight = containerHeight / slideSize.height;
+        const newScale = Math.min(scaleByWidth, scaleByHeight, 1); // 최대 1배 (확대 방지)
+
+        setDesktopScale(newScale);
+      }
+    };
+
+    // 초기 스케일 계산
+    updateScale();
+
+    // ResizeObserver로 컨테이너 크기 변경 감지
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(slideRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [isMobile, slideSize.width, slideSize.height]);
 
   // 뒤로가기/닫기: origin 우선, 없으면 from 파라미터에 따라 이전 페이지로 이동
   const handleClose = useCallback(() => {
@@ -502,31 +561,30 @@ export default function ViewerContent() {
       {/* 슬라이드 뷰어 */}
       {isMobile ? (
         // 모바일: 세로 스크롤 레이아웃 (1200×675 비율 유지, 화면에 맞게 스케일 조정)
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '12px',
-          background: '#F9FAFB',
-        }}>
+        <div
+          ref={containerRef}
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '12px',
+            background: '#F9FAFB',
+          }}
+        >
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             gap: '20px',
           }}>
             {slides.map((slide, index) => {
-              // 모바일 화면 너비 계산 (padding 제외)
-              const mobileWidth = typeof window !== 'undefined' ? window.innerWidth - 24 : 400;
-              // aspectRatio에 따른 스케일 계산
-              const scale = mobileWidth / slideSize.width;
-              // 스케일된 높이 계산
-              const scaledHeight = slideSize.height * scale;
+              // aspectRatio에 따른 스케일 계산 (containerWidth 상태 사용)
+              const scale = containerWidth > 0 ? containerWidth / slideSize.width : 1;
 
               return (
                 <div
                   key={index}
                   style={{
                     width: '100%',
-                    height: `${scaledHeight}px`,
+                    aspectRatio: cssAspectRatio,  // ← 핵심! 비율 강제
                     background: '#FFFFFF',
                     borderRadius: '12px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -534,18 +592,26 @@ export default function ViewerContent() {
                     position: 'relative',
                   }}
                 >
-                  <iframe
-                    srcDoc={createSlideDocument(slide.html, slide.css)}
+                  {/* 중간 wrapper: scale 적용 (history 페이지 패턴) */}
+                  <div
                     style={{
-                      width: `${slideSize.width}px`,
-                      height: `${slideSize.height}px`,
-                      border: 'none',
-                      display: 'block',
+                      position: 'absolute',
+                      inset: 0,
                       transform: `scale(${scale})`,
                       transformOrigin: 'top left',
                     }}
-                    title={`슬라이드 ${index + 1}`}
-                  />
+                  >
+                    <iframe
+                      srcDoc={createSlideDocument(slide.html, slide.css)}
+                      style={{
+                        width: `${slideSize.width}px`,
+                        height: `${slideSize.height}px`,
+                        border: 'none',
+                        display: 'block',
+                      }}
+                      title={`슬라이드 ${index + 1}`}
+                    />
+                  </div>
                 </div>
               );
             })}
@@ -553,60 +619,50 @@ export default function ViewerContent() {
         </div>
       ) : (
         // 데스크톱: 페이지네이션 레이아웃
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-          overflow: 'auto', // 광고로 인해 공간 부족 시 스크롤
-        }}>
-          {(() => {
-            // 화면 크기 기준 스케일 계산
-            // 너비: 화면의 90%
-            const maxWidth = typeof window !== 'undefined' ? window.innerWidth * 0.9 : slideSize.width;
-            // 높이: 화면의 75% (헤더, 광고, 네비게이션 공간 고려)
-            const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.75 : slideSize.height;
-
-            // 너비/높이 기준으로 스케일 계산하여 더 작은 값 사용
-            const scaleByWidth = maxWidth / slideSize.width;
-            const scaleByHeight = maxHeight / slideSize.height;
-            const scale = Math.min(scaleByWidth, scaleByHeight, 1); // 최대 1배 (확대 방지)
-
-            // 스케일 적용된 크기
-            const scaledWidth = slideSize.width * scale;
-            const scaledHeight = slideSize.height * scale;
-
-            return (
-              <div style={{
-                width: `${scaledWidth}px`,
-                height: `${scaledHeight}px`,
-                position: 'relative',
-              }}>
-                <div style={{
+        <div
+          ref={slideRef}
+          style={{
+            flex: 1,
+            minHeight: `${minHeightDesktop}px`, // ← 핵심! 광고에 가리지 않도록 최소 높이 보장
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            overflow: 'auto', // 광고로 인해 공간 부족 시 스크롤
+          }}
+        >
+          <div
+            style={{
+              width: `${slideSize.width * desktopScale}px`,
+              aspectRatio: cssAspectRatio,  // ← 핵심! 비율 강제, height 자동 계산
+              background: '#FFFFFF',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              position: 'relative',
+            }}
+          >
+            {/* 중간 wrapper: scale 적용 (history 페이지 패턴) */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                transform: `scale(${desktopScale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              <iframe
+                srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
+                style={{
                   width: `${slideSize.width}px`,
                   height: `${slideSize.height}px`,
-                  background: '#FFFFFF',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  overflow: 'hidden',
-                  transform: `scale(${scale})`,
-                  transformOrigin: 'top left',
-                }}>
-                  <iframe
-                    srcDoc={createSlideDocument(currentSlide.html, currentSlide.css)}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      display: 'block',
-                    }}
-                    title={`슬라이드 ${currentIndex + 1}`}
-                  />
-                </div>
-              </div>
-            );
-          })()}
+                  border: 'none',
+                  display: 'block',
+                }}
+                title={`슬라이드 ${currentIndex + 1}`}
+              />
+            </div>
+          </div>
         </div>
       )}
 
