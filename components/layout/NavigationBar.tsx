@@ -142,7 +142,7 @@ export default function NavigationBar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 border border-transparent hover:border-primary hover:bg-transparent transition-all"
                   >
                     <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/10 text-primary">
                       {session.user?.image ? (
