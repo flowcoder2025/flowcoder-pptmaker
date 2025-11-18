@@ -3301,6 +3301,7 @@ export class TossDefaultTemplate implements SlideTemplate {
    * HTML 이스케이프 헬퍼 함수
    *
    * XSS 방지를 위한 HTML 특수문자 이스케이프
+   * 마크다운 볼드(**텍스트**) 처리 지원
    */
   private escapeHtml(text: string | undefined | null): string {
     // 빈 값 방어 (에러 방지용)
@@ -3316,7 +3317,25 @@ export class TossDefaultTemplate implements SlideTemplate {
       "'": '&#039;',
     };
 
-    return text.replace(/[&<>"']/g, (m) => map[m]);
+    // 1. 마크다운 볼드 패턴 추출 (**텍스트** → 임시 플레이스홀더)
+    const boldMatches: string[] = [];
+    let processed = text.replace(/\*\*(.+?)\*\*/g, (match, content) => {
+      boldMatches.push(content);
+      return `__BOLD_${boldMatches.length - 1}__`;
+    });
+
+    // 2. HTML 이스케이프 (XSS 방지)
+    processed = processed.replace(/[&<>"']/g, (m) => map[m]);
+
+    // 3. 플레이스홀더를 <strong> 태그로 복원
+    processed = processed.replace(/__BOLD_(\d+)__/g, (match, index) => {
+      const content = boldMatches[parseInt(index)];
+      // 볼드 태그 내부 텍스트도 이스케이프 처리 (XSS 방지)
+      const escapedContent = content.replace(/[&<>"']/g, (m) => map[m]);
+      return `<strong>${escapedContent}</strong>`;
+    });
+
+    return processed;
   }
 
   /**
