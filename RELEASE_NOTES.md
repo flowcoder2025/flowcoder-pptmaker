@@ -23,6 +23,23 @@
 
 ### 🐛 Fixes
 
+#### 2025-11-21
+- **검색 엔진 favicon 표시 문제 수정**
+  - 구글/네이버 검색 결과에서 로고가 표시되지 않던 문제 해결
+  - `public/` 디렉토리에 다중 해상도 favicon 추가
+    - favicon.ico (16x16, 32x32 멀티 해상도)
+    - favicon-16x16.png
+    - favicon-32x32.png
+    - icon-192.png (Android)
+    - icon-512.png (Android/PWA)
+    - apple-icon.png (180x180, iOS)
+  - app/layout.tsx 메타데이터 개선
+    - 다중 해상도 아이콘 링크 추가
+    - PWA manifest.json 연동
+  - PWA 지원 강화
+    - public/manifest.json 생성
+    - 앱 설치 지원 (Android/iOS)
+
 #### 2025-11-17
 - **Open Graph 이미지 SNS 공유 문제 수정** (20ed592)
   - app/layout.tsx 메타데이터 수정
