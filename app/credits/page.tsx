@@ -5,14 +5,6 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useCreditStore } from '@/store/creditStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
@@ -24,7 +16,6 @@ import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
-import PaymentChannelModal from '@/components/PaymentChannelModal';
 import PaymentTestBanner from '@/components/PaymentTestBanner';
 
 /**
@@ -41,9 +32,7 @@ export default function CreditsPage() {
   const { plan } = useSubscriptionStore();
   const { requestPayment, isLoading, clearError } = usePortOnePayment();
 
-  const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedBundle, setSelectedBundle] = useState<typeof CREDIT_BUNDLES[0] | null>(null);
-  const [isPhoneRequiredDialogOpen, setIsPhoneRequiredDialogOpen] = useState(false);
 
   // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;
@@ -77,60 +66,33 @@ export default function CreditsPage() {
     return null;
   }
 
-  // 크레딧 구매 처리
-  const handlePurchase = (bundleId: string) => {
+  // 크레딧 구매 처리 - 카카오페이로 바로 결제
+  const handlePurchase = async (bundleId: string) => {
     const bundle = CREDIT_BUNDLES.find((b) => b.id === bundleId);
-    if (!bundle) return;
+    if (!bundle || !session) return;
 
-    // 결제 채널 선택 다이얼로그 열기
     setSelectedBundle(bundle);
-    setIsChannelDialogOpen(true);
-  };
-
-  // 결제 채널 선택 후 결제 진행
-  const handlePaymentChannelSelect = async (channelKey: string) => {
-    if (!selectedBundle || !session) return;
-
-    // 이니시스 채널인 경우 전화번호 확인
-    const isInicis = channelKey === PAYMENT_CHANNELS.INICIS_ONETIME.key ||
-                     channelKey === PAYMENT_CHANNELS.INICIS_SUBSCRIPTION.key;
-
-    if (isInicis) {
-      const phoneNumber = session.user?.phoneNumber;
-
-      if (!phoneNumber) {
-        // 전화번호 없음 -> 안내 모달 표시
-        setIsChannelDialogOpen(false);
-        setIsPhoneRequiredDialogOpen(true);
-        return;
-      }
-    }
 
     try {
       clearError();
-      setIsChannelDialogOpen(false);
 
       const result = await requestPayment({
         purpose: 'CREDIT_PURCHASE',
-        amount: selectedBundle.price,
-        orderName: `크레딧 ${selectedBundle.credits}개 구매`,
-        channelKey,
-        creditAmount: selectedBundle.credits,
+        amount: bundle.price,
+        orderName: `크레딧 ${bundle.credits}개 구매`,
+        channelKey: PAYMENT_CHANNELS.KAKAOPAY_ONETIME.key,
+        creditAmount: bundle.credits,
       });
 
       if (result.success && result.payment) {
-        // 성공: 결제 결과 페이지로 이동
         await fetchBalance();
         router.push(`/payments/result?success=true&paymentId=${result.payment.id}`);
       } else {
-        // 실패 처리
         const errorMsg = result.error || '결제에 실패했어요';
 
-        // "결제 시스템 준비 중" 에러는 toast로 표시하고 그 자리에 머물기
         if (errorMsg.includes('결제 시스템 준비 중')) {
           toast.error(errorMsg);
         } else {
-          // 다른 에러는 결제 결과 페이지로 이동
           router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
         }
       }
@@ -138,7 +100,6 @@ export default function CreditsPage() {
       console.error('결제 중 오류:', err);
       const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
 
-      // "결제 시스템 준비 중" 에러는 toast로 표시
       if (errorMsg.includes('결제 시스템 준비 중')) {
         toast.error(errorMsg);
       } else {
@@ -283,70 +244,6 @@ export default function CreditsPage() {
           <KakaoAdBanner />
         </div>
       )}
-
-      {/* 결제 채널 선택 모달 */}
-      <PaymentChannelModal
-        isOpen={isChannelDialogOpen}
-        onClose={() => setIsChannelDialogOpen(false)}
-        onSelectChannel={handlePaymentChannelSelect}
-        paymentType="onetime"
-        isLoading={isLoading}
-        title="크레딧 구매 방법을 선택해주세요"
-        description={
-          selectedBundle
-            ? `크레딧 ${selectedBundle.credits}개 (₩${selectedBundle.price.toLocaleString()})`
-            : '빠르고 안전하게 결제할 수 있어요'
-        }
-      />
-
-      {/* 전화번호 필수 안내 다이얼로그 */}
-      <Dialog open={isPhoneRequiredDialogOpen} onOpenChange={setIsPhoneRequiredDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>📞 전화번호가 필요해요</DialogTitle>
-            <DialogDescription>
-              이니시스 결제를 이용하려면 프로필에 전화번호를 입력해주세요
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-6 space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>왜 전화번호가 필요한가요?</strong>
-                <br />
-                이니시스 V2 결제 시스템은 본인 확인을 위해 구매자 휴대폰 번호를 필수로 요구해요.
-              </p>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>💡 다른 결제 방법도 있어요</strong>
-                <br />
-                토스페이나 카카오페이는 전화번호 없이도 결제할 수 있어요.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsPhoneRequiredDialogOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              취소
-            </Button>
-            <Button
-              onClick={() => {
-                setIsPhoneRequiredDialogOpen(false);
-                router.push('/profile');
-              }}
-              className="w-full sm:w-auto"
-            >
-              프로필에서 전화번호 입력하기
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* 로딩 오버레이 */}
       {isLoading && (

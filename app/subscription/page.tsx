@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
-import { usePortOnePayment } from '@/hooks/usePortOnePayment';
+import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
 import { Check, X, Star, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
@@ -15,7 +15,6 @@ import type { SubscriptionPlan } from '@/types/monetization';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
-import PaymentChannelModal from '@/components/PaymentChannelModal';
 import PaymentTestBanner from '@/components/PaymentTestBanner';
 
 /**
@@ -37,7 +36,6 @@ export default function SubscriptionPage() {
   } = useSubscriptionStore();
   const { requestPayment, isLoading, clearError } = usePortOnePayment();
 
-  const [isChannelDialogOpen, setIsChannelDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
@@ -76,16 +74,53 @@ export default function SubscriptionPage() {
     return null;
   }
 
-  // 구독 처리
-  const handleSubscribe = (planId: SubscriptionPlan) => {
+  // 구독 처리 - 카카오페이로 바로 결제
+  const handleSubscribe = async (planId: SubscriptionPlan) => {
     if (planId === 'free') {
-      alert('무료 플랜이에요!');
+      toast.info('무료 플랜이에요!');
       return;
     }
 
-    // 결제 채널 선택 다이얼로그 열기
+    if (!session) return;
+
+    const planInfo = PLAN_BENEFITS[planId];
     setSelectedPlan(planId);
-    setIsChannelDialogOpen(true);
+
+    try {
+      clearError();
+
+      const result = await requestPayment({
+        purpose: 'SUBSCRIPTION_UPGRADE',
+        amount: planInfo.price,
+        orderName: `${planInfo.name} 구독 (1개월)`,
+        channelKey: PAYMENT_CHANNELS.KAKAOPAY_SUBSCRIPTION.key,
+        subscriptionId: undefined,
+      });
+
+      if (result.success && result.payment) {
+        await fetchSubscription();
+        router.push(`/payments/result?success=true&paymentId=${result.payment.id}`);
+      } else {
+        const errorMsg = result.error || '결제에 실패했어요';
+
+        if (errorMsg.includes('결제 시스템 준비 중')) {
+          toast.error(errorMsg);
+        } else {
+          router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+        }
+      }
+    } catch (err) {
+      console.error('결제 중 오류:', err);
+      const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
+
+      if (errorMsg.includes('결제 시스템 준비 중')) {
+        toast.error(errorMsg);
+      } else {
+        router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
+      }
+    } finally {
+      setSelectedPlan(null);
+    }
   };
 
   // 구독 취소 처리
@@ -98,55 +133,6 @@ export default function SubscriptionPage() {
 
     // TODO: API 연동
     toast.info('구독 취소 준비 중이에요!');
-  };
-
-  // 결제 채널 선택 후 결제 진행
-  const handlePaymentChannelSelect = async (channelKey: string) => {
-    if (!selectedPlan || !session) return;
-
-    const planInfo = PLAN_BENEFITS[selectedPlan];
-
-    try {
-      clearError();
-      setIsChannelDialogOpen(false);
-
-      const result = await requestPayment({
-        purpose: 'SUBSCRIPTION_UPGRADE',
-        amount: planInfo.price,
-        orderName: `${planInfo.name} 구독 (1개월)`,
-        channelKey,
-        subscriptionId: undefined, // TODO: API에서 생성된 subscription ID 전달
-      });
-
-      if (result.success && result.payment) {
-        // 성공: 결제 결과 페이지로 이동
-        await fetchSubscription();
-        router.push(`/payments/result?success=true&paymentId=${result.payment.id}`);
-      } else {
-        // 실패 처리
-        const errorMsg = result.error || '결제에 실패했어요';
-
-        // "결제 시스템 준비 중" 에러는 toast로 표시하고 그 자리에 머물기
-        if (errorMsg.includes('결제 시스템 준비 중')) {
-          toast.error(errorMsg);
-        } else {
-          // 다른 에러는 결제 결과 페이지로 이동
-          router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
-        }
-      }
-    } catch (err) {
-      console.error('결제 중 오류:', err);
-      const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
-
-      // "결제 시스템 준비 중" 에러는 toast로 표시
-      if (errorMsg.includes('결제 시스템 준비 중')) {
-        toast.error(errorMsg);
-      } else {
-        router.push(`/payments/result?success=false&error=${encodeURIComponent(errorMsg)}`);
-      }
-    } finally {
-      setSelectedPlan(null);
-    }
   };
 
   return (
@@ -260,17 +246,6 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* 결제 채널 선택 모달 */}
-      <PaymentChannelModal
-        isOpen={isChannelDialogOpen}
-        onClose={() => setIsChannelDialogOpen(false)}
-        onSelectChannel={handlePaymentChannelSelect}
-        paymentType="subscription"
-        isLoading={isLoading}
-        title="구독 결제 방법을 선택해주세요"
-        description={selectedPlan ? `${PLAN_BENEFITS[selectedPlan].name} 플랜 (1개월)` : '빠르고 안전하게 결제할 수 있어요'}
-      />
-
       {/* 로딩 오버레이 */}
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -383,9 +358,9 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
     info.benefits.adFree ? '광고 제거' : '광고 시청 필요',
     info.benefits.hasWatermark ? '워터마크 표시' : '워터마크 제거',
     comingSoon
-      ? '월간 크레딧 미정'
-      : info.benefits.monthlyCredits > 0
-      ? `월 ${info.benefits.monthlyCredits} 크레딧`
+      ? '무제한 생성 미정'
+      : info.benefits.unlimitedGeneration
+      ? '심층검색/고품질 생성 무제한'
       : '크레딧 별도 구매',
     comingSoon
       ? '프리미엄 템플릿 미정'
@@ -506,7 +481,7 @@ function PlanComparisonTable() {
     {
       name: '월 요금',
       free: '무료',
-      pro: '₩4,900',
+      pro: '₩7,900',
       premium: '출시 예정',
     },
     {
@@ -528,16 +503,10 @@ function PlanComparisonTable() {
       premium: true,
     },
     {
-      name: '월간 크레딧',
-      free: '0',
-      pro: '490',
-      premium: '미정',
-    },
-    {
-      name: '건당 결제 할인',
-      free: '-',
-      pro: '20%',
-      premium: '20%',
+      name: '심층검색/고품질 생성',
+      free: '크레딧 구매',
+      pro: '무제한',
+      premium: '무제한',
     },
     {
       name: '프리미엄 템플릿',

@@ -75,6 +75,10 @@ export const CREDIT_BUNDLES: CreditBundle[] = [
 ];
 
 /**
- * Pro 플랜 월간 크래딧
+ * Pro 플랜 월간 크래딧 (DEPRECATED)
+ *
+ * @deprecated PRO 이상 구독자는 무제한 생성으로 변경됨 (2025-12-02)
+ * 이 상수는 하위 호환성을 위해 유지되지만 더 이상 사용되지 않음
+ * 대신 hasUnlimitedGeneration(plan)을 사용하세요
  */
-export const PRO_MONTHLY_CREDITS = 490;
+export const PRO_MONTHLY_CREDITS = 0;

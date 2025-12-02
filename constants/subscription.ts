@@ -17,6 +17,7 @@ export const PLAN_BENEFITS: Record<SubscriptionPlan, PlanInfo> = {
    * - 슬라이드 수 10페이지 제한
    * - 광고 시청 필요 (생성 1회 + 다운로드 1회)
    * - 최초 1회 무료: 심층 검색 + 고품질 생성
+   * - 유료 기능은 크레딧 구매 필요
    */
   free: {
     id: 'free',
@@ -26,6 +27,7 @@ export const PLAN_BENEFITS: Record<SubscriptionPlan, PlanInfo> = {
       adFree: false,
       unlimitedBasic: true,
       unlimitedBasicResearch: true,
+      unlimitedGeneration: false, // 크레딧 구매 필요
       monthlyCredits: 0,
       payPerUseDiscount: 0,
       maxSlides: 10,
@@ -35,23 +37,23 @@ export const PLAN_BENEFITS: Record<SubscriptionPlan, PlanInfo> = {
   },
 
   /**
-   * Pro 플랜 (₩4,900/월)
+   * Pro 플랜 (₩7,900/월)
    * - 광고 제거
    * - 워터마크 제거
    * - 슬라이드 수 20페이지 제한
-   * - 매월 490 크래딧 제공
-   * - 건당 결제 20% 할인
+   * - 무제한 생성 (심층 검색 + 고품질 생성)
    */
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 4900,
+    price: 7900,
     benefits: {
       adFree: true,
       unlimitedBasic: true,
       unlimitedBasicResearch: true,
-      monthlyCredits: 490,
-      payPerUseDiscount: 0.2,
+      unlimitedGeneration: true, // 무제한 생성
+      monthlyCredits: 0, // 더 이상 월간 크레딧 제공 안함 (무제한)
+      payPerUseDiscount: 0,
       maxSlides: 20,
       hasWatermark: false,
       premiumTemplates: 'none',
@@ -62,7 +64,7 @@ export const PLAN_BENEFITS: Record<SubscriptionPlan, PlanInfo> = {
    * Premium 플랜 (₩9,900/월)
    * - Pro 플랜 모든 혜택
    * - 슬라이드 수 50페이지 제한
-   * - 무제한 크래딧
+   * - 무제한 생성 (심층 검색 + 고품질 생성)
    * - 프리미엄 템플릿 무제한
    */
   premium: {
@@ -73,8 +75,9 @@ export const PLAN_BENEFITS: Record<SubscriptionPlan, PlanInfo> = {
       adFree: true,
       unlimitedBasic: true,
       unlimitedBasicResearch: true,
-      monthlyCredits: 9999999, // 사실상 무제한
-      payPerUseDiscount: 0.2,
+      unlimitedGeneration: true, // 무제한 생성
+      monthlyCredits: 0, // 더 이상 월간 크레딧 제공 안함 (무제한)
+      payPerUseDiscount: 0,
       maxSlides: 50,
       hasWatermark: false,
       premiumTemplates: 'unlimited',
@@ -122,4 +125,12 @@ export function getPayPerUseDiscount(plan: SubscriptionPlan): number {
  */
 export function getPremiumTemplatesAccess(plan: SubscriptionPlan): 'none' | 'discount' | 'unlimited' {
   return PLAN_BENEFITS[plan].benefits.premiumTemplates;
+}
+
+/**
+ * 무제한 생성 여부 확인 (심층 검색 + 고품질 생성)
+ * PRO 이상 구독자는 크레딧 없이 무제한 사용 가능
+ */
+export function hasUnlimitedGeneration(plan: SubscriptionPlan): boolean {
+  return PLAN_BENEFITS[plan].benefits.unlimitedGeneration;
 }

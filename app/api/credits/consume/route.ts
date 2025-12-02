@@ -4,11 +4,15 @@
  * POST /api/credits/consume - 크레딧 사용 (AI 생성 시)
  *
  * v2.0: 우선순위 기반 소모 로직 (FREE → EVENT → SUBSCRIPTION → PURCHASE)
+ * v2.1: PRO 이상 구독자 무제한 생성 지원 (2025-12-02)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUserId } from '@/lib/auth'
 import { consumeCredits, calculateBalance } from '@/lib/credits'
+import { prisma } from '@/lib/prisma'
+import { hasUnlimitedGeneration } from '@/constants/subscription'
+import type { SubscriptionPlan } from '@/types/monetization'
 
 // ============================================
 // POST /api/credits/consume
@@ -52,7 +56,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 크레딧 소모 (우선순위 기반: FREE → EVENT → SUBSCRIPTION → PURCHASE)
+    // 구독 상태 확인 - PRO 이상 구독자는 무제한 생성
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+      select: { tier: true, status: true },
+    })
+
+    // PRO 또는 PREMIUM 활성 구독자인지 확인
+    const isActiveSubscriber =
+      subscription?.status === 'ACTIVE' &&
+      (subscription?.tier === 'PRO' || subscription?.tier === 'PREMIUM')
+
+    // 무제한 생성 가능 여부 확인
+    const plan = (subscription?.tier?.toLowerCase() || 'free') as SubscriptionPlan
+    const isUnlimited = isActiveSubscriber && hasUnlimitedGeneration(plan)
+
+    // PRO 이상 구독자는 크레딧 차감 없이 성공 반환
+    if (isUnlimited) {
+      // 현재 잔액 조회 (표시용)
+      const { balance } = await calculateBalance(userId)
+
+      return NextResponse.json({
+        message: '구독자 무제한 생성으로 사용했어요',
+        remainingBalance: balance,
+        usageBreakdown: [], // 크레딧 사용 없음
+        unlimitedGeneration: true,
+      })
+    }
+
+    // Free 사용자: 크레딧 소모 (우선순위 기반: FREE → EVENT → SUBSCRIPTION → PURCHASE)
     try {
       const result = await consumeCredits(
         userId,
@@ -64,6 +96,7 @@ export async function POST(request: NextRequest) {
         message: `${amount} 크레딧을 사용했어요`,
         remainingBalance: result.remaining,
         usageBreakdown: result.usageBreakdown, // 타입별 사용 내역
+        unlimitedGeneration: false,
       })
     } catch (error) {
       if (error instanceof Error && error.message === '크레딧이 부족해요') {

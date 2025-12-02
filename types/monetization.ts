@@ -99,7 +99,10 @@ export interface PlanInfo {
     /** 기본 조사 무제한 여부 */
     unlimitedBasicResearch: boolean;
 
-    /** 매월 제공 크래딧 (Pro: 490, Premium: 무제한) */
+    /** 무제한 생성 여부 (심층 검색 + 고품질 생성) - PRO 이상 */
+    unlimitedGeneration: boolean;
+
+    /** 매월 제공 크래딧 (Free 사용자용, PRO 이상은 무제한) */
     monthlyCredits: number;
 
     /** 건당 결제 시 할인율 */

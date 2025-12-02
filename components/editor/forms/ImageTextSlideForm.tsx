@@ -51,7 +51,8 @@ export default function ImageTextSlideForm({
   };
 
   const handleBulletChange = (index: number, value: string) => {
-    const newBullets = [...slide.props.bullets];
+    const currentBullets = slide.props.bullets || [];
+    const newBullets = [...currentBullets];
     newBullets[index] = value;
     onChange({
       ...slide,
@@ -63,7 +64,8 @@ export default function ImageTextSlideForm({
   };
 
   const handleAddBullet = () => {
-    const newBullets = [...slide.props.bullets, ''];
+    const currentBullets = slide.props.bullets || [];
+    const newBullets = [...currentBullets, ''];
     onChange({
       ...slide,
       props: {
@@ -74,11 +76,12 @@ export default function ImageTextSlideForm({
   };
 
   const handleRemoveBullet = (index: number) => {
-    if (slide.props.bullets.length <= 1) {
+    const currentBullets = slide.props.bullets || [];
+    if (currentBullets.length <= 1) {
       alert('최소 1개의 항목이 필요해요');
       return;
     }
-    const newBullets = slide.props.bullets.filter((_, i) => i !== index);
+    const newBullets = currentBullets.filter((_, i) => i !== index);
     onChange({
       ...slide,
       props: {
@@ -188,7 +191,7 @@ export default function ImageTextSlideForm({
           </div>
 
           <div className="space-y-2">
-            {slide.props.bullets.map((bullet, index) => (
+            {(slide.props.bullets || []).map((bullet, index) => (
               <div key={index} className="flex gap-2">
                 <input
                   type="text"
@@ -198,7 +201,7 @@ export default function ImageTextSlideForm({
                   placeholder="텍스트 항목을 입력하세요"
                   required
                 />
-                {slide.props.bullets.length > 1 && (
+                {(slide.props.bullets || []).length > 1 && (
                   <button
                     type="button"
                     onClick={() => handleRemoveBullet(index)}

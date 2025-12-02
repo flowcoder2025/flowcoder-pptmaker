@@ -39,43 +39,49 @@ import type {
  *
  * @description
  * 포트원 테스트 환경 채널키 (2025-11-12 확인)
+ *
+ * 2025-12-02: 결제 방법 카카오페이로 단일화
+ * - 구독 결제: KAKAOPAY_SUBSCRIPTION
+ * - 크레딧 결제: KAKAOPAY_ONETIME
  */
 export const PAYMENT_CHANNELS = {
-  // 토스페이 일반/정기결제
-  TOSSPAY: {
-    key: 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742',
-    name: '토스페이',
-    pgProvider: 'tosspay_v2',
-    mid: 'tosstest',
-  },
-  // 카카오페이 일반결제
+  // 카카오페이 일반결제 (크레딧 구매용)
   KAKAOPAY_ONETIME: {
     key: 'channel-key-b67c5e30-67da-4b6d-bb60-abdcea65ab96',
     name: '카카오페이',
     pgProvider: 'kakaopay',
     mid: 'TC0ONETIME',
   },
-  // 카카오페이 정기결제
+  // 카카오페이 정기결제 (구독용)
   KAKAOPAY_SUBSCRIPTION: {
     key: 'channel-key-5bf9403e-6158-4a41-b756-0785c9dbbc32',
     name: '카카오페이 (정기)',
     pgProvider: 'kakaopay',
     mid: 'TCSUBSCRIP',
   },
-  // 이니시스 일반결제
-  INICIS_ONETIME: {
-    key: 'channel-key-7b85a467-d1a5-4233-a502-1748a38192ef',
-    name: '이니시스',
-    pgProvider: 'inicis_v2',
-    mid: 'INIpayTest',
-  },
-  // 이니시스 정기결제
-  INICIS_SUBSCRIPTION: {
-    key: 'channel-key-2d471aaa-b5b1-45ff-b4a8-961d28083960',
-    name: '이니시스 (정기)',
-    pgProvider: 'inicis_v2',
-    mid: 'INIBillTst',
-  },
+
+  // ===== 미사용 결제 채널 (향후 확장 대비 보존) =====
+  // // 토스페이 일반/정기결제
+  // TOSSPAY: {
+  //   key: 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742',
+  //   name: '토스페이',
+  //   pgProvider: 'tosspay_v2',
+  //   mid: 'tosstest',
+  // },
+  // // 이니시스 일반결제
+  // INICIS_ONETIME: {
+  //   key: 'channel-key-7b85a467-d1a5-4233-a502-1748a38192ef',
+  //   name: '이니시스',
+  //   pgProvider: 'inicis_v2',
+  //   mid: 'INIpayTest',
+  // },
+  // // 이니시스 정기결제
+  // INICIS_SUBSCRIPTION: {
+  //   key: 'channel-key-2d471aaa-b5b1-45ff-b4a8-961d28083960',
+  //   name: '이니시스 (정기)',
+  //   pgProvider: 'inicis_v2',
+  //   mid: 'INIBillTst',
+  // },
 } as const;
 
 /**
