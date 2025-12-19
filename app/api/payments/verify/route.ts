@@ -150,9 +150,25 @@ export async function POST(request: NextRequest) {
 
     // 6. 결제 성공 - V2 API 응답에서 필요한 값 추출
     const methodType = portoneData.method?.type || 'EASY_PAY';
-    const receiptUrl = portoneData.receipt?.url || null;
-    // customData는 V2에서 다른 위치에 있을 수 있음
-    const customData = portoneData.customData || (payment.portoneData as Record<string, unknown>)?.customData as Record<string, unknown> | undefined;
+    // receiptUrl은 V2에서 최상위 레벨에 있음
+    const receiptUrl = portoneData.receiptUrl || portoneData.receipt?.url || null;
+
+    // customData는 V2에서 JSON 문자열로 반환됨 - 파싱 필요
+    let customData: Record<string, unknown> | undefined;
+    if (typeof portoneData.customData === 'string') {
+      try {
+        customData = JSON.parse(portoneData.customData);
+      } catch {
+        console.error('[Payment Verify] Failed to parse customData:', portoneData.customData);
+        customData = undefined;
+      }
+    } else if (portoneData.customData) {
+      customData = portoneData.customData;
+    } else {
+      // DB에 저장된 customData fallback
+      const dbPortoneData = payment.portoneData as Record<string, unknown> | null;
+      customData = dbPortoneData?.customData as Record<string, unknown> | undefined;
+    }
 
     console.log('[Payment Verify] Extracted customData:', customData);
 
