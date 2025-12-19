@@ -38,6 +38,7 @@ export default function SubscriptionPage() {
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
@@ -129,10 +130,30 @@ export default function SubscriptionPage() {
   };
 
   const handleConfirmCancel = async () => {
-    setShowCancelDialog(false);
+    setIsCanceling(true);
 
-    // TODO: API 연동
-    toast.info('구독 취소 준비 중이에요!');
+    try {
+      const response = await fetch('/api/subscriptions/cancel', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '구독 취소에 실패했어요');
+      }
+
+      // 구독 상태 새로고침
+      await fetchSubscription();
+
+      setShowCancelDialog(false);
+      toast.success('구독이 취소되었어요. 현재 기간이 끝날 때까지 계속 사용할 수 있어요.');
+    } catch (error) {
+      console.error('[Subscription Cancel] Error:', error);
+      toast.error(error instanceof Error ? error.message : '구독 취소에 실패했어요');
+    } finally {
+      setIsCanceling(false);
+    }
   };
 
   return (
@@ -317,6 +338,7 @@ export default function SubscriptionPage() {
                 variant="outline"
                 size="lg"
                 className="px-8"
+                disabled={isCanceling}
               >
                 {BUTTON_TEXT.cancel}
               </Button>
@@ -324,8 +346,16 @@ export default function SubscriptionPage() {
                 onClick={handleConfirmCancel}
                 size="lg"
                 className="px-8 bg-yellow-500 hover:bg-yellow-600 text-white"
+                disabled={isCanceling}
               >
-                구독 취소하기
+                {isCanceling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    취소 중...
+                  </>
+                ) : (
+                  '구독 취소하기'
+                )}
               </Button>
             </div>
           </Card>
