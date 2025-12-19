@@ -53,6 +53,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 2.5. SUBSCRIPTION_UPGRADE 시 subscription 자동 생성/조회
+    let finalSubscriptionId = subscriptionId;
+    if (purpose === 'SUBSCRIPTION_UPGRADE' && !subscriptionId) {
+      // tier 결정 (금액 기반)
+      let tier: 'PRO' | 'PREMIUM' = 'PRO';
+      if (amount >= 9900) {
+        tier = 'PREMIUM';
+      }
+
+      // 기존 subscription 조회
+      const existingSubscription = await prisma.subscription.findUnique({
+        where: { userId: session.user.id },
+      });
+
+      if (existingSubscription) {
+        // 기존 subscription이 있으면 tier 업데이트 (PENDING 상태로)
+        const updated = await prisma.subscription.update({
+          where: { id: existingSubscription.id },
+          data: {
+            tier,
+            // status는 결제 완료 후 verify에서 ACTIVE로 변경
+          },
+        });
+        finalSubscriptionId = updated.id;
+        console.log('[Payment Request] Updated existing subscription:', updated.id, tier);
+      } else {
+        // 새 subscription 생성 (PENDING 상태)
+        const newSubscription = await prisma.subscription.create({
+          data: {
+            userId: session.user.id,
+            tier,
+            status: 'PENDING',
+            startDate: new Date(),
+            endDate: null,
+          },
+        });
+        finalSubscriptionId = newSubscription.id;
+        console.log('[Payment Request] Created new subscription:', newSubscription.id, tier);
+      }
+    }
+
     // 3. 고유 paymentId 생성
     const paymentId = `pay_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -137,7 +178,7 @@ export async function POST(request: NextRequest) {
       customData: {
         purpose,
         userId: session.user.id,
-        subscriptionId,
+        subscriptionId: finalSubscriptionId,
         creditAmount,
       },
       redirectUrl: `${process.env.NEXTAUTH_URL}/payments/result`,
@@ -168,7 +209,7 @@ export async function POST(request: NextRequest) {
         status: 'PENDING',
         method: finalPayMethod,  // 결정된 payMethod 저장
         purpose,
-        subscriptionId: subscriptionId || null,
+        subscriptionId: finalSubscriptionId || null,
         creditTransactionId: null,
         portoneData: paymentRequest as unknown as Prisma.InputJsonValue, // 타입으로 저장
         receiptUrl: null,
