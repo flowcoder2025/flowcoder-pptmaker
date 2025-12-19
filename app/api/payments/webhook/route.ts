@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client'
  *
  * @description
  * 포트원에서 결제 상태 변경 시 비동기로 호출하는 Webhook 엔드포인트
- * 1. PORTONE_WEBHOOK_SECRET으로 요청 검증
+ * 1. Standard Webhooks 스펙에 따른 서명 검증 (포트원 Server SDK 사용)
  * 2. Webhook 페이로드 파싱
  * 3. paymentId로 Payment 레코드 조회
  * 4. 결제 상태 업데이트
@@ -18,40 +18,59 @@ import { Prisma } from '@prisma/client'
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import type { PortOneWebhookPayload, PortOnePaymentStatus } from '@/types/payment';
+import * as PortOne from '@portone/server-sdk';
+import type { PortOnePaymentStatus } from '@/types/payment';
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Webhook Secret 검증
+    // 1. Webhook Secret 확인
     const webhookSecret = process.env.PORTONE_WEBHOOK_SECRET;
     if (!webhookSecret) {
       console.error('[Payment Webhook] PORTONE_WEBHOOK_SECRET not configured');
       return NextResponse.json({ received: false }, { status: 500 });
     }
 
-    // Authorization 헤더에서 Secret 추출
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.warn('[Payment Webhook] Missing or invalid Authorization header');
+    // 2. 웹훅 검증을 위한 헤더 및 바디 추출
+    const body = await request.text();
+    const webhookId = request.headers.get('webhook-id');
+    const webhookTimestamp = request.headers.get('webhook-timestamp');
+    const webhookSignature = request.headers.get('webhook-signature');
+
+    console.log('[Payment Webhook] Headers:', {
+      'webhook-id': webhookId,
+      'webhook-timestamp': webhookTimestamp,
+      'webhook-signature': webhookSignature ? 'present' : 'missing',
+    });
+
+    // 3. Standard Webhooks 서명 검증
+    if (!webhookId || !webhookTimestamp || !webhookSignature) {
+      console.error('[Payment Webhook] Missing webhook headers');
       return NextResponse.json({ received: false }, { status: 401 });
     }
 
-    const providedSecret = authHeader.substring(7); // 'Bearer ' 제거
-    if (providedSecret !== webhookSecret) {
-      console.warn('[Payment Webhook] Invalid webhook secret');
+    try {
+      // 포트원 Server SDK를 사용한 웹훅 검증
+      await PortOne.Webhook.verify(webhookSecret, body, {
+        'webhook-id': webhookId,
+        'webhook-timestamp': webhookTimestamp,
+        'webhook-signature': webhookSignature,
+      });
+      console.log('[Payment Webhook] Signature verified successfully');
+    } catch (verifyError) {
+      console.error('[Payment Webhook] Signature verification failed:', verifyError);
       return NextResponse.json({ received: false }, { status: 403 });
     }
 
-    // 2. Webhook 페이로드 파싱
-    const payload = (await request.json()) as PortOneWebhookPayload;
+    // 4. Webhook 페이로드 파싱
+    const payload = JSON.parse(body);
     const { type, data } = payload;
 
     console.log(`[Payment Webhook] Received event: ${type}`, {
-      paymentId: data.paymentId,
-      status: data.status,
+      paymentId: data?.paymentId,
+      status: data?.status,
     });
 
-    // 3. 이벤트 타입에 따라 처리
+    // 5. 이벤트 타입에 따라 처리
     if (type === 'Transaction.Paid') {
       // 결제 완료
       const { paymentId, status, method, receiptUrl } = data;
@@ -133,7 +152,7 @@ export async function POST(request: NextRequest) {
       console.log(`[Payment Webhook] Unhandled event type: ${type}`);
     }
 
-    // 4. 응답 반환
+    // 6. 응답 반환
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('[Payment Webhook] Error:', error);
