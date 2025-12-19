@@ -8,9 +8,10 @@ import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
+import { useBillingKey } from '@/hooks/useBillingKey';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Check, X, Star, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import { Check, X, Star, Sparkles, Loader2, AlertTriangle, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -35,10 +36,20 @@ export default function SubscriptionPage() {
     fetchSubscription,
   } = useSubscriptionStore();
   const { requestPayment, isLoading, clearError } = usePortOnePayment();
+  const {
+    billingKey,
+    subscription: billingSubscription,
+    isLoading: isBillingKeyLoading,
+    issueBillingKey,
+    deleteBillingKey,
+    fetchBillingKey,
+  } = useBillingKey();
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
+  const [showDeleteBillingKeyDialog, setShowDeleteBillingKeyDialog] = useState(false);
+  const [isDeletingBillingKey, setIsDeletingBillingKey] = useState(false);
 
   const daysRemaining = getDaysRemaining();
   const isSubscriptionActive = isActive();
@@ -156,6 +167,42 @@ export default function SubscriptionPage() {
     }
   };
 
+  // 자동 결제 등록
+  const handleRegisterBillingKey = async () => {
+    const success = await issueBillingKey();
+    if (success) {
+      toast.success('자동 결제가 등록되었어요!');
+      await fetchBillingKey();
+    } else {
+      toast.error('자동 결제 등록에 실패했어요');
+    }
+  };
+
+  // 자동 결제 해제 확인
+  const handleDeleteBillingKeyClick = () => {
+    setShowDeleteBillingKeyDialog(true);
+  };
+
+  // 자동 결제 해제 실행
+  const handleConfirmDeleteBillingKey = async () => {
+    setIsDeletingBillingKey(true);
+
+    try {
+      const success = await deleteBillingKey();
+      if (success) {
+        toast.success('자동 결제가 해제되었어요');
+        setShowDeleteBillingKeyDialog(false);
+      } else {
+        toast.error('자동 결제 해제에 실패했어요');
+      }
+    } catch (error) {
+      console.error('[BillingKey Delete] Error:', error);
+      toast.error('자동 결제 해제에 실패했어요');
+    } finally {
+      setIsDeletingBillingKey(false);
+    }
+  };
+
   return (
     <MaxWidthContainer className="py-8 lg:py-12">
       {/* 결제 테스트 안내 배너 */}
@@ -214,6 +261,80 @@ export default function SubscriptionPage() {
           )}
         </div>
       </div>
+
+      {/* 자동 결제 관리 섹션 (유료 플랜만 표시) */}
+      {currentPlan !== 'free' && isSubscriptionActive && (
+        <div className="rounded-xl p-6 mb-10 bg-white border border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <RefreshCw className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold text-foreground">
+              자동 결제 관리
+            </h2>
+          </div>
+
+          {isBillingKeyLoading ? (
+            <div className="flex items-center gap-2 py-4">
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">불러오는 중...</span>
+            </div>
+          ) : billingKey ? (
+            /* 등록된 결제 수단이 있는 경우 */
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-secondary">
+                <CreditCard className="w-8 h-8 text-primary" />
+                <div className="flex-1">
+                  <p className="font-medium text-foreground">
+                    {billingKey.cardInfo.issuer}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {billingKey.cardInfo.maskedNumber}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDeleteBillingKeyClick}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  해제
+                </Button>
+              </div>
+
+              {billingSubscription?.nextBillingDate && (
+                <p className="text-sm text-muted-foreground">
+                  다음 결제 예정일:{' '}
+                  <span className="font-medium text-foreground">
+                    {new Date(billingSubscription.nextBillingDate).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </p>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                자동 결제를 해제하면 구독 기간이 끝난 후 자동으로 무료 플랜으로 변경됩니다.
+              </p>
+            </div>
+          ) : (
+            /* 등록된 결제 수단이 없는 경우 */
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                자동 결제를 등록하면 구독 기간이 끝날 때 자동으로 결제됩니다.
+              </p>
+              <Button
+                onClick={handleRegisterBillingKey}
+                disabled={isBillingKeyLoading}
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                자동 결제 등록하기
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 플랜 카드 그리드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -355,6 +476,86 @@ export default function SubscriptionPage() {
                   </>
                 ) : (
                   '구독 취소하기'
+                )}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 자동 결제 해제 확인 모달 */}
+      {showDeleteBillingKeyDialog && (
+        <div
+          onClick={() => setShowDeleteBillingKeyDialog(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        >
+          <Card
+            onClick={(e) => e.stopPropagation()}
+            className="relative p-8 max-w-md w-full mx-4 bg-white shadow-2xl border-4 border-destructive rounded-2xl"
+          >
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setShowDeleteBillingKeyDialog(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="닫기"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 아이콘 */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <CreditCard size={48} className="text-destructive" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+              자동 결제를 해제할까요?
+            </h3>
+
+            <p className="text-gray-600 mb-2 text-center">
+              자동 결제를 해제하면 구독 기간이 끝난 후 자동으로 무료 플랜으로 변경돼요
+            </p>
+            <p className="text-gray-600 mb-6 text-center text-sm">
+              현재 구독 기간이 끝날 때까지는 계속 사용할 수 있어요
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <Button
+                onClick={() => setShowDeleteBillingKeyDialog(false)}
+                variant="outline"
+                size="lg"
+                className="px-8"
+                disabled={isDeletingBillingKey}
+              >
+                {BUTTON_TEXT.cancel}
+              </Button>
+              <Button
+                onClick={handleConfirmDeleteBillingKey}
+                size="lg"
+                className="px-8 bg-destructive hover:bg-destructive/90 text-white"
+                disabled={isDeletingBillingKey}
+              >
+                {isDeletingBillingKey ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    해제 중...
+                  </>
+                ) : (
+                  '자동 결제 해제'
                 )}
               </Button>
             </div>
