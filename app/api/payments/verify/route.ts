@@ -117,15 +117,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const portoneData = (await portoneResponse.json()) as PortOnePaymentVerifyResponse;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const portoneData = (await portoneResponse.json()) as any;
 
-    // 5. 결제 상태 확인
-    if (portoneData.status !== 'PAID') {
+    console.log('[Payment Verify] PortOne response data:', JSON.stringify(portoneData, null, 2));
+
+    // 5. 결제 상태 확인 (V2 API 응답 형식)
+    const paymentStatus = portoneData.status;
+    if (paymentStatus !== 'PAID') {
       // 결제 실패 - DB 업데이트
       await prisma.payment.update({
         where: { paymentId },
         data: {
-          status: portoneData.status,
+          status: paymentStatus,
           portoneData: portoneData as unknown as Prisma.InputJsonValue,
         },
       });
@@ -136,28 +140,35 @@ export async function POST(request: NextRequest) {
           error: '결제가 완료되지 않았어요',
           payment: {
             id: payment.id,
-            status: portoneData.status,
-            amount: portoneData.amount,
+            status: paymentStatus,
+            amount: portoneData.amount?.total || payment.amount,
           },
         },
         { status: 400 }
       );
     }
 
-    // 6. 결제 성공 - 트랜잭션으로 DB 업데이트
+    // 6. 결제 성공 - V2 API 응답에서 필요한 값 추출
+    const methodType = portoneData.method?.type || 'EASY_PAY';
+    const receiptUrl = portoneData.receipt?.url || null;
+    // customData는 V2에서 다른 위치에 있을 수 있음
+    const customData = portoneData.customData || (payment.portoneData as Record<string, unknown>)?.customData as Record<string, unknown> | undefined;
+
+    console.log('[Payment Verify] Extracted customData:', customData);
+
+    // 7. 트랜잭션으로 DB 업데이트
     const result = await prisma.$transaction(async (tx) => {
       // Payment 업데이트
       const updatedPayment = await tx.payment.update({
         where: { paymentId },
         data: {
           status: 'PAID',
-          method: portoneData.method || null,
+          method: methodType,
           portoneData: portoneData as unknown as Prisma.InputJsonValue,
-          receiptUrl: portoneData.receiptUrl || null,
+          receiptUrl: receiptUrl,
         },
       });
 
-      const customData = portoneData.customData as Record<string, unknown> | undefined;
       const purpose = customData?.purpose;
 
       // 7. 결제 목적에 따라 구독/크레딧 처리
