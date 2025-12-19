@@ -84,24 +84,27 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. PortOne 결제 요청 객체 생성
-    // channelKey가 없으면 기본값으로 토스페이 사용
-    const defaultChannelKey = 'channel-key-ac45bcb3-910c-4a2b-bc46-24ec05d20742';
+    // channelKey가 없으면 기본값으로 카카오페이 단건결제 사용
+    // 2025-12-19: 프로덕션 채널 키로 전환
+    const defaultChannelKey = 'channel-key-f320bf96-4e9a-4ef4-8a94-5e17d730216e'; // 카카오페이 단건결제 (프로덕션)
     const finalChannelKey = channelKey || defaultChannelKey;
 
     // payMethod가 없으면 channelKey에 따라 자동 설정
     let finalPayMethod = payMethod;
     if (!finalPayMethod) {
-      // 토스페이, 카카오페이는 EASY_PAY
-      if (finalChannelKey.includes('ac45bcb3') || finalChannelKey.includes('b67c5e30') || finalChannelKey.includes('5bf9403e')) {
+      // 카카오페이 프로덕션 채널은 EASY_PAY
+      // f320bf96: 단건결제 (CA25614310)
+      // 999ee55e: 정기결제 (CA63438855)
+      if (finalChannelKey.includes('f320bf96') || finalChannelKey.includes('999ee55e')) {
         finalPayMethod = 'EASY_PAY';
       }
       // 이니시스는 CARD (EASY_PAY 시 easyPayProvider 필수)
       else if (finalChannelKey.includes('7b85a467') || finalChannelKey.includes('2d471aaa')) {
         finalPayMethod = 'CARD';
       }
-      // 기타는 CARD
+      // 기타는 EASY_PAY (카카오페이 기본)
       else {
-        finalPayMethod = 'CARD';
+        finalPayMethod = 'EASY_PAY';
       }
     }
 

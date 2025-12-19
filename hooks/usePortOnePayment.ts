@@ -38,26 +38,27 @@ import type {
  * 사용 가능한 결제 채널 (포트원 콘솔에서 설정된 채널)
  *
  * @description
- * 포트원 테스트 환경 채널키 (2025-11-12 확인)
+ * 포트원 프로덕션 환경 채널키 (2025-12-19 업데이트)
  *
  * 2025-12-02: 결제 방법 카카오페이로 단일화
- * - 구독 결제: KAKAOPAY_SUBSCRIPTION
- * - 크레딧 결제: KAKAOPAY_ONETIME
+ * 2025-12-19: 테스트 → 프로덕션 채널 키 전환
+ * - 구독 결제: KAKAOPAY_SUBSCRIPTION (CA63438855)
+ * - 크레딧 결제: KAKAOPAY_ONETIME (CA25614310)
  */
 export const PAYMENT_CHANNELS = {
-  // 카카오페이 일반결제 (크레딧 구매용)
+  // 카카오페이 일반결제 (크레딧 구매용) - 프로덕션
   KAKAOPAY_ONETIME: {
-    key: 'channel-key-b67c5e30-67da-4b6d-bb60-abdcea65ab96',
+    key: 'channel-key-f320bf96-4e9a-4ef4-8a94-5e17d730216e',
     name: '카카오페이',
     pgProvider: 'kakaopay',
-    mid: 'TC0ONETIME',
+    mid: 'CA25614310',
   },
-  // 카카오페이 정기결제 (구독용)
+  // 카카오페이 정기결제 (구독용) - 프로덕션
   KAKAOPAY_SUBSCRIPTION: {
-    key: 'channel-key-5bf9403e-6158-4a41-b756-0785c9dbbc32',
+    key: 'channel-key-999ee55e-eafd-4203-b87b-4733326232b0',
     name: '카카오페이 (정기)',
     pgProvider: 'kakaopay',
-    mid: 'TCSUBSCRIP',
+    mid: 'CA63438855',
   },
 
   // ===== 미사용 결제 채널 (향후 확장 대비 보존) =====

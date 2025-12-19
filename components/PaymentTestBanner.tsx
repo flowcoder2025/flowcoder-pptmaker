@@ -4,8 +4,8 @@
  * 결제 테스트 환경 안내 배너
  *
  * @description
- * 카드사 심사를 위해 결제 시스템이 오픈되었지만,
- * 실제 결제가 이루어지지 않는다는 점을 명확히 안내하는 배너입니다.
+ * 결제 시스템이 테스트 모드일 때 안내하는 배너입니다.
+ * NEXT_PUBLIC_PAYMENT_ENABLED=true이면 배너가 숨겨집니다.
  *
  * @example
  * ```tsx
@@ -16,6 +16,9 @@
 // 배포 환경 감지
 const DEPLOYMENT_ENV = process.env.NEXT_PUBLIC_DEPLOYMENT_ENV || 'standalone';
 const isAppsInToss = DEPLOYMENT_ENV === 'apps-in-toss';
+
+// 결제 활성화 여부 (프로덕션이면 배너 숨김)
+const isPaymentEnabled = process.env.NEXT_PUBLIC_PAYMENT_ENABLED === 'true';
 
 /**
  * 배너 텍스트 (환경별 분기)
@@ -32,6 +35,11 @@ const BANNER_TEXT = {
 } as const;
 
 export default function PaymentTestBanner() {
+  // 프로덕션 환경에서는 배너 숨김
+  if (isPaymentEnabled) {
+    return null;
+  }
+
   return (
     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
       <div className="flex items-start gap-3">
