@@ -195,11 +195,17 @@ export async function POST(request: NextRequest) {
           throw new Error('subscriptionId is missing');
         }
 
+        // 구독 기간 설정: 현재 시간 + 30일
+        const now = new Date();
+        const endDate = new Date(now);
+        endDate.setDate(endDate.getDate() + 30);
+
         const subscription = await tx.subscription.update({
           where: { id: subscriptionId },
           data: {
             status: 'ACTIVE',
-            // 구독 기간은 별도 로직으로 계산 (예: 현재 시간 + 1개월)
+            startDate: now,
+            endDate: endDate,
           },
         });
 
