@@ -43,14 +43,22 @@ export async function GET(request: NextRequest) {
       retriesAttempted: 0,
     };
 
-    // 2. 만료된 구독 처리 (ACTIVE → EXPIRED)
+    // 2. 만료된 구독 처리 (ACTIVE/CANCELED → EXPIRED → FREE 다운그레이드)
+    // ACTIVE이면서 자동갱신이 아닌 구독, 또는 CANCELED 상태의 구독
     const expiredSubscriptions = await prisma.subscription.findMany({
       where: {
-        status: 'ACTIVE',
+        OR: [
+          {
+            status: 'ACTIVE',
+            autoRenewal: false, // 자동 갱신이 아닌 ACTIVE 구독
+          },
+          {
+            status: 'CANCELED', // 취소된 구독 (기간 종료 시 만료 처리)
+          },
+        ],
         endDate: {
           lt: now,
         },
-        autoRenewal: false, // 자동 갱신이 아닌 구독만
       },
       include: {
         user: {
@@ -60,11 +68,20 @@ export async function GET(request: NextRequest) {
     });
 
     for (const sub of expiredSubscriptions) {
+      const wasCanceled = sub.status === 'CANCELED';
+
       await prisma.$transaction([
-        // 구독 상태 업데이트
+        // 구독을 FREE 플랜으로 다운그레이드
         prisma.subscription.update({
           where: { id: sub.id },
-          data: { status: 'EXPIRED' },
+          data: {
+            status: 'ACTIVE', // FREE 플랜은 항상 ACTIVE
+            tier: 'FREE',
+            autoRenewal: false,
+            billingKeyId: null,
+            nextBillingDate: null,
+            failedPaymentCount: 0,
+          },
         }),
         // 만료 알림 생성
         prisma.subscriptionNotification.create({
@@ -72,13 +89,15 @@ export async function GET(request: NextRequest) {
             subscriptionId: sub.id,
             userId: sub.userId,
             type: 'EXPIRED',
-            title: '구독이 만료되었어요',
-            message: `${sub.tier} 플랜 구독이 만료되었어요. 계속 이용하시려면 다시 구독해주세요.`,
+            title: wasCanceled ? '구독 기간이 종료되었어요' : '구독이 만료되었어요',
+            message: wasCanceled
+              ? `${sub.tier} 플랜 구독 기간이 종료되어 무료 플랜으로 변경되었어요.`
+              : `${sub.tier} 플랜 구독이 만료되어 무료 플랜으로 변경되었어요. 계속 이용하시려면 다시 구독해주세요.`,
           },
         }),
       ]);
       results.expired++;
-      console.log(`[Cron] Expired subscription: ${sub.id} (${sub.user.email})`);
+      console.log(`[Cron] Expired subscription: ${sub.id} (${sub.user.email}), wasCanceled: ${wasCanceled}`);
     }
 
     // 3. 만료 임박 알림 (3일, 1일 전)
@@ -90,11 +109,14 @@ export async function GET(request: NextRequest) {
     oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
     oneDayFromNow.setHours(23, 59, 59, 999);
 
-    // 3일 전 알림 대상
+    // 3일 전 알림 대상 (ACTIVE + 자동갱신 OFF, 또는 CANCELED)
     const expiringSoon3Days = await prisma.subscription.findMany({
       where: {
-        status: 'ACTIVE',
-        autoRenewal: false,
+        OR: [
+          { status: 'ACTIVE', autoRenewal: false },
+          { status: 'CANCELED' },
+        ],
+        tier: { not: 'FREE' }, // FREE 플랜 제외
         endDate: {
           gte: new Date(threeDaysFromNow.getTime() - 24 * 60 * 60 * 1000), // 3일 전 시작
           lt: threeDaysFromNow, // 3일 전 끝
@@ -112,24 +134,30 @@ export async function GET(request: NextRequest) {
     });
 
     for (const sub of expiringSoon3Days) {
+      const isCanceled = sub.status === 'CANCELED';
       await prisma.subscriptionNotification.create({
         data: {
           subscriptionId: sub.id,
           userId: sub.userId,
           type: 'EXPIRING_SOON',
-          title: '구독 만료 3일 전이에요',
-          message: `${sub.tier} 플랜 구독이 3일 후 만료돼요. 자동 갱신을 설정하시면 편리하게 이용하실 수 있어요.`,
+          title: isCanceled ? '구독 기간 종료 3일 전이에요' : '구독 만료 3일 전이에요',
+          message: isCanceled
+            ? `${sub.tier} 플랜 이용 기간이 3일 후 종료돼요. 종료 후 무료 플랜으로 변경됩니다.`
+            : `${sub.tier} 플랜 구독이 3일 후 만료돼요. 자동 갱신을 설정하시면 편리하게 이용하실 수 있어요.`,
           daysBeforeExpiry: 3,
         },
       });
       results.notificationsCreated++;
     }
 
-    // 1일 전 알림 대상
+    // 1일 전 알림 대상 (ACTIVE + 자동갱신 OFF, 또는 CANCELED)
     const expiringSoon1Day = await prisma.subscription.findMany({
       where: {
-        status: 'ACTIVE',
-        autoRenewal: false,
+        OR: [
+          { status: 'ACTIVE', autoRenewal: false },
+          { status: 'CANCELED' },
+        ],
+        tier: { not: 'FREE' }, // FREE 플랜 제외
         endDate: {
           gte: new Date(oneDayFromNow.getTime() - 24 * 60 * 60 * 1000),
           lt: oneDayFromNow,
@@ -146,13 +174,16 @@ export async function GET(request: NextRequest) {
     });
 
     for (const sub of expiringSoon1Day) {
+      const isCanceled = sub.status === 'CANCELED';
       await prisma.subscriptionNotification.create({
         data: {
           subscriptionId: sub.id,
           userId: sub.userId,
           type: 'EXPIRING_SOON',
-          title: '구독이 내일 만료돼요',
-          message: `${sub.tier} 플랜 구독이 내일 만료돼요. 계속 이용하시려면 자동 갱신을 설정하거나 직접 갱신해주세요.`,
+          title: isCanceled ? '구독 기간이 내일 종료돼요' : '구독이 내일 만료돼요',
+          message: isCanceled
+            ? `${sub.tier} 플랜 이용 기간이 내일 종료돼요. 종료 후 무료 플랜으로 변경됩니다.`
+            : `${sub.tier} 플랜 구독이 내일 만료돼요. 계속 이용하시려면 자동 갱신을 설정하거나 직접 갱신해주세요.`,
           daysBeforeExpiry: 1,
         },
       });
