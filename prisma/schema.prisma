@@ -131,19 +131,32 @@ model Subscription {
   id        String   @id @default(cuid())
   userId    String   @unique
   tier      String   // 'FREE', 'PRO', 'PREMIUM'
-  status    String   // 'ACTIVE', 'CANCELED', 'EXPIRED'
+  status    String   // 'ACTIVE', 'CANCELED', 'EXPIRED', 'PAST_DUE'
 
   startDate DateTime
   endDate   DateTime?
 
+  // 자동 갱신 설정
+  autoRenewal       Boolean   @default(false)  // 자동 갱신 여부
+  billingKeyId      String?                    // 연결된 빌링키 ID
+  nextBillingDate   DateTime?                  // 다음 결제 예정일
+
+  // 결제 실패 추적
+  failedPaymentCount  Int       @default(0)   // 연속 결제 실패 횟수
+  lastPaymentAttempt  DateTime?               // 마지막 결제 시도일
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingKey BillingKey? @relation(fields: [billingKeyId], references: [id], onDelete: SetNull)
   payments  Payment[]
+  notifications SubscriptionNotification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([tier])
   @@index([status])
+  @@index([endDate])           // 만료 체크용
+  @@index([nextBillingDate])   // 정기결제 대상 조회용
   @@map("subscriptions")
 }
 
@@ -322,6 +335,7 @@ model BillingKey {
 
   // Relations
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -329,4 +343,38 @@ model BillingKey {
   @@index([userId])
   @@index([isActive])
   @@map("billing_keys")
+}
+
+// ============================================
+// Subscription Notification Model
+// ============================================
+
+model SubscriptionNotification {
+  id              String    @id @default(cuid())
+  subscriptionId  String
+  userId          String
+
+  // 알림 타입
+  type            String    // 'EXPIRING_SOON', 'EXPIRED', 'PAYMENT_FAILED', 'PAYMENT_SUCCESS', 'RENEWED'
+
+  // 알림 메시지
+  title           String
+  message         String    @db.Text
+
+  // 만료 전 알림의 경우 남은 일수
+  daysBeforeExpiry Int?
+
+  // 읽음 상태
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+
+  // Relations
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+
+  @@index([userId, isRead])
+  @@index([subscriptionId])
+  @@index([createdAt])
+  @@map("subscription_notifications")
 }

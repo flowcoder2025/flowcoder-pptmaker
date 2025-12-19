@@ -17,6 +17,7 @@ import {
 import { User, FileText, LogOut, ChevronDown, Home, Sparkles, Star, Gem, Receipt } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { BUTTON_TEXT } from '@/lib/text-config';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 /**
  * NavigationBar 컴포넌트
@@ -127,6 +128,9 @@ export default function NavigationBar() {
               );
             })}
           </ul>
+
+          {/* 알림 벨 (로그인 시만 표시) */}
+          {session && <NotificationBell />}
 
           {/* 인증 버튼/메뉴 */}
           <div className="ml-2">
