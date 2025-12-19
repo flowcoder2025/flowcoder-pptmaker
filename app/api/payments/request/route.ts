@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
         subscriptionId: finalSubscriptionId,
         creditAmount,
       },
-      redirectUrl: `${process.env.NEXTAUTH_URL}/payments/result`,
+      redirectUrl: `${process.env.NEXTAUTH_URL}/payments/result?paymentId=${paymentId}`,
       noticeUrls: [`${process.env.NEXTAUTH_URL}/api/payments/webhook`],
     } as PortOnePaymentRequest;
 

@@ -35,9 +35,9 @@ function PaymentResultContent() {
   const [error, setError] = useState<string | null>(null);
 
   // URL params
-  const success = searchParams.get('success') === 'true';
   const paymentId = searchParams.get('paymentId');
   const errorMessage = searchParams.get('error');
+  const [verifySuccess, setVerifySuccess] = useState<boolean | null>(null);
 
   // 로그인 체크
   useEffect(() => {
@@ -46,31 +46,94 @@ function PaymentResultContent() {
     }
   }, [status, router]);
 
-  // 결제 정보 조회
+  // 결제 검증 및 정보 조회
   useEffect(() => {
-    if (status === 'authenticated' && success && paymentId) {
-      fetchPaymentInfo(paymentId);
-    } else {
+    if (status === 'authenticated' && paymentId) {
+      verifyAndFetchPayment(paymentId);
+    } else if (status === 'authenticated' && !paymentId) {
+      // paymentId 없으면 실패
+      setVerifySuccess(false);
       setIsLoading(false);
     }
-  }, [status, success, paymentId]);
+  }, [status, paymentId]);
 
-  const fetchPaymentInfo = async (id: string) => {
+  // 결제 검증 후 정보 조회
+  const verifyAndFetchPayment = async (id: string) => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/payments/${id}`);
-      if (!res.ok) {
-        throw new Error('결제 정보를 가져올 수 없어요');
+
+      // 먼저 결제 정보 조회하여 txId 확인
+      const infoRes = await fetch(`/api/payments/${id}`);
+      if (!infoRes.ok) {
+        // 결제 정보가 없으면 verify 시도
+        const verifyRes = await fetch('/api/payments/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId: id, txId: id }),
+        });
+
+        if (!verifyRes.ok) {
+          setVerifySuccess(false);
+          setError('결제 검증에 실패했어요');
+          return;
+        }
+
+        const verifyData = await verifyRes.json();
+        if (verifyData.success) {
+          setVerifySuccess(true);
+          setPaymentData(verifyData);
+        } else {
+          setVerifySuccess(false);
+          setError(verifyData.error || '결제가 완료되지 않았어요');
+        }
+        return;
       }
-      const data = await res.json();
-      setPaymentData(data);
+
+      const data = await infoRes.json();
+
+      // 이미 PAID 상태인지 확인
+      if (data.payment?.status === 'PAID') {
+        setVerifySuccess(true);
+        setPaymentData(data);
+        return;
+      }
+
+      // PENDING 상태면 포트원 API로 검증 시도
+      if (data.payment?.status === 'PENDING') {
+        const verifyRes = await fetch('/api/payments/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId: id, txId: id }),
+        });
+
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setVerifySuccess(true);
+            setPaymentData(verifyData);
+            return;
+          }
+        }
+      }
+
+      // 그 외 상태는 실패
+      if (data.payment?.status === 'FAILED' || data.payment?.status === 'CANCELED') {
+        setVerifySuccess(false);
+        setError(data.payment?.failReason || '결제가 완료되지 않았어요');
+      } else {
+        // 상태 불명확 - 데이터는 보여주되 성공으로 처리
+        setVerifySuccess(true);
+        setPaymentData(data);
+      }
     } catch (err) {
-      console.error('결제 정보 조회 오류:', err);
+      console.error('결제 검증 오류:', err);
+      setVerifySuccess(false);
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했어요');
     } finally {
       setIsLoading(false);
     }
   };
+
 
   // 로딩 상태
   if (status === 'loading' || isLoading) {
@@ -88,7 +151,7 @@ function PaymentResultContent() {
   }
 
   // 결제 실패
-  if (!success) {
+  if (verifySuccess === false) {
     return (
       <MaxWidthContainer className="py-8 lg:py-12">
         <div className="max-w-2xl mx-auto">
@@ -110,7 +173,7 @@ function PaymentResultContent() {
               className="text-base lg:text-lg"
               style={{ color: TOSS_COLORS.textSecondary }}
             >
-              {errorMessage || '결제 처리 중 문제가 발생했어요'}
+              {error || errorMessage || '결제 처리 중 문제가 발생했어요'}
             </p>
           </div>
 
@@ -126,7 +189,7 @@ function PaymentResultContent() {
               className="text-sm"
               style={{ color: TOSS_COLORS.textSecondary }}
             >
-              {errorMessage || '사용자가 결제를 취소했거나, 결제 처리 중 오류가 발생했어요'}
+              {error || errorMessage || '사용자가 결제를 취소했거나, 결제 처리 중 오류가 발생했어요'}
             </p>
           </Card>
 
