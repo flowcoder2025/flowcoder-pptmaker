@@ -93,20 +93,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 포트원 API 호출
+    // 포트원 V2 API 호출 (storeId 필수)
+    const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     const portoneResponse = await fetch(
-      `https://api.portone.io/v2/payments/${paymentId}`,
+      `https://api.portone.io/payments/${paymentId}?storeId=${storeId}`,
       {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${apiSecret}`,
+          Authorization: `PortOne ${apiSecret}`,
           'Content-Type': 'application/json',
         },
       }
     );
 
+    console.log('[Payment Verify] PortOne API response status:', portoneResponse.status);
+
     if (!portoneResponse.ok) {
-      console.error('[Payment Verify] PortOne API error:', portoneResponse.status);
+      const errorText = await portoneResponse.text();
+      console.error('[Payment Verify] PortOne API error:', portoneResponse.status, errorText);
       return NextResponse.json(
         { success: false, error: '결제 검증 중 오류가 발생했어요' },
         { status: 500 }
