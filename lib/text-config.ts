@@ -196,12 +196,33 @@ export const PLACEHOLDER_TEXT = {
 } as const;
 
 /**
+ * 공지/알림 텍스트
+ *
+ * 시스템 공지사항이나 중요 알림에 사용되는 텍스트입니다.
+ */
+export const ANNOUNCEMENT_TEXT = {
+  // ========================================
+  // 결제 시스템 관련 (Payment System)
+  // ========================================
+  paymentSystemReady: isAppsInToss
+    ? '🎉 결제 시스템이 완성됐어요! 이제 구독과 크레딧 결제가 가능해요.'
+    : '🎉 결제 시스템이 완성되었습니다! 이제 구독과 크레딧 결제가 가능합니다.',
+  paymentSystemReadyTitle: isAppsInToss
+    ? '결제 시스템 오픈!'
+    : '결제 시스템 오픈',
+  paymentSystemReadyDescription: isAppsInToss
+    ? 'Pro 구독으로 광고 없이 더 많은 슬라이드를 만들어보세요!'
+    : 'Pro 구독으로 광고 없이 더 많은 슬라이드를 만들어보세요.',
+} as const;
+
+/**
  * TypeScript 타입 정의
  */
 export type ButtonTextKey = keyof typeof BUTTON_TEXT;
 export type StatusTextKey = keyof typeof STATUS_TEXT;
 export type ConfirmTextKey = keyof typeof CONFIRM_TEXT;
 export type PlaceholderTextKey = keyof typeof PLACEHOLDER_TEXT;
+export type AnnouncementTextKey = keyof typeof ANNOUNCEMENT_TEXT;
 
 /**
  * 현재 배포 환경 확인 유틸리티

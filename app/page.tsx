@@ -1,21 +1,56 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
-import { BUTTON_TEXT } from '@/lib/text-config';
+import { BUTTON_TEXT, ANNOUNCEMENT_TEXT } from '@/lib/text-config';
 import { Bot, Palette, PenLine, Search, Zap, Save } from 'lucide-react';
+import { toast } from 'sonner';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 
+// 결제 활성화 여부 확인
+const isPaymentEnabled = process.env.NEXT_PUBLIC_PAYMENT_ENABLED === 'true';
+
+// 로컬스토리지 키
+const PAYMENT_ANNOUNCEMENT_KEY = 'pptmaker_payment_announcement_shown';
+
 export default function HomePage() {
   const router = useRouter();
   const { plan } = useSubscriptionStore();
+
+  // 결제 시스템 완성 공지 토스트 (한 번만 표시)
+  useEffect(() => {
+    // 결제가 활성화된 경우에만 공지
+    if (!isPaymentEnabled) return;
+
+    // 이미 공지를 본 경우 스킵
+    const hasSeenAnnouncement = localStorage.getItem(PAYMENT_ANNOUNCEMENT_KEY);
+    if (hasSeenAnnouncement) return;
+
+    // 토스트 표시 (약간의 딜레이를 주어 자연스럽게)
+    const timer = setTimeout(() => {
+      toast.success(ANNOUNCEMENT_TEXT.paymentSystemReady, {
+        duration: 6000,
+        description: ANNOUNCEMENT_TEXT.paymentSystemReadyDescription,
+        action: {
+          label: '구독하기',
+          onClick: () => router.push('/subscription'),
+        },
+      });
+
+      // 공지 확인 표시 저장
+      localStorage.setItem(PAYMENT_ANNOUNCEMENT_KEY, 'true');
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [router]);
 
   // 광고 표시 여부 결정 (유료 플랜은 광고 제거)
   const showAds = !PLAN_BENEFITS[plan].benefits.adFree;

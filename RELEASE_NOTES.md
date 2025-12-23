@@ -78,6 +78,17 @@
 
 ### ✨ Features
 
+#### 2025-12-23
+- **결제 시스템 완성 공지 토스트 추가**
+  - 카드사 심사 완료로 결제 시스템 정식 오픈
+  - 홈페이지 첫 방문 시 토스트 메시지로 공지
+    - "🎉 결제 시스템이 완성되었습니다! 이제 구독과 크레딧 결제가 가능합니다."
+    - "구독하기" 버튼으로 구독 페이지 바로 이동 가능
+  - localStorage로 중복 표시 방지 (한 번만 표시)
+  - 환경별 텍스트 분기 지원 (standalone/apps-in-toss)
+  - lib/text-config.ts에 ANNOUNCEMENT_TEXT 섹션 추가
+  - 환경변수 `NEXT_PUBLIC_PAYMENT_ENABLED=true` 필요
+
 #### 2025-11-15
 - **ReportTwoColumn 슬라이드 표 가독성 개선**
   - TossDefaultTemplate.renderReportTwoColumn() 수정
