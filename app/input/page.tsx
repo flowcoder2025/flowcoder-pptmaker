@@ -303,15 +303,15 @@ export default function InputPage() {
                   <span>보유 크래딧</span>
                 </div>
                 {isPremiumUser && (
-                  <span className="text-xs text-blue-600">Pro 플랜</span>
+                  <span className="text-xs text-blue-600">{plan === 'premium' ? 'Premium' : 'Pro'} 플랜</span>
                 )}
               </div>
               <div className="text-2xl font-bold text-blue-700">
-                {hasUnlimitedGeneration(plan) ? '무제한' : `${totalCredits} 크래딧`}
+                {totalCredits} 크래딧
               </div>
               {hasUnlimitedGeneration(plan) && (
                 <p className="text-xs text-blue-600 mt-1">
-                  심층검색 · 고품질 생성 무제한
+                  ✨ 심층검색 · 고품질 생성 무제한
                 </p>
               )}
             </Card>
