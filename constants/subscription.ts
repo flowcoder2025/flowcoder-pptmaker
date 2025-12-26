@@ -134,3 +134,30 @@ export function getPremiumTemplatesAccess(plan: SubscriptionPlan): 'none' | 'dis
 export function hasUnlimitedGeneration(plan: SubscriptionPlan): boolean {
   return PLAN_BENEFITS[plan].benefits.unlimitedGeneration;
 }
+
+/**
+ * 초과 슬라이드 수 계산
+ * @param plan 현재 구독 플랜
+ * @param slideCount 생성할 슬라이드 수
+ * @returns 초과 슬라이드 수 (0 이상)
+ */
+export function getExtraSlideCount(plan: SubscriptionPlan, slideCount: number): number {
+  const maxSlides = PLAN_BENEFITS[plan].benefits.maxSlides;
+  return Math.max(0, slideCount - maxSlides);
+}
+
+/**
+ * 초과 슬라이드 크레딧 비용 계산
+ * @param plan 현재 구독 플랜
+ * @param slideCount 생성할 슬라이드 수
+ * @param creditPerSlide 슬라이드당 크레딧 비용 (기본값: CREDIT_COST.EXTRA_SLIDE)
+ * @returns 필요한 크레딧 수
+ */
+export function getExtraSlideCreditCost(
+  plan: SubscriptionPlan,
+  slideCount: number,
+  creditPerSlide: number = 2
+): number {
+  const extraSlides = getExtraSlideCount(plan, slideCount);
+  return extraSlides * creditPerSlide;
+}

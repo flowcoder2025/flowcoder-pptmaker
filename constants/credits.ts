@@ -22,6 +22,12 @@ export const CREDIT_COST = {
 
   /** 고품질 생성: 50 크래딧 (500원) */
   QUALITY_GENERATION: 50,
+
+  /** 초과 슬라이드: 2 크래딧/장 (20원/장)
+   * Pro 플랜(20장 제한) 초과 시 적용
+   * Premium 업그레이드(3 크래딧/장)보다 저렴하게 설정
+   */
+  EXTRA_SLIDE: 2,
 } as const;
 
 /**

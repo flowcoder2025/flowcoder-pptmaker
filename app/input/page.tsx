@@ -24,7 +24,8 @@ import {
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
-import { PLAN_BENEFITS, hasUnlimitedGeneration } from '@/constants/subscription';
+import { PLAN_BENEFITS, hasUnlimitedGeneration, getExtraSlideCount, getExtraSlideCreditCost } from '@/constants/subscription';
+import { CREDIT_COST } from '@/constants/credits';
 import { TEMPLATE_EXAMPLES } from '@/constants/design';
 import { STYLE_THEMES } from '@/constants/themes';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
@@ -685,7 +686,7 @@ export default function InputPage() {
                 value={[targetSlideCount]}
                 onValueChange={([value]) => setTargetSlideCount(value)}
                 min={5}
-                max={PLAN_BENEFITS[plan].benefits.maxSlides}
+                max={plan === 'pro' ? 50 : PLAN_BENEFITS[plan].benefits.maxSlides}
                 step={1}
                 className="mb-4"
                 disabled={pageFormat === 'one-page'}
@@ -693,7 +694,7 @@ export default function InputPage() {
 
               <div className="flex justify-between text-xs text-gray-500 mb-3">
                 <span>5장</span>
-                <span>{PLAN_BENEFITS[plan].benefits.maxSlides}장</span>
+                <span>{plan === 'pro' ? '50장' : `${PLAN_BENEFITS[plan].benefits.maxSlides}장`}</span>
               </div>
 
               {pageFormat === 'one-page' ? (
@@ -704,16 +705,39 @@ export default function InputPage() {
                   </p>
                 </div>
               ) : (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="flex items-center gap-1.5 text-xs text-yellow-800">
-                    <AlertTriangle className="w-4 h-4" />
-                    AI 특성상 ±2-3장 오차가 있을 수 있어요
-                  </p>
-                  <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
-                    <Lightbulb className="w-4 h-4" />
-                    {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 최대 {PLAN_BENEFITS[plan].benefits.maxSlides}장
-                  </p>
-                </div>
+                <>
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="flex items-center gap-1.5 text-xs text-yellow-800">
+                      <AlertTriangle className="w-4 h-4" />
+                      AI 특성상 ±2-3장 오차가 있을 수 있어요
+                    </p>
+                    <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
+                      <Lightbulb className="w-4 h-4" />
+                      {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 기본 {PLAN_BENEFITS[plan].benefits.maxSlides}장
+                    </p>
+                  </div>
+
+                  {/* Pro 플랜 초과 슬라이드 비용 안내 */}
+                  {plan === 'pro' && getExtraSlideCount(plan, targetSlideCount) > 0 && (
+                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <CreditCard className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-blue-800">
+                            초과 슬라이드 비용
+                          </p>
+                          <p className="text-xs text-blue-700 mt-1">
+                            기본 20장 초과: <span className="font-bold">+{getExtraSlideCount(plan, targetSlideCount)}장</span>
+                          </p>
+                          <p className="text-xs text-blue-700">
+                            추가 비용: <span className="font-bold">{getExtraSlideCreditCost(plan, targetSlideCount, CREDIT_COST.EXTRA_SLIDE)} 크레딧</span>
+                            <span className="text-gray-500 ml-1">({CREDIT_COST.EXTRA_SLIDE} 크레딧/장)</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

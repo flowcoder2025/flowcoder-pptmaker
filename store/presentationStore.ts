@@ -323,6 +323,29 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         }
       }
 
+      // 3. Pro 플랜 초과 슬라이드 크레딧 차감 (20장 초과 시 2 크레딧/장)
+      const { getExtraSlideCount, getExtraSlideCreditCost } = await import('@/constants/subscription');
+      const { CREDIT_COST } = await import('@/constants/credits');
+
+      if (subscriptionStore.plan === 'pro') {
+        const extraSlides = getExtraSlideCount('pro', targetSlideCount);
+
+        if (extraSlides > 0) {
+          const extraSlideCost = getExtraSlideCreditCost('pro', targetSlideCount, CREDIT_COST.EXTRA_SLIDE);
+          const hasCredits = creditStore.canUseCredits(extraSlideCost);
+
+          if (!hasCredits) {
+            throw new Error(`크레딧이 부족해요. 초과 슬라이드 ${extraSlides}장을 생성하려면 ${extraSlideCost} 크레딧이 필요해요.`);
+          }
+
+          const success = await creditStore.useCredits(extraSlideCost);
+          if (!success) {
+            throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+          }
+          console.log(`💳 초과 슬라이드 크레딧 차감: -${extraSlideCost} (${extraSlides}장 × ${CREDIT_COST.EXTRA_SLIDE} 크레딧)`);
+        }
+      }
+
       // 멀티모달 분기: 파일 첨부가 있으면 /api/generate 엔드포인트 호출
       if (attachments && attachments.length > 0) {
         console.log(`📎 멀티모달 생성 모드 (파일 ${attachments.length}개)`);
