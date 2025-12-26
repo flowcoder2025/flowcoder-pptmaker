@@ -585,7 +585,9 @@ function PlanCard({ plan, current, recommended, comingSoon, onSubscribe }: PlanC
 
   // 특징 목록
   const features = [
-    `슬라이드 ${info.benefits.maxSlides}페이지`,
+    plan === 'pro'
+      ? '슬라이드 20페이지 무료 (최대 50)'
+      : `슬라이드 ${info.benefits.maxSlides}페이지`,
     info.benefits.adFree ? '광고 제거' : '광고 시청 필요',
     info.benefits.hasWatermark ? '워터마크 표시' : '워터마크 제거',
     comingSoon
@@ -718,7 +720,7 @@ function PlanComparisonTable() {
     {
       name: '슬라이드 수',
       free: '10페이지',
-      pro: '20페이지',
+      pro: '20페이지 무료 (최대 50)',
       premium: '50페이지',
     },
     {
