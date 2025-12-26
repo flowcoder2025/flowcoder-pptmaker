@@ -8,7 +8,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT, ANNOUNCEMENT_TEXT } from '@/lib/text-config';
-import { Bot, Palette, PenLine, Search, Zap, Save } from 'lucide-react';
+import { Bot, Palette, PenLine, Search, Zap, Save, Check, Star, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAd from '@/components/ads/KakaoAd';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
@@ -224,29 +224,134 @@ export default function HomePage() {
         </MaxWidthContainer>
       </div>
 
-      {/* CTA Section */}
-      <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 text-center relative px-4">
-        <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-foreground">
-          지금 바로 시작해보세요
+      {/* Pricing Preview Section */}
+      <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 px-4">
+        <h2 className="text-2xl sm:text-4xl font-bold text-center mb-4 text-foreground">
+          합리적인 가격
         </h2>
-        <p className="text-base sm:text-lg mb-6 sm:mb-8 text-muted-foreground">
-          무료 플랜으로 시작해서 원하는 프리젠테이션을 만들어요
+        <p className="text-center text-muted-foreground mb-8 sm:mb-12">
+          필요에 맞는 플랜을 선택하세요
         </p>
-        <Button
-          onClick={() => router.push('/input')}
-          size="lg"
-          className="min-w-[200px]"
-        >
-          ✨ {BUTTON_TEXT.startFree}
-        </Button>
 
-        {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}
-        {showAds && (
-          <div className="hidden xl:block fixed right-4 top-24 z-30">
-            <KakaoAd />
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {/* Free Plan */}
+          <Card className="p-6 text-center border-border hover:shadow-lg transition-shadow">
+            <Star className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-xl font-bold mb-2 text-foreground">무료</h3>
+            <p className="text-3xl font-bold text-primary mb-4">₩0</p>
+            <ul className="space-y-2 text-sm text-left mb-6">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>슬라이드 10장</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>기본 템플릿</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">광고 표시</span>
+              </li>
+            </ul>
+            <Button
+              onClick={() => router.push('/input')}
+              variant="outline"
+              className="w-full"
+            >
+              무료로 시작
+            </Button>
+          </Card>
+
+          {/* Pro Plan - Recommended */}
+          <Card className="p-6 text-center border-primary border-2 hover:shadow-lg transition-shadow relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full">
+              추천
+            </div>
+            <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
+            <h3 className="text-xl font-bold mb-2 text-foreground">Pro</h3>
+            <p className="text-3xl font-bold text-primary mb-1">₩7,900</p>
+            <p className="text-xs text-muted-foreground mb-4">/ 월</p>
+            <ul className="space-y-2 text-sm text-left mb-6">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span className="font-semibold text-blue-700">20장 무료 (최대 50장)</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>심층검색 · 고품질 생성 무제한</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>광고 제거 · 워터마크 제거</span>
+              </li>
+            </ul>
+            <Button
+              onClick={() => router.push('/subscription')}
+              className="w-full"
+            >
+              Pro 구독하기
+            </Button>
+          </Card>
+
+          {/* Premium Plan - Coming Soon */}
+          <Card className="p-6 text-center border-border hover:shadow-lg transition-shadow opacity-75">
+            <Sparkles className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-xl font-bold mb-2 text-foreground">Premium</h3>
+            <p className="text-xl font-semibold text-muted-foreground mb-4">출시 예정</p>
+            <ul className="space-y-2 text-sm text-left mb-6 text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>슬라이드 50장 무제한</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>심층검색 · 고품질 생성 무제한</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>프리미엄 템플릿</span>
+              </li>
+            </ul>
+            <Button
+              onClick={() => window.open('https://forms.gle/xW9sUdkiVCQ715Xb8', '_blank')}
+              variant="outline"
+              className="w-full"
+            >
+              출시 알림 받기
+            </Button>
+          </Card>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Pro 플랜은 20장까지 무제한 무료, 21장부터 2 크레딧/장으로 최대 50장 생성 가능
+        </p>
       </MaxWidthContainer>
+
+      {/* CTA Section */}
+      <div className="bg-secondary">
+        <MaxWidthContainer className="py-12 sm:py-20 lg:py-24 text-center relative px-4">
+          <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-foreground">
+            지금 바로 시작해보세요
+          </h2>
+          <p className="text-base sm:text-lg mb-6 sm:mb-8 text-muted-foreground">
+            무료 플랜으로 시작해서 원하는 프리젠테이션을 만들어요
+          </p>
+          <Button
+            onClick={() => router.push('/input')}
+            size="lg"
+            className="min-w-[200px]"
+          >
+            ✨ {BUTTON_TEXT.startFree}
+          </Button>
+
+          {/* 오른쪽 여백에 세로 광고 (절대 위치, 무료 플랜만) */}
+          {showAds && (
+            <div className="hidden xl:block fixed right-4 top-24 z-30">
+              <KakaoAd />
+            </div>
+          )}
+        </MaxWidthContainer>
+      </div>
 
       {/* 하단 고정 가로 배너 광고 - 데스크톱 (무료 플랜만) */}
       {showAds && (
