@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import DownloadProgressModal from '@/components/DownloadProgressModal';
+import PremiumUpgradeButton from '@/components/premium/PremiumUpgradeButton';
 import type { HTMLSlide } from '@/types/slide';
 
 /**
@@ -734,6 +735,18 @@ function PresentationCard({
             <Trash2 size={16} className="mr-1" />
             {BUTTON_TEXT.delete}
           </Button>
+        </div>
+
+        {/* 프리미엄 업그레이드 버튼 */}
+        <div className="mt-2">
+          <PremiumUpgradeButton
+            presentationId={presentation.id}
+            slides={presentation.slides}
+            size="sm"
+            showLabel={true}
+            className="w-full justify-center"
+            alreadyUpgraded={(presentation.metadata as { premiumUpgraded?: boolean } | null)?.premiumUpgraded}
+          />
         </div>
       </div>
     </Card>

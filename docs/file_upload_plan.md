@@ -532,7 +532,7 @@
 
     const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!)
     const model = genAI.getGenerativeModel({
-      model: useProModel ? 'gemini-2.5-pro' : 'gemini-2.5-flash'
+      model: useProModel ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview'
     })
 
     const modelName = useProModel ? 'Pro' : 'Flash'

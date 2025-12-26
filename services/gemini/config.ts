@@ -27,14 +27,19 @@ const API_KEY = getApiKey();
 // Gemini AI 인스턴스
 export const genAI = new GoogleGenerativeAI(API_KEY);
 
-// Gemini Flash 모델 (빠른 HTML 생성용)
+// Gemini 3 Flash 모델 (빠른 콘텐츠 생성용)
 export const geminiFlash = genAI.getGenerativeModel({
-  model: 'gemini-2.5-flash',
+  model: 'gemini-3-flash-preview',
 });
 
-// Gemini Pro 모델 (고품질 HTML 생성용)
+// Gemini 3 Pro 모델 (고품질 콘텐츠 생성용)
 export const geminiPro = genAI.getGenerativeModel({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3-pro-preview',
+});
+
+// Gemini 3 Flash Preview 모델 (프리미엄 업그레이드용) - geminiFlash와 동일
+export const gemini3Flash = genAI.getGenerativeModel({
+  model: 'gemini-3-flash-preview',
 });
 
 // 기본 설정
@@ -48,5 +53,11 @@ export const GEMINI_CONFIG = {
     temperature: 0.3, // 낮은 온도로 더 안정적인 JSON 생성
     maxOutputTokens: 32768, // 토큰 한도를 크게 늘림 (많은 슬라이드 처리 가능)
     responseMimeType: 'application/json', // JSON 형식으로 직접 응답 (파싱 안정성 향상)
+  },
+  // Gemini 3.0 Flash Preview (프리미엄 업그레이드용)
+  flash3: {
+    temperature: 0.4, // 약간 높은 온도로 창의적인 개선 허용
+    maxOutputTokens: 65536, // 충분한 출력 토큰 (HTML 전체 개선)
+    responseMimeType: 'text/plain', // HTML 출력
   },
 } as const;

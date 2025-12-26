@@ -17,6 +17,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Save, Download, Share2, Edit, X, Loader2, FileCode, FileText, Presentation, CheckCircle, AlertCircle } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
+import PremiumUpgradeButton from '@/components/premium/PremiumUpgradeButton';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { downloadHTML, downloadPDF, downloadPPTX } from '@/utils/download';
@@ -517,6 +518,16 @@ export default function ViewerContent() {
             <Share2 size={18} strokeWidth={2} />
             {!isMobile && '공유'}
           </Button>
+
+          {/* 프리미엄 업그레이드 버튼 */}
+          {currentPresentation?.id && currentPresentation?.slides && (
+            <PremiumUpgradeButton
+              presentationId={currentPresentation.id}
+              slides={currentPresentation.slides}
+              showLabel={!isMobile}
+              alreadyUpgraded={(currentPresentation.metadata as { premiumUpgraded?: boolean } | null)?.premiumUpgraded}
+            />
+          )}
 
           <Button
             onClick={handleEdit}

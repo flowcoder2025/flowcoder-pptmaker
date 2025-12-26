@@ -63,7 +63,7 @@ export async function parseDocument(file: FileAttachment): Promise<ParsedDocumen
   try {
     // Gemini API 초기화
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     // 문서 파싱 프롬프트
     const prompt = `이 파일의 모든 내용을 정확하고 상세하게 추출해주세요.

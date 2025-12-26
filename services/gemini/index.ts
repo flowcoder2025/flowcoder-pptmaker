@@ -46,3 +46,11 @@ export class GeminiService {
 
 // 기존 함수도 export
 export { generateSlideContent, type ContentGenerationOptions }
+
+// 프리미엄 업그레이드 서비스 export
+export {
+  upgradeSingleSlide,
+  upgradeAllSlides,
+  type PremiumUpgradeOptions,
+  type PremiumUpgradeResult,
+} from './premium-upgrade'

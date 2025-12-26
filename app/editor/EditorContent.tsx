@@ -9,8 +9,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb, Settings } from 'lucide-react';
+import { Save, Eye, Undo2, Redo2, Palette, Plus, Copy, Trash2, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb, Settings, Sparkles, X } from 'lucide-react';
 import { usePresentationStore } from '@/store/presentationStore';
+import PremiumUpgradeButton from '@/components/premium/PremiumUpgradeButton';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import SlideList from '@/components/editor/SlideList';
@@ -47,6 +48,10 @@ export default function EditorContent() {
   // 변경사항 추적 및 종료 확인 모달
   const [isDirty, setIsDirty] = useState(false);
   const [showExitConfirmDialog, setShowExitConfirmDialog] = useState(false);
+
+  // 프리미엄 업그레이드 안내 배너 상태
+  const [showUpgradeTip, setShowUpgradeTip] = useState(true);
+  const isAlreadyUpgraded = (currentPresentation?.metadata as { premiumUpgraded?: boolean } | null)?.premiumUpgraded;
 
   // URL에서 from 파라미터 추출 (어디서 왔는지)
   const from = searchParams.get('from') || 'viewer'; // 기본값: viewer
@@ -389,6 +394,18 @@ export default function EditorContent() {
               <span>삭제</span>
             </Button>
 
+            {/* 프리미엄 업그레이드 - 태블릿 이상 */}
+            {currentPresentation?.id && currentPresentation?.slides && (
+              <div className="hidden lg:block">
+                <PremiumUpgradeButton
+                  presentationId={currentPresentation.id}
+                  slides={currentPresentation.slides}
+                  showLabel={true}
+                  alreadyUpgraded={(currentPresentation.metadata as { premiumUpgraded?: boolean } | null)?.premiumUpgraded}
+                />
+              </div>
+            )}
+
             {/* 저장 - 항상 표시 */}
             <Button
               onClick={handleSave}
@@ -448,6 +465,35 @@ export default function EditorContent() {
       {showAds && (
         <div className="border-b border-gray-200 bg-white px-4 py-3 flex justify-center">
           <KakaoAdMobileThick />
+        </div>
+      )}
+
+      {/* 프리미엄 업그레이드 안내 배너 (아직 업그레이드 안 한 경우만) */}
+      {showUpgradeTip && !isAlreadyUpgraded && (
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100 px-4 py-3">
+          <div className="flex items-center justify-between gap-3 max-w-4xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 p-2 bg-white/80 rounded-full">
+                <Sparkles className="h-5 w-5 text-purple-500" />
+              </div>
+              <div className="text-sm">
+                <span className="font-medium text-purple-900">프리미엄 업그레이드 팁</span>
+                <span className="text-purple-700 ml-2 hidden sm:inline">
+                  편집을 모두 완료한 후 업그레이드하세요. 업그레이드 후에는 수정이 어려울 수 있어요.
+                </span>
+                <span className="text-purple-700 ml-2 sm:hidden">
+                  편집 완료 후 업그레이드해요.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowUpgradeTip(false)}
+              className="flex-shrink-0 p-1 text-purple-400 hover:text-purple-600 rounded-full hover:bg-purple-100 transition-colors"
+              aria-label="닫기"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 
