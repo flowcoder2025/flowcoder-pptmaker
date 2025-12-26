@@ -9,10 +9,10 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useCreditStore } from '@/store/creditStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
-import { PLAN_BENEFITS } from '@/constants/subscription';
+import { PLAN_BENEFITS, hasUnlimitedGeneration } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem } from 'lucide-react';
+import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem, Infinity } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -150,8 +150,16 @@ export default function CreditsPage() {
             </span>
           </div>
 
+          {/* Pro/Premium 무제한 안내 */}
+          {hasUnlimitedGeneration(plan) && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white/20 text-white">
+              <Infinity className="w-4 h-4" />
+              심층검색 · 고품질 생성 무제한
+            </div>
+          )}
+
           {/* 최초 무료 안내 */}
-          {(isFirstTimeFree('deepResearch') || isFirstTimeFree('qualityGeneration')) && (
+          {!hasUnlimitedGeneration(plan) && (isFirstTimeFree('deepResearch') || isFirstTimeFree('qualityGeneration')) && (
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white/20 text-white">
               <Gift className="w-4 h-4" />
               최초 1회 무료로 사용해보세요!
@@ -177,9 +185,16 @@ export default function CreditsPage() {
           <p className="text-sm mb-1 text-muted-foreground">
             검색 전용 AI로 웹 자료를 조사해요
           </p>
-          <p className="text-2xl font-bold text-primary">
-            {CREDIT_COST.DEEP_RESEARCH} 크레딧
-          </p>
+          {hasUnlimitedGeneration(plan) ? (
+            <div className="flex items-center gap-2 text-2xl font-bold text-primary">
+              <Infinity size={24} />
+              무제한
+            </div>
+          ) : (
+            <p className="text-2xl font-bold text-primary">
+              {CREDIT_COST.DEEP_RESEARCH} 크레딧
+            </p>
+          )}
         </div>
 
         <div className="rounded-xl p-5 bg-secondary">
@@ -192,9 +207,16 @@ export default function CreditsPage() {
           <p className="text-sm mb-1 text-muted-foreground">
             추론 모델로 더 나은 품질을 제공해요
           </p>
-          <p className="text-2xl font-bold text-primary">
-            {CREDIT_COST.QUALITY_GENERATION} 크레딧
-          </p>
+          {hasUnlimitedGeneration(plan) ? (
+            <div className="flex items-center gap-2 text-2xl font-bold text-primary">
+              <Infinity size={24} />
+              무제한
+            </div>
+          ) : (
+            <p className="text-2xl font-bold text-primary">
+              {CREDIT_COST.QUALITY_GENERATION} 크레딧
+            </p>
+          )}
         </div>
       </div>
 
