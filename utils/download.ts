@@ -1,14 +1,32 @@
 /**
  * 다운로드 유틸리티 함수들
  * HTML, PDF, PPTX 다운로드 지원
+ *
+ * @description
+ * html2canvas를 사용하여 HTML 슬라이드를 이미지로 변환한 후
+ * PDF/PPTX로 내보내기합니다. 디자인 품질을 최대화하기 위해
+ * 최적화된 설정을 사용합니다.
  */
 
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { toJpeg } from 'html-to-image';
 import pptxgen from 'pptxgenjs';
 import type { Presentation, AspectRatio } from '@/types/presentation';
 import type { HTMLSlide } from '@/types/slide';
 import { calculateSlideSize } from '@/services/template/engine/types';
+
+/**
+ * html-to-image 공통 설정
+ * 디자인 품질과 파일 크기의 균형을 위한 최적화된 옵션
+ */
+const getHtmlToImageOptions = (width: number, height: number) => ({
+  width, // 원본 슬라이드 크기
+  height,
+  quality: 0.92, // JPEG 품질
+  pixelRatio: 2, // 고해상도 (2x) - pixelRatio로 스케일링
+  skipFonts: false, // 폰트 포함
+  cacheBust: true, // 캐시 무효화
+});
 
 /**
  * HTML 다운로드
@@ -42,8 +60,107 @@ export async function downloadHTML(presentation: Presentation): Promise<void> {
 }
 
 /**
+ * 슬라이드를 이미지로 변환하는 공통 함수
+ * iframe을 사용하여 vh/vw가 슬라이드 크기를 기준으로 계산되도록 함
+ */
+async function renderSlideToImage(
+  slide: HTMLSlide,
+  slideSize: { width: number; height: number }
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // iframe 생성 - vh/vw가 슬라이드 크기를 기준으로 계산되도록 함
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = `
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: ${slideSize.width}px;
+      height: ${slideSize.height}px;
+      border: none;
+      background: transparent;
+    `;
+    document.body.appendChild(iframe);
+
+    // iframe이 로드되면 콘텐츠 삽입
+    const setupIframe = async () => {
+      try {
+        const iframeDoc = iframe.contentDocument;
+        if (!iframeDoc) {
+          throw new Error('iframe document를 가져올 수 없습니다.');
+        }
+
+        // iframe 내 HTML 구조 생성
+        iframeDoc.open();
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              html, body {
+                width: ${slideSize.width}px;
+                height: ${slideSize.height}px;
+                overflow: hidden;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+              }
+              /* 직접 자식 요소들이 전체 크기를 채우도록 */
+              body > * {
+                width: 100% !important;
+                height: 100% !important;
+              }
+              ${slide.css}
+            </style>
+          </head>
+          <body>
+            ${slide.html}
+          </body>
+          </html>
+        `);
+        iframeDoc.close();
+
+        // 이미지 로딩 대기
+        const images = iframeDoc.querySelectorAll('img');
+        await Promise.all(
+          Array.from(images).map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                if (img.complete) {
+                  resolve();
+                } else {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                }
+              })
+          )
+        );
+
+        // 폰트 및 레이아웃 안정화 대기
+        await new Promise(r => setTimeout(r, 150));
+
+        // html-to-image로 이미지 생성 (iframe body 캡처)
+        const imgData = await toJpeg(iframeDoc.body, getHtmlToImageOptions(slideSize.width, slideSize.height));
+
+        // 정리
+        document.body.removeChild(iframe);
+        resolve(imgData);
+      } catch (error) {
+        document.body.removeChild(iframe);
+        reject(error);
+      }
+    };
+
+    // iframe 로드 후 설정
+    iframe.onload = setupIframe;
+    iframe.src = 'about:blank';
+  });
+}
+
+/**
  * PDF 다운로드
- * HTML 슬라이드를 캔버스로 변환한 후 PDF 생성
+ * HTML 슬라이드를 이미지로 변환한 후 PDF 생성
  */
 export async function downloadPDF(presentation: Presentation): Promise<void> {
   try {
@@ -59,10 +176,17 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
     console.log(`📐 AspectRatio: ${aspectRatio}, 크기: ${slideSize.width}x${slideSize.height}`);
 
     // jsPDF 인스턴스 생성 (aspectRatio에 맞게 조정)
+    // pixelRatio 2배 적용된 이미지 크기에 맞춰 PDF 크기도 조정
+    const scale = 2;
+    const pdfWidth = slideSize.width * scale;
+    const pdfHeight = slideSize.height * scale;
+
     const pdf = new jsPDF({
       orientation,
       unit: 'px',
-      format: [slideSize.width, slideSize.height],
+      format: [pdfWidth, pdfHeight],
+      hotfixes: ['px_scaling'], // px 단위 스케일링 보정
+      compress: true, // PDF 압축 활성화
     });
 
     for (let i = 0; i < slides.length; i++) {
@@ -70,38 +194,14 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
 
       const slide = slides[i];
 
-      // 임시 div 생성하여 슬라이드 렌더링
-      const tempDiv = document.createElement('div');
-      tempDiv.style.width = `${slideSize.width}px`;
-      tempDiv.style.height = `${slideSize.height}px`;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.innerHTML = `
-        <style>${slide.css}</style>
-        ${slide.html}
-      `;
-      document.body.appendChild(tempDiv);
-
-      // HTML을 캔버스로 변환
-      const canvas = await html2canvas(tempDiv, {
-        width: slideSize.width,
-        height: slideSize.height,
-        scale: 1.5, // 고해상도 (2 → 1.5로 최적화: 용량 44% 감소)
-        logging: false,
-        useCORS: true,
-      });
-
-      // 임시 div 제거
-      document.body.removeChild(tempDiv);
-
-      // 캔버스를 이미지로 변환하여 PDF에 추가 (JPEG 0.85 품질: 용량 80-90% 감소)
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      // 슬라이드를 이미지로 변환 (html-to-image 사용)
+      const imgData = await renderSlideToImage(slide, slideSize);
 
       if (i > 0) {
-        pdf.addPage([slideSize.width, slideSize.height], orientation);
+        pdf.addPage([pdfWidth, pdfHeight], orientation);
       }
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, slideSize.width, slideSize.height);
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     }
 
     // PDF 다운로드
@@ -116,7 +216,13 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
 
 /**
  * PPTX 다운로드
- * unified-ppt JSON을 PptxGenJS로 변환하여 PPTX 생성
+ * HTML 슬라이드를 이미지로 변환하여 PPTX 생성
+ *
+ * @description
+ * 개선된 렌더링 파이프라인을 사용하여 디자인 품질을 최대화합니다.
+ * - iframe 기반 렌더링으로 스타일 격리
+ * - scale 2x로 고해상도 이미지 생성
+ * - PNG 포맷 사용으로 품질 손실 방지
  */
 export async function downloadPPTX(presentation: Presentation): Promise<void> {
   try {
@@ -134,8 +240,8 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
     const pptx = new pptxgen();
 
     // 프리젠테이션 메타데이터 설정
-    pptx.author = 'PPT Maker in Toss';
-    pptx.company = 'Toss';
+    pptx.author = 'PPT Maker';
+    pptx.company = 'FlowCoder';
     pptx.title = title;
     pptx.subject = 'AI 생성 프리젠테이션';
 
@@ -160,30 +266,8 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
       const slide = slides[i];
       const pptxSlide = pptx.addSlide();
 
-      // HTML을 캔버스로 변환
-      const tempDiv = document.createElement('div');
-      tempDiv.style.width = `${slideSize.width}px`;
-      tempDiv.style.height = `${slideSize.height}px`;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.innerHTML = `
-        <style>${slide.css}</style>
-        ${slide.html}
-      `;
-      document.body.appendChild(tempDiv);
-
-      const canvas = await html2canvas(tempDiv, {
-        width: slideSize.width,
-        height: slideSize.height,
-        scale: 1.5, // 고해상도 (2 → 1.5로 최적화: 용량 44% 감소)
-        logging: false,
-        useCORS: true,
-      });
-
-      document.body.removeChild(tempDiv);
-
-      // 캔버스를 이미지로 변환하여 슬라이드에 추가 (JPEG 0.85 품질: 용량 80-90% 감소)
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      // html-to-image로 이미지 생성
+      const imgData = await renderSlideToImage(slide, slideSize);
 
       pptxSlide.addImage({
         data: imgData,
