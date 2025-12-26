@@ -312,9 +312,21 @@ export default function InputPage() {
                 {totalCredits} 크래딧
               </div>
               {hasUnlimitedGeneration(plan) && (
-                <p className="text-xs text-blue-600 mt-1">
-                  ✨ 심층검색 · 고품질 생성 무제한
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-blue-600">
+                    ✨ 심층검색 · 고품질 생성 무제한
+                  </p>
+                  {plan === 'pro' && (
+                    <p className="text-xs text-blue-600">
+                      📄 슬라이드 20장까지 무료 (21장부터 크레딧 필요)
+                    </p>
+                  )}
+                  {plan === 'premium' && (
+                    <p className="text-xs text-blue-600">
+                      📄 슬라이드 50장까지 무제한 무료
+                    </p>
+                  )}
+                </div>
               )}
             </Card>
 
@@ -323,18 +335,25 @@ export default function InputPage() {
               className={`p-4 ${
                 plan === 'free'
                   ? 'bg-yellow-50 border-yellow-200'
-                  : 'bg-gray-50 border-gray-200'
+                  : plan === 'pro'
+                    ? 'bg-blue-50 border-blue-200'
+                    : 'bg-gray-50 border-gray-200'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-gray-900 mb-1">
-                    📄 슬라이드 생성 제한
+                    📄 슬라이드 생성
                   </div>
                   <p className="text-xs text-gray-600">
                     {plan === 'free' && '무료 플랜은 한번 생성에 최대 10장까지 만들 수 있어요'}
-                    {plan === 'pro' && 'Pro 플랜은 한번 생성에 최대 20장까지 만들 수 있어요'}
-                    {plan === 'premium' && 'Premium 플랜은 한번 생성에 최대 50장까지 만들 수 있어요'}
+                    {plan === 'pro' && (
+                      <>
+                        <span className="font-bold text-blue-700">20장까지 무제한 무료!</span>
+                        <span className="text-gray-500"> 최대 50장까지 생성 가능 (초과분 크레딧 필요)</span>
+                      </>
+                    )}
+                    {plan === 'premium' && 'Premium 플랜은 한번 생성에 최대 50장까지 무제한 무료예요'}
                   </p>
 
                   {/* 크래딧 사용 시 혜택 안내 */}
@@ -679,7 +698,17 @@ export default function InputPage() {
                   </h3>
                 </div>
                 <span className="text-sm font-bold text-blue-600">
-                  {pageFormat === 'one-page' ? '1장 (고정)' : `${targetSlideCount}장`}
+                  {pageFormat === 'one-page' ? '1장 (고정)' : (
+                    <>
+                      {targetSlideCount}장
+                      {plan === 'pro' && targetSlideCount <= 20 && (
+                        <span className="ml-1.5 text-xs font-normal text-green-600">(무료)</span>
+                      )}
+                      {plan === 'pro' && targetSlideCount > 20 && (
+                        <span className="ml-1.5 text-xs font-normal text-orange-600">(+{getExtraSlideCount(plan, targetSlideCount)}장 추가)</span>
+                      )}
+                    </>
+                  )}
                 </span>
               </div>
 
@@ -695,7 +724,14 @@ export default function InputPage() {
 
               <div className="flex justify-between text-xs text-gray-500 mb-3">
                 <span>5장</span>
-                <span>{plan === 'pro' ? '50장' : `${PLAN_BENEFITS[plan].benefits.maxSlides}장`}</span>
+                {plan === 'pro' ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-blue-600 font-semibold">20장 무료</span>
+                    <span>50장</span>
+                  </div>
+                ) : (
+                  <span>{PLAN_BENEFITS[plan].benefits.maxSlides}장</span>
+                )}
               </div>
 
               {pageFormat === 'one-page' ? (
@@ -714,7 +750,13 @@ export default function InputPage() {
                     </p>
                     <p className="flex items-center gap-1.5 text-xs text-gray-600 mt-1">
                       <Lightbulb className="w-4 h-4" />
-                      {plan === 'free' ? '무료 플랜' : plan === 'pro' ? 'Pro 플랜' : 'Premium 플랜'}: 기본 {PLAN_BENEFITS[plan].benefits.maxSlides}장
+                      {plan === 'free' && `무료 플랜: 최대 ${PLAN_BENEFITS[plan].benefits.maxSlides}장`}
+                      {plan === 'pro' && (
+                        <span>
+                          Pro 플랜: <span className="font-bold text-blue-700">20장 무료</span> / 최대 50장 (초과분 {CREDIT_COST.EXTRA_SLIDE} 크레딧/장)
+                        </span>
+                      )}
+                      {plan === 'premium' && `Premium 플랜: 최대 ${PLAN_BENEFITS[plan].benefits.maxSlides}장 무제한 무료`}
                     </p>
                   </div>
 
