@@ -37,6 +37,7 @@ import type {
   SubscriptionPlan,
   CreditUsageType,
 } from '@/types/monetization';
+import { logger } from '@/lib/logger';
 
 /**
  * 통합 수익화 훅 상태
@@ -204,11 +205,11 @@ export const useMonetization = (): MonetizationState => {
    */
   const showAdBeforeGeneration = useCallback(async () => {
     if (subscriptionStore.isAdFree()) {
-      console.log('[Monetization] 구독자: 광고 생략');
+      logger.debug('구독자: 생성 전 광고 생략');
       return;
     }
 
-    console.log('[Monetization] 생성 전 광고 표시');
+    logger.debug('생성 전 광고 표시');
     await ad.showAd();
   }, [subscriptionStore, ad]);
 
@@ -224,11 +225,11 @@ export const useMonetization = (): MonetizationState => {
    */
   const showAdBeforeDownload = useCallback(async () => {
     if (subscriptionStore.isAdFree()) {
-      console.log('[Monetization] 구독자: 광고 생략');
+      logger.debug('구독자: 다운로드 전 광고 생략');
       return;
     }
 
-    console.log('[Monetization] 다운로드 전 광고 표시');
+    logger.debug('다운로드 전 광고 표시');
     await ad.showAd();
   }, [subscriptionStore, ad]);
 
@@ -240,13 +241,13 @@ export const useMonetization = (): MonetizationState => {
       const validation = validateGeneration(options);
 
       if (!validation.allowed) {
-        console.error('[Monetization] 크래딧 부족:', validation.message);
+        logger.warn('크래딧 부족', { message: validation.message });
         return false;
       }
 
       // 무료 사용
       if (validation.method === 'free') {
-        console.log('[Monetization] 무료 사용 (광고 시청)');
+        logger.debug('무료 사용 (광고 시청)');
         return true;
       }
 
@@ -257,14 +258,12 @@ export const useMonetization = (): MonetizationState => {
           const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
           if (isFirstFree) {
             creditStore.useFirstTimeFree('qualityGeneration');
-            console.log('[Monetization] 최초 무료: 고품질 생성');
+            logger.info('최초 무료 사용: 고품질 생성');
             return true;
           } else {
             const creditCost = creditStore.getCreditCost('qualityGeneration');
             const success = creditStore.useCredits(creditCost);
-            console.log(
-              `[Monetization] 크래딧 차감: ${creditCost} (성공: ${success})`
-            );
+            logger.info('크래딧 차감', { creditCost, success });
             return success;
           }
         }
@@ -274,14 +273,12 @@ export const useMonetization = (): MonetizationState => {
           const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
           if (isFirstFree) {
             creditStore.useFirstTimeFree('deepResearch');
-            console.log('[Monetization] 최초 무료: 심층 검색');
+            logger.info('최초 무료 사용: 심층 검색');
             return true;
           } else {
             const creditCost = creditStore.getCreditCost('deepResearch');
             const success = creditStore.useCredits(creditCost);
-            console.log(
-              `[Monetization] 크래딧 차감: ${creditCost} (성공: ${success})`
-            );
+            logger.info('크래딧 차감', { creditCost, success });
             return success;
           }
         }

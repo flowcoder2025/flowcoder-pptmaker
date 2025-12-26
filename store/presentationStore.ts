@@ -16,6 +16,7 @@ import type { UnifiedPPTJSON, Slide, SlideType, GlobalSlideSettings } from '@/ty
 import type { AttachmentFile } from '@/types/research';
 import { createDefaultSlide } from '@/utils/slideDefaults';
 import { DEFAULT_THEME, getThemeById } from '@/constants/themes';
+import { logger } from '@/lib/logger';
 
 interface PresentationState {
   // 현재 프리젠테이션
@@ -123,7 +124,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
   applyGlobalSettingsToAll: () => {
     const { currentPresentation, globalSettings } = get();
     if (!currentPresentation?.slideData) {
-      console.warn('⚠️ 프리젠테이션이 없거나 편집 데이터가 없어요');
+      logger.warn('프리젠테이션이 없거나 편집 데이터가 없어요');
       return;
     }
 
@@ -252,7 +253,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     set({ currentPresentation: updatedPresentation });
 
-    console.log('✅ 전역 설정이 모든 슬라이드에 적용되었어요!');
+    logger.info('전역 설정이 모든 슬라이드에 적용되었어요');
   },
 
   generatePresentation: async (text: string, attachments?: AttachmentFile[]) => {
@@ -268,11 +269,11 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       const creditStore = await import('@/store/creditStore').then(m => m.useCreditStore.getState());
       const maxSlides = subscriptionStore.getMaxSlides();
 
-      console.log('✅ 슬라이드 생성 시작');
+      logger.info('슬라이드 생성 시작');
 
       // 🔄 크레딧 잔액 동기화 (DB → 로컬 상태)
       await creditStore.fetchBalance();
-      console.log('✅ 크레딧 정보 동기화 완료');
+      logger.debug('크레딧 정보 동기화 완료');
 
       const { selectedThemeId, researchMode, useProContentModel, targetSlideCount } = get();
 
@@ -282,7 +283,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
 
         if (isFirstFree) {
-          console.log('🎁 깊은 조사 최초 1회 무료 사용');
+          logger.info('깊은 조사 최초 1회 무료 사용');
           await creditStore.useFirstTimeFree('deepResearch');
         } else {
           const deepResearchCost = creditStore.getCreditCost('deepResearch');
@@ -296,7 +297,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           if (!success) {
             throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
           }
-          console.log(`💳 깊은 조사 크레딧 차감: -${deepResearchCost}`);
+          logger.info('깊은 조사 크레딧 차감', { cost: deepResearchCost });
         }
       }
 
@@ -305,7 +306,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
 
         if (isFirstFree) {
-          console.log('🎁 고품질 생성 최초 1회 무료 사용');
+          logger.info('고품질 생성 최초 1회 무료 사용');
           await creditStore.useFirstTimeFree('qualityGeneration');
         } else {
           const qualityCost = creditStore.getCreditCost('qualityGeneration');
@@ -319,7 +320,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           if (!success) {
             throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
           }
-          console.log(`💳 고품질 생성 크레딧 차감: -${qualityCost}`);
+          logger.info('고품질 생성 크레딧 차감', { cost: qualityCost });
         }
       }
 
@@ -342,14 +343,14 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           if (!success) {
             throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
           }
-          console.log(`💳 초과 슬라이드 크레딧 차감: -${extraSlideCost} (${extraSlides}장 × ${CREDIT_COST.EXTRA_SLIDE} 크레딧)`);
+          logger.info('초과 슬라이드 크레딧 차감', { cost: extraSlideCost, extraSlides, perSlide: CREDIT_COST.EXTRA_SLIDE });
         }
       }
 
       // 멀티모달 분기: 파일 첨부가 있으면 /api/generate 엔드포인트 호출
       if (attachments && attachments.length > 0) {
-        console.log(`📎 멀티모달 생성 모드 (파일 ${attachments.length}개)`);
-        console.log(`🎯 목표 슬라이드 분량: ${targetSlideCount}장 (±2-3장 오차 가능)`);
+        logger.info('멀티모달 생성 모드', { fileCount: attachments.length });
+        logger.debug('목표 슬라이드 분량', { targetSlideCount });
 
         set({ generationStep: 'parsing' });
 
@@ -374,16 +375,16 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         }
 
         const { slideData, metadata } = await response.json();
-        console.log('✅ 멀티모달 슬라이드 데이터 수신:', slideData.slides.length, '개');
+        logger.info('멀티모달 슬라이드 데이터 수신', { slideCount: slideData.slides.length });
 
         set({ generationStep: 'generating' });
 
         // HTML 생성 (TemplateEngine)
         const theme = getThemeById(selectedThemeId) || DEFAULT_THEME;
-        console.log(`🎨 HTML 슬라이드 생성 중... (테마: ${theme.name}, 템플릿: ${theme.id})`);
+        logger.debug('HTML 슬라이드 생성 중', { themeName: theme.name, templateId: theme.id });
         const engine = new TemplateEngine();
         const htmlSlides = engine.generateAll(slideData, theme.id); // ✅ theme.id 사용
-        console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
+        logger.info('HTML 생성 완료', { slideCount: htmlSlides.length });
 
         // Presentation 객체 생성
         const firstSlide = slideData.slides[0];
@@ -409,15 +410,15 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           generationStep: 'done',
         });
 
-        console.log('🎉 멀티모달 프리젠테이션 생성 완료!');
+        logger.info('멀티모달 프리젠테이션 생성 완료');
 
         // 데이터베이스 저장
         try {
-          console.log('💾 데이터베이스에 저장 중...');
+          logger.debug('데이터베이스에 저장 중');
           await get().savePresentation();
-          console.log('✅ 데이터베이스 저장 완료!');
+          logger.info('데이터베이스 저장 완료');
         } catch (saveError) {
-          console.error('❌ 데이터베이스 저장 실패:', saveError);
+          logger.error('데이터베이스 저장 실패', saveError);
           throw new Error(`프리젠테이션 저장에 실패했어요: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
         }
 
@@ -427,18 +428,18 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       // 기존 로직 (파일 첨부 없는 경우)
       let enrichedContent = text;
 
-      console.log(`🎯 목표 슬라이드 분량: ${targetSlideCount}장 (±2-3장 오차 가능)`);
+      logger.debug('목표 슬라이드 분량', { targetSlideCount });
 
       // 1단계 (선택): 자료 조사
       if (researchMode !== 'none') {
         const config = RESEARCH_MODE_CONFIG[researchMode];
         if (config.enabled && config.model) {
-          console.log(`🔍 1️⃣ 자료 조사 중... (모드: ${config.label})`);
+          logger.info('자료 조사 시작', { mode: config.label });
           const researchResult = await researchTopic(text, config.model);
-          console.log('✅ 자료 조사 완료');
+          logger.info('자료 조사 완료');
 
           // 2단계: 콘텐츠 생성 (자료 조사 결과 포함)
-          console.log(`📝 2️⃣ 슬라이드 콘텐츠 생성 중... (모델: ${useProContentModel ? 'Pro' : 'Flash'})`);
+          logger.info('슬라이드 콘텐츠 생성 시작', { model: useProContentModel ? 'Pro' : 'Flash' });
           enrichedContent = await generateSlideContent({
             userInput: text,
             research: researchResult,
@@ -447,11 +448,11 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             aspectRatio: get().aspectRatio,
             pageFormat: get().pageFormat,
           });
-          console.log('✅ 슬라이드 콘텐츠 생성 완료');
+          logger.info('슬라이드 콘텐츠 생성 완료');
         }
       } else {
         // 자료 조사 없이 콘텐츠 생성
-        console.log(`📝 1️⃣ 슬라이드 콘텐츠 생성 중... (모델: ${useProContentModel ? 'Pro' : 'Flash'})`);
+        logger.info('슬라이드 콘텐츠 생성 시작', { model: useProContentModel ? 'Pro' : 'Flash' });
         enrichedContent = await generateSlideContent({
           userInput: text,
           useProModel: useProContentModel,
@@ -459,17 +460,16 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           aspectRatio: get().aspectRatio,
           pageFormat: get().pageFormat,
         });
-        console.log('✅ 슬라이드 콘텐츠 생성 완료');
+        logger.info('슬라이드 콘텐츠 생성 완료');
       }
 
       set({ generationStep: 'parsing' });
 
       // 2단계: JSON 파싱 (Parser 단계 제거 - Content generator가 직접 UnifiedPPTJSON 출력)
-      console.log('🔍 2️⃣ JSON 파싱 중...');
+      logger.debug('JSON 파싱 시작');
 
       // 🆕 디버깅: Gemini API 원시 응답 로깅
-      console.log('📝 Gemini API 원시 응답 (전체):', enrichedContent);
-      console.log('📏 응답 길이:', enrichedContent.length, '자');
+      logger.debug('Gemini API 원시 응답', { length: enrichedContent.length });
 
       // 마크다운 코드 블록 제거
       let jsonString = enrichedContent.trim();
@@ -477,18 +477,18 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       if (lines[0].trim().startsWith('```')) {
         lines.shift();
-        console.log('✅ 첫 줄 코드 블록 마커 제거');
+        logger.debug('첫 줄 코드 블록 마커 제거');
       }
 
       if (lines.length > 0 && lines[lines.length - 1].trim() === '```') {
         lines.pop();
-        console.log('✅ 마지막 줄 코드 블록 마커 제거');
+        logger.debug('마지막 줄 코드 블록 마커 제거');
       }
 
       jsonString = lines.join('\n').trim();
 
       // 🆕 디버깅: 정제된 JSON 문자열 로깅
-      console.log('📄 정제된 JSON (첫 1000자):', jsonString.substring(0, 1000));
+      logger.debug('정제된 JSON 미리보기', { preview: jsonString.substring(0, 200) });
 
       // UnifiedPPTJSON 파싱
       let slideJSON: UnifiedPPTJSON;
@@ -498,11 +498,11 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         // ✅ 화면 비율 및 페이지 형식 설정
         slideJSON.aspectRatio = get().aspectRatio;
         slideJSON.pageFormat = get().pageFormat;
-        console.log(`📐 AspectRatio: ${slideJSON.aspectRatio}, PageFormat: ${slideJSON.pageFormat}`);
+        logger.debug('화면 설정', { aspectRatio: slideJSON.aspectRatio, pageFormat: slideJSON.pageFormat });
 
         // 검증 1: 기본 구조
         if (!slideJSON.slides || !Array.isArray(slideJSON.slides) || slideJSON.slides.length === 0) {
-          console.error('❌ 슬라이드 배열이 비어있습니다');
+          logger.error('슬라이드 배열이 비어있습니다');
           throw new Error('슬라이드 데이터가 올바르지 않습니다.');
         }
 
@@ -512,7 +512,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           const hasValidType = slideJSON.slides.some(slide => validTypes.includes(slide.type));
 
           if (!hasValidType) {
-            console.error('❌ 원페이지 모드에서 잘못된 슬라이드 타입이 생성됨:', slideJSON.slides.map(s => s.type));
+            logger.error('원페이지 모드에서 잘못된 슬라이드 타입 생성', { types: slideJSON.slides.map(s => s.type) });
             throw new Error('원페이지 모드에서는 reportTwoColumn 또는 reportA4 타입만 가능합니다. 다시 시도해주세요.');
           }
 
@@ -520,7 +520,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           const firstValidSlide = slideJSON.slides.find(slide => validTypes.includes(slide.type));
           if (firstValidSlide) {
             slideJSON.slides = [firstValidSlide];
-            console.log(`✅ 원페이지 모드: ${firstValidSlide.type} 슬라이드 1장으로 설정`);
+            logger.info('원페이지 모드 슬라이드 설정', { type: firstValidSlide.type });
           }
         }
 
@@ -538,29 +538,24 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         });
 
         if (emptySlides.length > 0) {
-          console.error(`❌ 빈 슬라이드 감지: ${emptySlides.length}개 / ${slideJSON.slides.length}개`);
-          console.error('🔍 빈 슬라이드 예시:', JSON.stringify(emptySlides[0], null, 2));
+          logger.warn('빈 슬라이드 감지', { emptyCount: emptySlides.length, totalCount: slideJSON.slides.length });
         }
 
         // 🆕 검증 3: 모든 슬라이드가 비어있으면 에러
         if (emptySlides.length === slideJSON.slides.length) {
-          console.error('❌ 모든 슬라이드가 비어있습니다!');
-          console.error('🔍 원시 JSON:', jsonString.substring(0, 2000));
+          logger.error('모든 슬라이드가 비어있습니다');
           throw new Error('생성된 슬라이드가 모두 비어있어요. Gemini API 응답을 확인해주세요.');
         }
 
-        console.log('✅ JSON 파싱 완료:', slideJSON.slides.length, '개 슬라이드');
-        console.log(`📊 내용 있는 슬라이드: ${slideJSON.slides.length - emptySlides.length}개`);
+        logger.info('JSON 파싱 완료', { slideCount: slideJSON.slides.length, contentSlides: slideJSON.slides.length - emptySlides.length });
 
         // 슬라이드 수 제한 적용
         if (slideJSON.slides.length > maxSlides) {
-          console.warn(`⚠️ 슬라이드 수 제한: ${slideJSON.slides.length}개 → ${maxSlides}개로 축소`);
+          logger.warn('슬라이드 수 제한 적용', { from: slideJSON.slides.length, to: maxSlides });
           slideJSON.slides = slideJSON.slides.slice(0, maxSlides);
         }
       } catch (parseError) {
-        console.error('❌ JSON 파싱 실패:', parseError);
-        console.log('🔍 파싱 실패한 JSON (첫 1000자):', jsonString.substring(0, 1000));
-        console.log('🔍 파싱 실패한 JSON (마지막 500자):', jsonString.substring(Math.max(0, jsonString.length - 500)));
+        logger.error('JSON 파싱 실패', parseError);
         throw new Error('JSON 파싱 실패: ' + (parseError instanceof Error ? parseError.message : String(parseError)));
       }
 
@@ -568,10 +563,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       // 3단계: HTML 생성 (TemplateEngine)
       const theme = getThemeById(selectedThemeId) || DEFAULT_THEME;
-      console.log(`🎨 3️⃣ HTML 슬라이드 생성 중... (테마: ${theme.name}, 템플릿: ${theme.id})`);
+      logger.info('HTML 슬라이드 생성 중', { themeName: theme.name, templateId: theme.id });
       const engine = new TemplateEngine();
       const htmlSlides = engine.generateAll(slideJSON, theme.id); // ✅ theme.id 사용
-      console.log('✅ HTML 생성 완료:', htmlSlides.length, '개 슬라이드');
+      logger.info('HTML 생성 완료', { slideCount: htmlSlides.length });
 
       // 4단계: 프리젠테이션 객체 생성
       const firstSlide = slideJSON.slides[0];
@@ -596,29 +591,27 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         generationStep: 'done',
       });
 
-      console.log('🎉 프리젠테이션 생성 완료!');
+      logger.info('프리젠테이션 생성 완료');
 
       // 생성 즉시 자동 저장 (무료 카운트는 저장 성공 후 차감)
       try {
-        console.log('💾 데이터베이스에 저장 중...');
+        logger.debug('데이터베이스에 저장 중');
         await get().savePresentation();
-        console.log('✅ 데이터베이스 저장 완료!');
+        logger.info('데이터베이스 저장 완료');
       } catch (saveError) {
-        console.error('❌ 데이터베이스 저장 실패:', saveError);
+        logger.error('데이터베이스 저장 실패', saveError);
         // 에러를 사용자에게 명확히 전달
         throw new Error(`프리젠테이션 저장에 실패했어요: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
       }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
-      console.error('❌ 프리젠테이션 생성 실패:', error);
+      logger.error('프리젠테이션 생성 실패', error);
 
       // 디버깅을 위한 추가 로깅 (프로덕션 환경)
-      console.error('🔍 에러 상세 정보:', {
+      logger.error('에러 상세 정보', {
         message: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
         geminiApiKeyExists: !!process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        userInput: text.substring(0, 100), // 첫 100자만 로깅
       });
 
       set({
@@ -645,7 +638,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         ? '/api/presentations'
         : `/api/presentations/${currentPresentation.id}`;
 
-      console.log(`[savePresentation] ${method} ${url}`, { isNew, id: currentPresentation.id });
+      logger.debug('프리젠테이션 저장 요청', { method, isNew, id: currentPresentation.id });
 
       const response = await fetch(url, {
         method,
@@ -680,10 +673,10 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
             id: data.presentation.id,
           },
         });
-        console.log(`[savePresentation] 새 ID로 업데이트: ${data.presentation.id}`);
+        logger.debug('새 ID로 업데이트', { id: data.presentation.id });
       }
 
-      console.log('✅ 프리젠테이션 저장 완료!');
+      logger.info('프리젠테이션 저장 완료');
 
       // 🆕 저장 성공 후 무료 카운트 차감 및 크레딧 동기화
       if (isNew) {
@@ -692,21 +685,21 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
         // 심층 검색 무료 카운트 차감
         if (researchMode === 'deep' && creditStore.isFirstTimeFree('deepResearch')) {
           await creditStore.useFirstTimeFree('deepResearch');
-          console.log('✅ 심층 검색 최초 무료 사용 완료');
+          logger.info('심층 검색 최초 무료 사용 완료');
         }
 
         // 고품질 생성 무료 카운트 차감
         if (useProContentModel && creditStore.isFirstTimeFree('qualityGeneration')) {
           await creditStore.useFirstTimeFree('qualityGeneration');
-          console.log('✅ 고품질 생성 최초 무료 사용 완료');
+          logger.info('고품질 생성 최초 무료 사용 완료');
         }
 
         // 크레딧 잔액 동기화 (프레젠테이션 생성 시 서버에서 1 크레딧 차감)
         await creditStore.fetchBalance();
-        console.log('✅ 크레딧 잔액 동기화 완료');
+        logger.debug('크레딧 잔액 동기화 완료');
       }
     } catch (error) {
-      console.error('❌ 저장 실패:', error);
+      logger.error('저장 실패', error);
       throw error;  // Fallback 없이 에러 전파
     }
   },
@@ -717,17 +710,17 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          console.log('⚠️ 인증 필요: 로그인 후 프리젠테이션 조회 가능');
+          logger.debug('인증 필요: 로그인 후 프리젠테이션 조회 가능');
           return [];
         }
         throw new Error(`프리젠테이션 목록 조회 실패: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log(`✅ 프리젠테이션 ${data.presentations.length}개 로드`);
+      logger.info('프리젠테이션 목록 로드 완료', { count: data.presentations.length });
       return data.presentations;
     } catch (error) {
-      console.error('❌ 프리젠테이션 목록 조회 실패:', error);
+      logger.error('프리젠테이션 목록 조회 실패', error);
       return [];
     }
   },
@@ -757,40 +750,39 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
           currentPresentation: mappedPresentation,
           selectedThemeId: templateId,
         });
-        console.log(`✅ 프리젠테이션 로드: ${presentation.title} (테마: ${templateId})`);
+        logger.info('프리젠테이션 로드 완료', { title: presentation.title, themeId: templateId });
       }
     } catch (error) {
-      console.error('❌ 프리젠테이션 조회 실패:', error);
+      logger.error('프리젠테이션 조회 실패', error);
       throw error;
     }
   },
 
   updateSlide: (index: number, updatedSlide: Slide) => {
-    console.log('🔄 [presentationStore] updateSlide 시작', {
+    logger.debug('슬라이드 업데이트 시작', {
       index,
-      슬라이드타입: updatedSlide.type,
-      props키: Object.keys(updatedSlide.props),
+      slideType: updatedSlide.type,
     });
 
     const { currentPresentation } = get();
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return;
     }
 
     if (index < 0 || index >= currentPresentation.slideData.slides.length) {
-      console.error('❌ 잘못된 슬라이드 인덱스:', index);
+      logger.error('잘못된 슬라이드 인덱스', { index });
       return;
     }
 
-    console.log('✅ [presentationStore] 유효성 검사 통과');
+    logger.debug('유효성 검사 통과');
 
     // 히스토리 기록 (변경 전)
     useHistoryStore.getState().pushHistory(currentPresentation);
@@ -803,15 +795,13 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       ),
     };
 
-    console.log('📝 [presentationStore] slideData 업데이트 완료');
+    logger.debug('slideData 업데이트 완료');
 
     // 3. TemplateEngine으로 HTML 재생성
-    console.log('🎨 [presentationStore] TemplateEngine으로 HTML 재생성 시작...');
+    logger.debug('TemplateEngine으로 HTML 재생성 시작');
     const engine = new TemplateEngine();
     const htmlSlides = engine.generateAll(newSlideData, currentPresentation.templateId || 'toss');
-    console.log('✅ [presentationStore] HTML 재생성 완료', {
-      htmlSlides개수: htmlSlides.length,
-    });
+    logger.debug('HTML 재생성 완료', { slideCount: htmlSlides.length });
 
     // 4. currentPresentation 업데이트
     const updated = {
@@ -823,9 +813,8 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     };
 
-    console.log('💾 [presentationStore] set() 호출 전');
     set(updated);
-    console.log('✅ [presentationStore] set() 호출 완료 - 슬라이드 업데이트 완료:', index);
+    logger.info('슬라이드 업데이트 완료', { index });
   },
 
   reorderSlides: (startIndex: number, endIndex: number) => {
@@ -833,12 +822,12 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return;
     }
 
@@ -850,7 +839,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       endIndex < 0 ||
       endIndex >= slides.length
     ) {
-      console.error('❌ 잘못된 슬라이드 인덱스:', { startIndex, endIndex });
+      logger.error('잘못된 슬라이드 인덱스', { startIndex, endIndex });
       return;
     }
 
@@ -881,7 +870,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     });
 
-    console.log(`✅ 슬라이드 순서 변경 완료: ${startIndex} → ${endIndex}`);
+    logger.info('슬라이드 순서 변경 완료', { from: startIndex, to: endIndex });
   },
 
   addSlide: (slideType: SlideType, afterIndex: number) => {
@@ -889,19 +878,19 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return;
     }
 
     const { slides } = currentPresentation.slideData;
 
     if (afterIndex < -1 || afterIndex >= slides.length) {
-      console.error('❌ 잘못된 삽입 위치:', afterIndex);
+      logger.error('잘못된 삽입 위치', { afterIndex });
       return;
     }
 
@@ -934,7 +923,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     });
 
-    console.log(`✅ 슬라이드 추가 완료: 타입=${slideType}, 위치=${afterIndex + 1}`);
+    logger.info('슬라이드 추가 완료', { slideType, position: afterIndex + 1 });
   },
 
   deleteSlide: (index: number): boolean => {
@@ -942,25 +931,25 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return false;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return false;
     }
 
     const { slides } = currentPresentation.slideData;
 
     if (index < 0 || index >= slides.length) {
-      console.error('❌ 잘못된 슬라이드 인덱스:', index);
+      logger.error('잘못된 슬라이드 인덱스', { index });
       return false;
     }
 
     // 2. 마지막 슬라이드 삭제 방지
     if (slides.length <= 1) {
-      console.warn('⚠️ 마지막 슬라이드는 삭제할 수 없어요');
+      logger.warn('마지막 슬라이드는 삭제할 수 없어요');
       return false;
     }
 
@@ -989,7 +978,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     });
 
-    console.log(`✅ 슬라이드 삭제 완료: 인덱스=${index}`);
+    logger.info('슬라이드 삭제 완료', { index });
     return true;
   },
 
@@ -998,19 +987,19 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return;
     }
 
     const { slides } = currentPresentation.slideData;
 
     if (index < 0 || index >= slides.length) {
-      console.error('❌ 잘못된 슬라이드 인덱스:', index);
+      logger.error('잘못된 슬라이드 인덱스', { index });
       return;
     }
 
@@ -1049,7 +1038,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     });
 
-    console.log(`✅ 슬라이드 복제 완료: 인덱스=${index} → ${index + 1}`);
+    logger.info('슬라이드 복제 완료', { from: index, to: index + 1 });
   },
 
   changeTemplate: (templateId: string) => {
@@ -1057,18 +1046,18 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
 
     // 1. 유효성 검사
     if (!currentPresentation) {
-      console.error('❌ 현재 프리젠테이션이 없습니다.');
+      logger.error('현재 프리젠테이션이 없습니다');
       return;
     }
 
     if (!currentPresentation.slideData) {
-      console.error('❌ slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다.');
+      logger.error('slideData가 없는 구버전 프리젠테이션은 편집할 수 없습니다');
       return;
     }
 
     // 2. 현재 템플릿과 동일한 경우 스킵
     if (currentPresentation.templateId === templateId) {
-      console.log('ℹ️ 이미 해당 템플릿을 사용 중이에요');
+      logger.debug('이미 해당 템플릿을 사용 중이에요');
       return;
     }
 
@@ -1076,7 +1065,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     useHistoryStore.getState().pushHistory(currentPresentation);
 
     // 3. TemplateEngine으로 전체 HTML 재생성
-    console.log(`🎨 템플릿 전환 중: ${currentPresentation.templateId} → ${templateId}`);
+    logger.info('템플릿 전환 중', { from: currentPresentation.templateId, to: templateId });
     const engine = new TemplateEngine();
     const htmlSlides = engine.generateAll(currentPresentation.slideData, templateId);
 
@@ -1090,7 +1079,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       },
     });
 
-    console.log(`✅ 템플릿 전환 완료: ${templateId}`);
+    logger.info('템플릿 전환 완료', { templateId });
   },
 
   undo: () => {
@@ -1106,7 +1095,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     const previousPresentation = historyStore.undo();
     if (previousPresentation) {
       set({ currentPresentation: previousPresentation });
-      console.log('↶ Undo 완료');
+      logger.debug('Undo 완료');
     }
   },
 
@@ -1123,7 +1112,7 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
     const nextPresentation = historyStore.redo();
     if (nextPresentation) {
       set({ currentPresentation: nextPresentation });
-      console.log('↷ Redo 완료');
+      logger.debug('Redo 완료');
     }
   },
 

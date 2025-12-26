@@ -31,6 +31,7 @@
 import { useState, useCallback } from 'react';
 import type { BundleType } from '@/types/monetization';
 import type { GenerationOptions } from '@/types/monetization';
+import { logger } from '@/lib/logger';
 
 /**
  * 결제 상태 인터페이스
@@ -100,9 +101,8 @@ export const usePayment = (): PaymentState => {
         const amount = plan === 'pro' ? 4900 : 9900;
 
         // TODO: 토스페이먼츠 정기 결제 API 연동
-        console.log(`[Payment] ${plan === 'pro' ? 'Pro' : 'Premium'} 구독 결제 요청:`, plan);
-        console.log(`[Payment] 결제 금액: ₩${amount.toLocaleString()}`);
-        console.warn('[Payment] 토스페이먼츠 정기 결제 API 미구현');
+        logger.debug('구독 결제 요청', { plan, amount });
+        logger.warn('토스페이먼츠 정기 결제 API 미구현');
 
         // 실제 구현:
         // 1. 서버에서 빌링키 발급
@@ -113,7 +113,7 @@ export const usePayment = (): PaymentState => {
         setLoading(false);
         return false; // 미구현 상태
       } catch (err) {
-        console.error('[Payment] 구독 결제 실패:', err);
+        logger.error('구독 결제 실패', err);
         setError('구독 결제 중 문제가 발생했어요');
         setLoading(false);
         return false;
@@ -133,13 +133,13 @@ export const usePayment = (): PaymentState => {
       setError(null);
 
       try {
-        console.log('[Payment] 건당 결제 요청:', options);
-        console.warn('[Payment] 크래딧 시스템 v4.0에서는 건당 결제가 제거되었습니다.');
+        logger.debug('건당 결제 요청', options);
+        logger.warn('크래딧 시스템 v4.0에서는 건당 결제가 제거되었습니다');
 
         setLoading(false);
         return false; // 미구현 상태
       } catch (err) {
-        console.error('[Payment] 건당 결제 실패:', err);
+        logger.error('건당 결제 실패', err);
         setError('결제 중 문제가 발생했어요');
         setLoading(false);
         return false;
@@ -158,8 +158,8 @@ export const usePayment = (): PaymentState => {
 
       try {
         // TODO: 토스페이먼츠 간편 결제 API 연동
-        console.log('[Payment] 묶음 구매 요청:', bundleType);
-        console.warn('[Payment] 토스페이먼츠 간편 결제 API 미구현');
+        logger.debug('묶음 구매 요청', { bundleType });
+        logger.warn('토스페이먼츠 간편 결제 API 미구현');
 
         // 가격 계산
         const prices = {
@@ -169,7 +169,7 @@ export const usePayment = (): PaymentState => {
         };
 
         const amount = prices[bundleType];
-        console.log(`[Payment] 결제 금액: ₩${amount}`);
+        logger.debug('묶음 구매 결제 금액', { amount });
 
         // 실제 구현:
         // 1. 서버에서 payToken 생성
@@ -180,7 +180,7 @@ export const usePayment = (): PaymentState => {
         setLoading(false);
         return false; // 미구현 상태
       } catch (err) {
-        console.error('[Payment] 묶음 구매 실패:', err);
+        logger.error('묶음 구매 실패', err);
         setError('묶음 구매 중 문제가 발생했어요');
         setLoading(false);
         return false;
@@ -198,8 +198,8 @@ export const usePayment = (): PaymentState => {
 
     try {
       // TODO: 토스페이먼츠 빌링키 해지 API 연동
-      console.log('[Payment] 구독 취소 요청');
-      console.warn('[Payment] 토스페이먼츠 빌링키 해지 API 미구현');
+      logger.debug('구독 취소 요청');
+      logger.warn('토스페이먼츠 빌링키 해지 API 미구현');
 
       // 실제 구현:
       // 1. 서버에서 빌링키 해지 API 호출
@@ -209,7 +209,7 @@ export const usePayment = (): PaymentState => {
       setLoading(false);
       return false; // 미구현 상태
     } catch (err) {
-      console.error('[Payment] 구독 취소 실패:', err);
+      logger.error('구독 취소 실패', err);
       setError('구독 취소 중 문제가 발생했어요');
       setLoading(false);
       return false;
@@ -226,9 +226,8 @@ export const usePayment = (): PaymentState => {
 
       try {
         // TODO: 토스페이먼츠 간편 결제 API 연동 (IAP)
-        console.log('[Payment] 프리미엄 템플릿 구매 요청:', { templateId, originalPrice });
-        console.log('[Payment] 결제 금액: ₩${originalPrice.toLocaleString()}');
-        console.warn('[Payment] 토스페이먼츠 IAP 결제 API 미구현');
+        logger.debug('프리미엄 템플릿 구매 요청', { templateId, originalPrice });
+        logger.warn('토스페이먼츠 IAP 결제 API 미구현');
 
         // 실제 구현:
         // 1. 서버에서 payToken 생성
@@ -240,7 +239,7 @@ export const usePayment = (): PaymentState => {
         setLoading(false);
         return false; // 미구현 상태
       } catch (err) {
-        console.error('[Payment] 템플릿 구매 실패:', err);
+        logger.error('템플릿 구매 실패', err);
         setError('템플릿 구매 중 문제가 발생했어요');
         setLoading(false);
         return false;
@@ -259,8 +258,8 @@ export const usePayment = (): PaymentState => {
 
       try {
         // TODO: 토스페이먼츠 환불 API 연동
-        console.log('[Payment] 환불 요청:', { orderId, reason });
-        console.warn('[Payment] 토스페이먼츠 환불 API 미구현');
+        logger.debug('환불 요청', { orderId, reason });
+        logger.warn('토스페이먼츠 환불 API 미구현');
 
         // 실제 구현:
         // 1. 서버에서 환불 API 호출
@@ -270,7 +269,7 @@ export const usePayment = (): PaymentState => {
         setLoading(false);
         return false; // 미구현 상태
       } catch (err) {
-        console.error('[Payment] 환불 실패:', err);
+        logger.error('환불 실패', err);
         setError('환불 처리 중 문제가 발생했어요');
         setLoading(false);
         return false;

@@ -8,6 +8,7 @@ import {
   hasWatermark as planHasWatermark,
   getPremiumTemplatesAccess as getPlanPremiumTemplatesAccess,
 } from '@/constants/subscription';
+import { logger } from '@/lib/logger';
 
 /**
  * 구독 상태 인터페이스 (하이브리드 모델)
@@ -187,14 +188,14 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             lastCreditProvidedDate: now,
           });
 
-          console.log(`✅ 구독 플랜 설정 완료: ${plan}`);
+          logger.info('구독 플랜 설정 완료', { plan });
 
           // Pro 이상 플랜이면 즉시 크래딧 제공
           if ((plan === 'pro' || plan === 'premium') && !currentState.monthlyCreditsProvided) {
             get().provideMonthlyCredits();
           }
         } catch (error) {
-          console.error('❌ 구독 설정 실패:', error);
+          logger.error('구독 설정 실패', error);
           // 에러 시 로컬 상태만 업데이트 (fallback)
           set({
             plan,
@@ -302,7 +303,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             lastCreditProvidedDate: Date.now(),
           });
 
-          console.log(`[Subscription] 월간 크래딧 제공: ${monthlyCredits} 크래딧`);
+          logger.info('월간 크레딧 제공', { credits: monthlyCredits });
         }
       },
 
@@ -355,7 +356,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
             set({
               monthlyCreditsProvided: false,
             });
-            console.log('[Subscription] 월간 크래딧 제공 플래그 초기화 (매월 1일 기준)');
+            logger.debug('월간 크레딧 제공 플래그 초기화 (매월 1일 기준)');
             get().provideMonthlyCredits();
           }
           return;
@@ -376,7 +377,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           set({
             monthlyCreditsProvided: false,
           });
-          console.log(`[Subscription] 월간 크래딧 제공 플래그 초기화 (매월 ${dayOfMonth}일 기준)`);
+          logger.debug('월간 크레딧 제공 플래그 초기화', { dayOfMonth });
           get().provideMonthlyCredits();
         }
       },
@@ -388,11 +389,11 @@ export const useSubscriptionStore = create<SubscriptionState>()(
           if (!response.ok) {
             // 401/403이면 로그인 필요, 404면 구독 없음 (free)
             if (response.status === 401 || response.status === 403) {
-              console.log('⚠️ 인증 필요: 로그인 후 구독 정보 조회 가능');
+              logger.debug('인증 필요: 로그인 후 구독 정보 조회 가능');
               return;
             }
             if (response.status === 404) {
-              console.log('📭 구독 정보 없음: Free 플랜 유지');
+              logger.debug('구독 정보 없음: Free 플랜 유지');
               return;
             }
             throw new Error(`구독 조회 실패: ${response.status}`);
@@ -412,10 +413,10 @@ export const useSubscriptionStore = create<SubscriptionState>()(
               subscriptionStartDate: data.startDate ? new Date(data.startDate).getTime() : null,
             });
 
-            console.log(`✅ 구독 정보 로드 완료: ${plan} (만료: ${data.endDate || '없음'})`);
+            logger.info('구독 정보 로드 완료', { plan, endDate: data.endDate || '없음' });
           }
         } catch (error) {
-          console.error('❌ 구독 정보 조회 실패:', error);
+          logger.error('구독 정보 조회 실패', error);
           // 에러 시 로컬 상태 유지 (fallback)
         }
       },

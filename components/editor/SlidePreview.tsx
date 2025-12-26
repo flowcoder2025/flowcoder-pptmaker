@@ -6,6 +6,7 @@
 'use client';
 
 import { useMemo, useState, useEffect, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import type { Slide } from '@/types/slide';
 import type { AspectRatio } from '@/types/presentation';
 import { TemplateEngine } from '@/services/template';
@@ -64,12 +65,11 @@ export default function SlidePreview({ slide, templateId = 'toss', aspectRatio =
 
   // 🔍 DEBUG: slide prop 변경 감지
   useEffect(() => {
-    console.log('🔍 [SlidePreview] slide prop 변경됨:', {
+    logger.debug('SlidePreview slide prop 변경됨', {
       type: slide.type,
       propsKeys: Object.keys(slide.props),
       aspectRatio,
       slideSize,
-      timestamp: Date.now()
     });
   }, [slide, aspectRatio, slideSize]);
 
@@ -78,24 +78,22 @@ export default function SlidePreview({ slide, templateId = 'toss', aspectRatio =
   const slidePropsJson = JSON.stringify(slide.props);
 
   const htmlSlide = useMemo(() => {
-    console.log('🔄 [SlidePreview] useMemo 재계산 중...', {
+    logger.debug('SlidePreview useMemo 재계산 중', {
       type: slide.type,
       propsKeys: Object.keys(slide.props),
       aspectRatio,
-      timestamp: Date.now(),
     });
 
     try {
       const engine = new TemplateEngine();
       const result = engine.generateSlide(slide, templateId, aspectRatio);
-      console.log('✅ [SlidePreview] HTML 생성 완료', {
+      logger.debug('SlidePreview HTML 생성 완료', {
         aspectRatio,
         slideType: slide.type,
-        timestamp: Date.now(),
       });
       return result;
     } catch (error) {
-      console.error('❌ [SlidePreview] 슬라이드 HTML 생성 실패:', error);
+      logger.error('SlidePreview 슬라이드 HTML 생성 실패', error);
       return null;
     }
   }, [slide.type, slidePropsJson, templateId, aspectRatio]);

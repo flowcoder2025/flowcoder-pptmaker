@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('회원가입 에러:', error)
+    logger.error('회원가입 실패', error)
     return NextResponse.json(
       { error: '회원가입 중 문제가 발생했어요. 다시 시도해주세요' },
       { status: 500 }

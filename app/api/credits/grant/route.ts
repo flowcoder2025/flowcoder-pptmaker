@@ -1,13 +1,16 @@
 /**
  * Credit Grant API - 크레딧 지급
  *
- * POST /api/credits/grant - 크레딧 지급 (관리자 또는 시스템)
+ * POST /api/credits/grant - 크레딧 지급 (관리자 전용)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUserId } from '@/lib/auth'
 import { grantCredits } from '@/lib/credits'
+import { requireAdmin } from '@/lib/permissions'
 import { CreditSourceType } from '@/types/credits'
+import { logger } from '@/lib/logger'
+import { creditGrantRequestSchema, validateRequest } from '@/lib/validations'
 
 // ============================================
 // POST /api/credits/grant
@@ -17,7 +20,7 @@ import { CreditSourceType } from '@/types/credits'
  * 크레딧 지급
  *
  * @auth Required
- * @permission 관리자 또는 시스템 (향후 권한 체크 추가 필요)
+ * @permission admin (시스템 관리자만 가능)
  * @body {
  *   userId: string  // 지급 대상 사용자 ID
  *   sourceType: 'FREE' | 'EVENT' | 'SUBSCRIPTION' | 'PURCHASE'  // 크레딧 타입
@@ -42,49 +45,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: 관리자 권한 체크 (향후 구현)
-    // const isAdmin = await checkAdmin(currentUserId)
-    // if (!isAdmin) {
-    //   return NextResponse.json(
-    //     { error: '관리자만 크레딧을 지급할 수 있어요' },
-    //     { status: 403 }
-    //   )
-    // }
+    // 🔒 관리자 권한 체크 (Zanzibar ReBAC)
+    try {
+      await requireAdmin(currentUserId)
+    } catch {
+      logger.warn('크레딧 지급 권한 거부', { userId: currentUserId })
+      return NextResponse.json(
+        { error: '관리자만 크레딧을 지급할 수 있어요' },
+        { status: 403 }
+      )
+    }
 
+    // Zod 스키마 검증
     const body = await request.json()
-    const { userId, sourceType, amount, description, expiresInDays } = body
-
-    // 입력 검증
-    if (!userId) {
+    const validation = validateRequest(creditGrantRequestSchema, body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: '사용자 ID를 입력해주세요' },
+        { error: validation.error },
         { status: 400 }
       )
     }
 
-    if (!sourceType || !Object.values(CreditSourceType).includes(sourceType)) {
-      return NextResponse.json(
-        {
-          error: '올바른 크레딧 타입을 선택해주세요',
-          validTypes: Object.values(CreditSourceType),
-        },
-        { status: 400 }
-      )
-    }
-
-    if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: '올바른 크레딧 수량을 입력해주세요' },
-        { status: 400 }
-      )
-    }
-
-    if (!description) {
-      return NextResponse.json(
-        { error: '지급 사유를 입력해주세요' },
-        { status: 400 }
-      )
-    }
+    const { userId, sourceType, amount, description, expiresInDays } = validation.data
 
     // 크레딧 지급
     const transaction = await grantCredits(
@@ -94,6 +76,16 @@ export async function POST(request: NextRequest) {
       description,
       expiresInDays
     )
+
+    // 감사 로그 (항상 기록)
+    logger.audit('CREDIT_GRANT', {
+      adminId: currentUserId,
+      targetUserId: userId,
+      sourceType,
+      amount,
+      description,
+      expiresInDays,
+    })
 
     return NextResponse.json({
       transaction: {
@@ -109,7 +101,7 @@ export async function POST(request: NextRequest) {
       message: `${amount} 크레딧을 지급했어요`,
     })
   } catch (error) {
-    console.error('크레딧 지급 실패:', error)
+    logger.error('크레딧 지급 실패', error)
     return NextResponse.json(
       { error: '크레딧을 지급하지 못했어요' },
       { status: 500 }

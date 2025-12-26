@@ -7,6 +7,7 @@
  */
 
 import { PrismaClient } from '@prisma/client'
+import { logger } from '@/lib/logger'
 
 // Singleton 패턴
 const globalForPrisma = globalThis as unknown as {
@@ -56,6 +57,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 연결 해제 시 재연결 (P1017 에러 복구)
 prisma.$connect().catch((error) => {
-  console.error('❌ Prisma 초기 연결 실패:', error)
-  console.log('🔄 재연결 시도 중...')
+  logger.error('Prisma 초기 연결 실패', error);
+  logger.info('Prisma 재연결 시도 중');
 })

@@ -14,6 +14,7 @@ import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { BUTTON_TEXT } from '@/lib/text-config';
 import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem, Infinity, Layers } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import PaymentTestBanner from '@/components/PaymentTestBanner';
@@ -97,7 +98,7 @@ export default function CreditsPage() {
         }
       }
     } catch (err) {
-      console.error('결제 중 오류:', err);
+      logger.error('결제 중 오류', err);
       const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
 
       if (errorMsg.includes('결제 시스템 준비 중')) {

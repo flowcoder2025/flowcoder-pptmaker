@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 
 interface Subscription {
   id: string
@@ -50,7 +51,7 @@ export default function AdminSubscriptionsPage() {
       setStats(data.stats)
       setSubscriptions(data.subscriptions)
     } catch (error) {
-      console.error(error)
+      logger.error('구독 목록 조회 실패', error)
       toast.error('구독 목록을 불러오지 못했어요.')
     } finally {
       setLoading(false)

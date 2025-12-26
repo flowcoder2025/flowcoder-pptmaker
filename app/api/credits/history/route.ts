@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // GET /api/credits/history
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       offset,
     })
   } catch (error) {
-    console.error('크레딧 거래 내역 조회 실패:', error)
+    logger.error('크레딧 거래 내역 조회 실패', error)
     return NextResponse.json(
       { error: '크레딧 거래 내역을 불러오지 못했어요.' },
       { status: 500 }

@@ -4,6 +4,7 @@
  */
 
 import type { PerplexityModel, ResearchResult, SearchResult } from '@/types/research';
+import { logger } from '@/lib/logger';
 
 /**
  * 자체 API 라우트를 통해 주제에 대한 자료 조사
@@ -16,7 +17,7 @@ export async function researchTopic(
     model === 'sonar-deep-research' ? 'Deep Research' :
     model === 'sonar-reasoning' ? 'Reasoning' :
     'Sonar';
-  console.log(`🔍 [Perplexity ${modelName}] 자료 조사 시작: "${topic}"`);
+  logger.info('Perplexity 자료 조사 시작', { model: modelName, topic });
 
   try {
     const response = await fetch('/api/research', {
@@ -39,27 +40,21 @@ export async function researchTopic(
 
     // 💰 토큰 사용량 로깅 (수익 분석용)
     if (data.usage) {
-      const promptTokens = data.usage.prompt_tokens || 0;
-      const completionTokens = data.usage.completion_tokens || 0;
-      const totalTokens = data.usage.total_tokens || 0;
-      const searchQueries = data.usage.num_search_queries || 0;
-
-      console.log(`💰 [Perplexity ${modelName}] 토큰 사용량:`, {
-        입력_토큰: promptTokens,
-        출력_토큰: completionTokens,
-        총_토큰: totalTokens,
-        검색_쿼리_수: searchQueries,
-        계산_검증: `${promptTokens} + ${completionTokens} = ${promptTokens + completionTokens}`,
+      logger.debug('Perplexity 토큰 사용량', {
+        model: modelName,
+        promptTokens: data.usage.prompt_tokens || 0,
+        completionTokens: data.usage.completion_tokens || 0,
+        totalTokens: data.usage.total_tokens || 0,
+        searchQueries: data.usage.num_search_queries || 0,
       });
     }
 
-    console.log(`✅ [Perplexity ${modelName}] 자료 조사 완료`);
-    console.log(`📚 검색 결과 수: ${data.sources?.length || 0}개`);
-    console.log(`📝 조사 내용 길이: ${data.content?.length || 0}자`);
-
-    if (data.sources && data.sources.length > 0) {
-      console.log(`🔗 출처:`, data.sources.slice(0, 3).map((s: SearchResult) => s.title));
-    }
+    logger.info('Perplexity 자료 조사 완료', {
+      model: modelName,
+      sourcesCount: data.sources?.length || 0,
+      contentLength: data.content?.length || 0,
+      topSources: data.sources?.slice(0, 3).map((s: SearchResult) => s.title),
+    });
 
     return {
       content: data.content || '',
@@ -72,7 +67,7 @@ export async function researchTopic(
       },
     };
   } catch (error) {
-    console.error(`❌ [Perplexity ${modelName}] 자료 조사 실패:`, error);
+    logger.error('Perplexity 자료 조사 실패', { model: modelName, error });
     throw error;
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { requireAdmin } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -60,7 +61,7 @@ export async function GET() {
       })),
     })
   } catch (error) {
-    console.error('Admin monitoring error:', error)
+    logger.error('관리자 모니터링 데이터 조회 실패', error)
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },

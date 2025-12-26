@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { requireAdmin } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 /**
  * Admin 크레딧 통계 및 거래 내역 조회 API
@@ -99,7 +100,7 @@ export async function GET(req: Request) {
       })),
     })
   } catch (error) {
-    console.error('Admin credits error:', error)
+    logger.error('관리자 크레딧 통계 조회 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(

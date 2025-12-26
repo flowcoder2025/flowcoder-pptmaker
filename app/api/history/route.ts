@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUserId } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // GET /api/history
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
       offset,
     })
   } catch (error) {
-    console.error('생성 이력 조회 실패:', error)
+    logger.error('생성 이력 조회 실패', error)
     return NextResponse.json(
       { error: '생성 이력을 불러오지 못했어요.' },
       { status: 500 }

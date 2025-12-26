@@ -25,6 +25,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
@@ -152,7 +153,7 @@ export default function UsagePage() {
       setCreditTransactions(data.transactions || []);
       setCreditTotal(data.total || 0);
     } catch (error) {
-      console.error('크레딧 거래 내역 조회 실패:', error);
+      logger.error('크레딧 거래 내역 조회 실패', error);
       toast.error('크레딧 사용 내역을 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoadingCredits(false);
@@ -181,7 +182,7 @@ export default function UsagePage() {
       setPayments(data.payments || []);
       setPaymentTotal(data.total || 0);
     } catch (error) {
-      console.error('결제 내역 조회 실패:', error);
+      logger.error('결제 내역 조회 실패', error);
       toast.error('결제 내역을 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoadingPayments(false);
@@ -212,7 +213,7 @@ export default function UsagePage() {
       const data = await res.json();
       setDashboardStats(data);
     } catch (error) {
-      console.error('대시보드 통계 조회 실패:', error);
+      logger.error('대시보드 통계 조회 실패', error);
       toast.error('통계를 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoadingDashboard(false);

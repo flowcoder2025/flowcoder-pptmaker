@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { VerifyPaymentResponse } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -98,7 +99,7 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Payment GET] Error:', error);
+    logger.error('결제 정보 조회 실패', error);
     return NextResponse.json(
       {
         success: false,

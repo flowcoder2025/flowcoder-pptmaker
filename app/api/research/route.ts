@@ -6,11 +6,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import type { PerplexityModel } from '@/types/research';
+import { logger } from '@/lib/logger';
+import { researchRequestSchema, validateRequest } from '@/lib/validations';
 
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
 if (!PERPLEXITY_API_KEY) {
-  console.warn('⚠️ PERPLEXITY_API_KEY가 설정되지 않았습니다. 자료 조사 기능이 비활성화됩니다.');
+  logger.warn('PERPLEXITY_API_KEY 미설정 - 자료 조사 기능 비활성화');
 }
 
 /**
@@ -45,20 +47,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 요청 파라미터 파싱
+    // Zod 스키마 검증
     const body = await request.json();
-    const { topic, model = 'sonar' } = body;
-
-    if (!topic || typeof topic !== 'string') {
+    const validation = validateRequest(researchRequestSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: '주제를 입력해주세요.' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
+    const { topic, model } = validation.data;
+
     // Perplexity API 호출
     const perplexityModel = getPerplexityModel(model as PerplexityModel);
-    console.log(`🔍 [Perplexity API] 자료 조사 시작: "${topic}" (모델: ${perplexityModel})`);
+    logger.info('Perplexity API 자료 조사 시작', { topic, model: perplexityModel });
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ [Perplexity API] 오류 (${response.status}):`, errorText);
+      logger.error('Perplexity API 오류', { status: response.status, errorText });
 
       return NextResponse.json(
         { error: `Perplexity API 호출에 실패했어요. (${response.status})` },
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log(`✅ [Perplexity API] 자료 조사 완료`);
+    logger.info('Perplexity API 자료 조사 완료');
 
     // 응답 데이터 구조화
     const content = data.choices?.[0]?.message?.content || '';
@@ -127,10 +130,10 @@ export async function POST(request: NextRequest) {
 
     // 토큰 사용량 로깅
     if (usage) {
-      console.log(`💰 [Perplexity API] 토큰 사용량:`, {
-        입력_토큰: usage.prompt_tokens || 0,
-        출력_토큰: usage.completion_tokens || 0,
-        총_토큰: usage.total_tokens || 0,
+      logger.debug('Perplexity API 토큰 사용량', {
+        promptTokens: usage.prompt_tokens || 0,
+        completionTokens: usage.completion_tokens || 0,
+        totalTokens: usage.total_tokens || 0,
       });
     }
 
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ [Perplexity API] 예상치 못한 오류:', error);
+    logger.error('Perplexity API 예상치 못한 오류', error);
 
     return NextResponse.json(
       {

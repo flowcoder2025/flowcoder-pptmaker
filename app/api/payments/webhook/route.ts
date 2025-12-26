@@ -20,13 +20,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import * as PortOne from '@portone/server-sdk';
 import type { PortOnePaymentStatus } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
     // 1. Webhook Secret 확인
     const webhookSecret = process.env.PORTONE_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('[Payment Webhook] PORTONE_WEBHOOK_SECRET not configured');
+      logger.error('PORTONE_WEBHOOK_SECRET not configured');
       return NextResponse.json({ received: false }, { status: 500 });
     }
 
@@ -36,15 +37,15 @@ export async function POST(request: NextRequest) {
     const webhookTimestamp = request.headers.get('webhook-timestamp');
     const webhookSignature = request.headers.get('webhook-signature');
 
-    console.log('[Payment Webhook] Headers:', {
-      'webhook-id': webhookId,
-      'webhook-timestamp': webhookTimestamp,
-      'webhook-signature': webhookSignature ? 'present' : 'missing',
+    logger.debug('Webhook 헤더 수신', {
+      webhookId,
+      webhookTimestamp,
+      hasSignature: !!webhookSignature,
     });
 
     // 3. Standard Webhooks 서명 검증
     if (!webhookId || !webhookTimestamp || !webhookSignature) {
-      console.error('[Payment Webhook] Missing webhook headers');
+      logger.error('Webhook 헤더 누락');
       return NextResponse.json({ received: false }, { status: 401 });
     }
 
@@ -55,9 +56,9 @@ export async function POST(request: NextRequest) {
         'webhook-timestamp': webhookTimestamp,
         'webhook-signature': webhookSignature,
       });
-      console.log('[Payment Webhook] Signature verified successfully');
+      logger.debug('Webhook 서명 검증 완료');
     } catch (verifyError) {
-      console.error('[Payment Webhook] Signature verification failed:', verifyError);
+      logger.error('Webhook 서명 검증 실패', verifyError);
       return NextResponse.json({ received: false }, { status: 403 });
     }
 
@@ -65,7 +66,8 @@ export async function POST(request: NextRequest) {
     const payload = JSON.parse(body);
     const { type, data } = payload;
 
-    console.log(`[Payment Webhook] Received event: ${type}`, {
+    logger.info('Webhook 이벤트 수신', {
+      type,
       paymentId: data?.paymentId,
       status: data?.status,
     });
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
       const { paymentId, status, method, receiptUrl } = data;
 
       if (!paymentId) {
-        console.error('[Payment Webhook] paymentId is missing');
+        logger.error('paymentId 누락');
         return NextResponse.json({ received: false }, { status: 400 });
       }
 
@@ -86,13 +88,13 @@ export async function POST(request: NextRequest) {
       });
 
       if (!payment) {
-        console.error(`[Payment Webhook] Payment not found: ${paymentId}`);
+        logger.error('Payment 레코드 없음', { paymentId });
         return NextResponse.json({ received: false }, { status: 404 });
       }
 
       // 이미 처리된 경우 스킵
       if (payment.status === 'PAID') {
-        console.log(`[Payment Webhook] Already processed: ${paymentId}`);
+        logger.debug('이미 처리된 결제', { paymentId });
         return NextResponse.json({ received: true });
       }
 
@@ -110,13 +112,13 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log(`[Payment Webhook] Payment updated: ${paymentId}`);
+      logger.info('결제 완료 처리', { paymentId });
     } else if (type === 'Transaction.Failed') {
       // 결제 실패
       const { paymentId, status, failReason } = data;
 
       if (!paymentId) {
-        console.error('[Payment Webhook] paymentId is missing');
+        logger.error('paymentId 누락');
         return NextResponse.json({ received: false }, { status: 400 });
       }
 
@@ -129,13 +131,13 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log(`[Payment Webhook] Payment failed: ${paymentId}`);
+      logger.info('결제 실패 처리', { paymentId });
     } else if (type === 'Transaction.Cancelled') {
       // 결제 취소
       const { paymentId, status } = data;
 
       if (!paymentId) {
-        console.error('[Payment Webhook] paymentId is missing');
+        logger.error('paymentId 누락');
         return NextResponse.json({ received: false }, { status: 400 });
       }
 
@@ -147,15 +149,15 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log(`[Payment Webhook] Payment cancelled: ${paymentId}`);
+      logger.info('결제 취소 처리', { paymentId });
     } else {
-      console.log(`[Payment Webhook] Unhandled event type: ${type}`);
+      logger.debug('처리되지 않은 이벤트 타입', { type });
     }
 
     // 6. 응답 반환
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('[Payment Webhook] Error:', error);
+    logger.error('Webhook 처리 오류', error);
     return NextResponse.json({ received: false }, { status: 500 });
   }
 }

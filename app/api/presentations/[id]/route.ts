@@ -7,6 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import type { Prisma } from '@prisma/client'
+import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import {
   requirePresentationViewer,
@@ -14,6 +16,7 @@ import {
   requirePresentationOwner,
 } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { presentationUpdateRequestSchema, validateRequest } from '@/lib/validations'
 
 // ============================================
 // GET /api/presentations/[id]
@@ -84,7 +87,7 @@ export async function GET(
       return NextResponse.json({ error: errorMessage }, { status: 401 })
     }
 
-    console.error('프레젠테이션 조회 실패:', error)
+    logger.error('프레젠테이션 조회 실패', error)
     return NextResponse.json(
       { error: '프레젠테이션을 불러오지 못했어요.' },
       { status: 500 }
@@ -129,8 +132,17 @@ export async function PATCH(
     // Zanzibar 권한 확인: editor 이상
     await requirePresentationEditor(userId, id)
 
+    // Zod 스키마 검증
     const body = await request.json()
-    const { title, description, slideData, slides, metadata, isPublic } = body
+    const validation = validateRequest(presentationUpdateRequestSchema, body)
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      )
+    }
+
+    const { title, description, slideData, slides, metadata, isPublic } = validation.data
 
     // 프레젠테이션 수정
     const presentation = await prisma.presentation.update({
@@ -138,9 +150,9 @@ export async function PATCH(
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
-        ...(slideData !== undefined && { slideData }),
-        ...(slides !== undefined && { slides }),  // HTML 캐시 업데이트
-        ...(metadata !== undefined && { metadata }),
+        ...(slideData !== undefined && { slideData: slideData as Prisma.InputJsonValue }),
+        ...(slides !== undefined && { slides: slides as Prisma.InputJsonValue }),
+        ...(metadata !== undefined && { metadata: metadata as Prisma.InputJsonValue }),
         ...(isPublic !== undefined && { isPublic }),
       },
       select: {
@@ -169,7 +181,7 @@ export async function PATCH(
     if (errorMessage.includes('로그인')) {
       return NextResponse.json({ error: errorMessage }, { status: 401 })}
 
-    console.error('프레젠테이션 수정 실패:', error)
+    logger.error('프레젠테이션 수정 실패', error)
     return NextResponse.json(
       { error: '프레젠테이션을 수정하지 못했어요.' },
       { status: 500 }
@@ -231,7 +243,7 @@ export async function DELETE(
       return NextResponse.json({ error: errorMessage }, { status: 401 })
     }
 
-    console.error('프레젠테이션 삭제 실패:', error)
+    logger.error('프레젠테이션 삭제 실패', error)
     return NextResponse.json(
       { error: '프레젠테이션을 삭제하지 못했어요.' },
       { status: 500 }

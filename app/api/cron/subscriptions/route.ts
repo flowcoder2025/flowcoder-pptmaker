@@ -15,6 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 // Vercel Cron 인증
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -28,12 +29,12 @@ export async function GET(request: NextRequest) {
     // Vercel Cron이 아니고, CRON_SECRET이 설정된 경우 인증 필요
     if (!isVercelCron && CRON_SECRET) {
       if (authHeader !== `Bearer ${CRON_SECRET}`) {
-        console.log('[Cron] Unauthorized request');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        logger.warn('Cron 미인증 요청');
+        return NextResponse.json({ error: '인증되지 않은 요청이에요' }, { status: 401 });
       }
     }
 
-    console.log('[Cron] Starting subscription batch job...');
+    logger.info('구독 배치 작업 시작');
     const now = new Date();
     const results = {
       expired: 0,
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
         }),
       ]);
       results.expired++;
-      console.log(`[Cron] Expired subscription: ${sub.id} (${sub.user.email}), wasCanceled: ${wasCanceled}`);
+      logger.info('구독 만료 처리', { subscriptionId: sub.id, email: sub.user.email, wasCanceled });
     }
 
     // 3. 만료 임박 알림 (3일, 1일 전)
@@ -213,7 +214,7 @@ export async function GET(request: NextRequest) {
       if (!sub.billingKey) continue;
 
       results.renewalsAttempted++;
-      console.log(`[Cron] Attempting renewal for: ${sub.id}`);
+      logger.info('구독 갱신 시도', { subscriptionId: sub.id });
 
       try {
         // 정기결제 실행 (빌링키 결제)
@@ -245,7 +246,7 @@ export async function GET(request: NextRequest) {
             }),
           ]);
           results.renewalsSucceeded++;
-          console.log(`[Cron] Renewal succeeded: ${sub.id}`);
+          logger.info('구독 갱신 성공', { subscriptionId: sub.id });
         } else {
           // 실패: 실패 카운트 증가
           const newFailCount = sub.failedPaymentCount + 1;
@@ -272,10 +273,10 @@ export async function GET(request: NextRequest) {
               },
             }),
           ]);
-          console.log(`[Cron] Renewal failed: ${sub.id}, failCount: ${newFailCount}`);
+          logger.warn('구독 갱신 실패', { subscriptionId: sub.id, failCount: newFailCount });
         }
       } catch (error) {
-        console.error(`[Cron] Renewal error for ${sub.id}:`, error);
+        logger.error('구독 갱신 오류', { subscriptionId: sub.id, error });
       }
     }
 
@@ -307,7 +308,7 @@ export async function GET(request: NextRequest) {
 
       if (shouldRetry) {
         results.retriesAttempted++;
-        console.log(`[Cron] Retrying payment for: ${sub.id} (attempt ${sub.failedPaymentCount + 1})`);
+        logger.info('결제 재시도', { subscriptionId: sub.id, attempt: sub.failedPaymentCount + 1 });
 
         try {
           const paymentResult = await executeRecurringPayment(sub);
@@ -350,12 +351,12 @@ export async function GET(request: NextRequest) {
             });
           }
         } catch (error) {
-          console.error(`[Cron] Retry error for ${sub.id}:`, error);
+          logger.error('재시도 오류', { subscriptionId: sub.id, error });
         }
       }
     }
 
-    console.log('[Cron] Batch job completed:', results);
+    logger.info('배치 작업 완료', results);
 
     return NextResponse.json({
       success: true,
@@ -363,9 +364,9 @@ export async function GET(request: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('[Cron] Batch job error:', error);
+    logger.error('배치 작업 오류', error);
     return NextResponse.json(
-      { error: 'Batch job failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: '배치 작업에 실패했어요', details: error instanceof Error ? error.message : '알 수 없는 오류' },
       { status: 500 }
     );
   }
@@ -381,7 +382,7 @@ async function executeRecurringPayment(subscription: {
   billingKey: { billingKeyId: string } | null;
 }): Promise<{ success: boolean; paymentId?: string; error?: string }> {
   if (!subscription.billingKey) {
-    return { success: false, error: 'No billing key' };
+    return { success: false, error: '빌링키가 없어요' };
   }
 
   // 결제 금액 결정
@@ -392,8 +393,8 @@ async function executeRecurringPayment(subscription: {
   const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
 
   if (!apiSecret || !storeId) {
-    console.error('[Cron] PortOne credentials not configured');
-    return { success: false, error: 'Payment system not configured' };
+    logger.error('PortOne 인증 정보 미설정');
+    return { success: false, error: '결제 시스템이 설정되지 않았어요' };
   }
 
   try {
@@ -422,7 +423,7 @@ async function executeRecurringPayment(subscription: {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Cron] PortOne billing payment failed:', errorText);
+      logger.error('PortOne 빌링 결제 실패', { error: errorText });
       return { success: false, error: errorText };
     }
 
@@ -446,7 +447,7 @@ async function executeRecurringPayment(subscription: {
 
     return { success: true, paymentId };
   } catch (error) {
-    console.error('[Cron] Recurring payment error:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    logger.error('정기 결제 오류', error);
+    return { success: false, error: error instanceof Error ? error.message : '알 수 없는 오류' };
   }
 }

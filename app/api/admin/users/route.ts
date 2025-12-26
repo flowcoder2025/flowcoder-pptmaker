@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { requireAdmin, check } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import { calculateBalance } from '@/lib/credits'
+import { logger } from '@/lib/logger'
 
 /**
  * Admin 사용자 목록 API
@@ -74,7 +75,7 @@ export async function GET() {
       total: users.length,
     })
   } catch (error) {
-    console.error('Admin users list error:', error)
+    logger.error('관리자 사용자 목록 조회 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(

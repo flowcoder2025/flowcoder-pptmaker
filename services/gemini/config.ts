@@ -3,6 +3,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from '@/lib/logger';
 
 // Static Export 모드에서 환경 변수 접근 방식 개선
 // typeof window === 'undefined' 체크로 서버/클라이언트 환경 구분
@@ -11,11 +12,14 @@ const getApiKey = (): string => {
   const key = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 
   if (!key) {
-    console.error('🚨 CRITICAL: NEXT_PUBLIC_GEMINI_API_KEY가 설정되지 않았습니다!');
-    console.error('📝 환경 변수 확인 방법:');
-    console.error('1. .env.production 파일 확인');
-    console.error('2. NEXT_PUBLIC_GEMINI_API_KEY 값 존재 여부 확인');
-    console.error('3. npm run build 재실행 후 배포');
+    logger.error('Gemini API 키가 설정되지 않았어요', {
+      envVar: 'NEXT_PUBLIC_GEMINI_API_KEY',
+      help: [
+        '.env.production 파일 확인',
+        'NEXT_PUBLIC_GEMINI_API_KEY 값 존재 여부 확인',
+        'npm run build 재실행 후 배포',
+      ],
+    });
     throw new Error('Gemini API 키가 설정되지 않았어요. 앱을 재배포해야 해요.');
   }
 

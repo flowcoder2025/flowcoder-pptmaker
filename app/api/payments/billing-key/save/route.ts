@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 interface SaveBillingKeyBody {
   billingKeyId: string;
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
 
     if (!apiSecret || !storeId) {
-      console.error('[BillingKey Save] Missing API credentials');
+      logger.error('결제 시스템 인증 정보 누락');
       return NextResponse.json(
         { success: false, error: '결제 시스템 설정이 올바르지 않아요' },
         { status: 500 }
@@ -78,11 +79,11 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    console.log('[BillingKey Save] PortOne API response status:', portoneResponse.status);
+    logger.debug('PortOne 빌링키 검증 API 응답', { status: portoneResponse.status });
 
     if (!portoneResponse.ok) {
       const errorText = await portoneResponse.text();
-      console.error('[BillingKey Save] PortOne API error:', portoneResponse.status, errorText);
+      logger.error('PortOne 빌링키 검증 실패', { status: portoneResponse.status, errorText });
       return NextResponse.json(
         { success: false, error: '빌링키 검증에 실패했어요' },
         { status: 400 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const portoneData = (await portoneResponse.json()) as any;
-    console.log('[BillingKey Save] PortOne response:', JSON.stringify(portoneData, null, 2));
+    logger.debug('PortOne 빌링키 데이터', { status: portoneData.status });
 
     // 빌링키 상태 확인
     if (portoneData.status !== 'ISSUED') {
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          console.log('[BillingKey Save] Connected to subscription:', subscription.id);
+          logger.info('빌링키 구독 연결 완료', { subscriptionId: subscription.id });
         }
       }
 
@@ -194,7 +195,7 @@ export async function POST(request: NextRequest) {
       } : null,
     });
   } catch (error) {
-    console.error('[BillingKey Save] Error:', error);
+    logger.error('빌링키 저장 실패', error);
     return NextResponse.json(
       {
         success: false,

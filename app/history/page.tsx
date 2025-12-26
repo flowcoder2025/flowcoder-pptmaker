@@ -12,6 +12,7 @@ import { PLAN_BENEFITS } from '@/constants/subscription';
 import { BUTTON_TEXT } from '@/lib/text-config';
 import { Search, Plus, Calendar, Trash2, Eye, Edit, Download, Loader2, FileCode, FileText, Presentation, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import DownloadProgressModal from '@/components/DownloadProgressModal';
@@ -106,7 +107,7 @@ export default function HistoryPage() {
       setTotalCount(data.totalCount || 0);
       setCurrentPage(data.currentPage || 1);
     } catch (error) {
-      console.error('프리젠테이션 조회 실패:', error);
+      logger.error('프리젠테이션 조회 실패', error);
       toast.error('프리젠테이션을 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
@@ -196,7 +197,7 @@ export default function HistoryPage() {
       // 성공 상태로 업데이트
       setDownloadStatus('success');
     } catch (error) {
-      console.error('다운로드 실패:', error);
+      logger.error('다운로드 실패', error);
       // 에러 상태로 업데이트
       setDownloadStatus('error');
       setDownloadError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');

@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -73,7 +74,7 @@ export default function EditorContent() {
         try {
           await fetchPresentation(id);
         } catch (error) {
-          console.error('프리젠테이션 로드 실패:', error);
+          logger.error('프리젠테이션 로드 실패', error);
           router.push('/history');
         } finally {
           setIsLoading(false);
@@ -145,7 +146,7 @@ export default function EditorContent() {
       setIsDirty(false); // 저장 성공 시 변경사항 초기화
       setShowSaveSuccessDialog(true);
     } catch (error) {
-      console.error('저장 실패:', error);
+      logger.error('저장 실패', error);
       setSaveErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
       setShowSaveErrorDialog(true);
     }
@@ -160,7 +161,7 @@ export default function EditorContent() {
         : `/viewer?from=editor&origin=${origin}`;
       router.push(url);
     } catch (error) {
-      console.error('저장 실패:', error);
+      logger.error('저장 실패', error);
       setSaveErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');
       setShowSaveErrorDialog(true);
     }
@@ -213,17 +214,17 @@ export default function EditorContent() {
     : null;
 
   const handleSlideChange = (updatedSlide: typeof currentSlide) => {
-    console.log('📥 [EditorContent] handleSlideChange 호출됨', {
+    logger.debug('EditorContent handleSlideChange 호출됨', {
       selectedSlideIndex,
       슬라이드타입: updatedSlide?.type,
       유효성: selectedSlideIndex >= 0 && !!updatedSlide,
     });
 
     if (selectedSlideIndex >= 0 && updatedSlide) {
-      console.log('🔄 [EditorContent] updateSlide 호출 전');
+      logger.debug('EditorContent updateSlide 호출 전');
       updateSlide(selectedSlideIndex, updatedSlide);
       setIsDirty(true); // 변경사항 표시
-      console.log('✅ [EditorContent] updateSlide 호출 완료');
+      logger.debug('EditorContent updateSlide 호출 완료');
     }
   };
 

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // POST /api/admin/users/[id]/subscription
@@ -117,7 +118,7 @@ export async function POST(
       message: `${targetUser.email}의 구독을 ${tier}로 변경했어요.`,
     })
   } catch (error) {
-    console.error('사용자 구독 수정 실패:', error)
+    logger.error('사용자 구독 수정 실패', error)
 
     // 권한 에러 처리
     if (error instanceof Error) {

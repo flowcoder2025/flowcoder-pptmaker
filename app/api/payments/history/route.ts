@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/payments/history
@@ -97,7 +98,7 @@ export async function GET(req: Request) {
       total,
     });
   } catch (error) {
-    console.error('결제 내역 조회 실패:', error);
+    logger.error('결제 내역 조회 실패', error);
     return NextResponse.json(
       { error: '결제 내역을 불러오는 중 문제가 발생했어요' },
       { status: 500 }

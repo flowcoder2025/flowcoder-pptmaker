@@ -18,6 +18,7 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import type {
   CreatePaymentRequestBody,
   CreatePaymentRequestResponse,
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
           },
         });
         finalSubscriptionId = updated.id;
-        console.log('[Payment Request] Updated existing subscription:', updated.id, tier);
+        logger.debug('기존 구독 업데이트', { subscriptionId: updated.id, tier });
       } else {
         // 새 subscription 생성 (PENDING 상태)
         const newSubscription = await prisma.subscription.create({
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
           },
         });
         finalSubscriptionId = newSubscription.id;
-        console.log('[Payment Request] Created new subscription:', newSubscription.id, tier);
+        logger.debug('신규 구독 생성', { subscriptionId: newSubscription.id, tier });
       }
     }
 
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
     // 4. storeId 환경 변수 확인
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     if (!storeId) {
-      console.error('[Payment Request] PORTONE_STORE_ID not configured');
+      logger.error('PORTONE_STORE_ID 미설정');
       return NextResponse.json(
         { success: false, error: '결제 시스템 설정이 올바르지 않아요' },
         { status: 500 }
@@ -187,15 +188,12 @@ export async function POST(request: NextRequest) {
 
     // 디버깅: 이니시스 결제 요청 내용 로그
     if (isInicis) {
-      console.log('[Inicis Payment Debug]', {
+      logger.debug('이니시스 결제 요청', {
         channelKey: finalChannelKey,
         payMethod: finalPayMethod,
         hasPhoneNumber: !!user.phoneNumber,
-        phoneNumber: user.phoneNumber,
         hasEmail: !!user.email,
-        email: user.email,
         hasFullName: !!user.name,
-        fullName: user.name,
       });
     }
 
@@ -225,11 +223,11 @@ export async function POST(request: NextRequest) {
     };
 
     // 디버깅: 서버 응답 객체 로그
-    console.log('[Server Response]', JSON.stringify(response, null, 2));
+    logger.debug('결제 요청 응답', { paymentId: response.paymentId });
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Payment Request] Error:', error);
+    logger.error('결제 요청 생성 오류', error);
     return NextResponse.json(
       {
         success: false,

@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export async function POST() {
   try {
@@ -57,7 +58,7 @@ export async function POST() {
       },
     });
 
-    console.log('[POST /api/subscriptions/cancel] 구독 취소:', {
+    logger.info('구독 취소 완료', {
       userId: session.user.id,
       subscriptionId: updatedSubscription.id,
       tier: updatedSubscription.tier,
@@ -76,7 +77,7 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error('[POST /api/subscriptions/cancel] 구독 취소 실패:', error);
+    logger.error('구독 취소 실패', error);
     return NextResponse.json(
       { error: '구독 취소에 실패했어요' },
       { status: 500 }

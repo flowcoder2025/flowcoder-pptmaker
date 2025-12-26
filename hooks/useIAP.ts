@@ -5,6 +5,7 @@ import type {
   TemplateSKU,
   IAPState,
 } from '@/types/iap';
+import { logger } from '@/lib/logger';
 
 /**
  * IAP(인앱 결제) 훅
@@ -45,8 +46,8 @@ export const useIAP = (): IAPState => {
       setError(null);
 
       // TODO: Apps in Toss IAP SDK 연동
-      console.log('[IAP] 템플릿 구매 요청:', sku);
-      console.warn('[IAP] Apps in Toss IAP SDK 미구현');
+      logger.debug('IAP 템플릿 구매 요청', { sku });
+      logger.warn('Apps in Toss IAP SDK 미구현');
 
       // 실제 구현:
       // 1. Apps in Toss IAP SDK 연동
@@ -111,7 +112,7 @@ export const useIAP = (): IAPState => {
       return true;
       */
     } catch (e) {
-      console.error('[IAP] 구매 실패:', e);
+      logger.error('IAP 구매 실패', e);
       setError('구매 중 문제가 발생했어요.');
       return false;
     } finally {

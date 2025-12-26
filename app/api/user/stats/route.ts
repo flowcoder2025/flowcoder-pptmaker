@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { calculateBalance } from '@/lib/credits';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/user/stats
@@ -87,7 +88,7 @@ export async function GET() {
     ];
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        console.error(`⚠️ ${queryNames[index]} 쿼리 실패:`, result.reason);
+        logger.warn(`${queryNames[index]} 쿼리 실패`, { reason: result.reason });
       }
     });
 
@@ -103,7 +104,7 @@ export async function GET() {
       const balanceResult = await calculateBalance(userId);
       creditsBalance = balanceResult.balance;
     } catch (balanceError) {
-      console.error('⚠️ 크레딧 잔액 계산 실패:', balanceError);
+      logger.warn('크레딧 잔액 계산 실패', balanceError);
       // 실패 시 0으로 fallback
     }
 
@@ -130,7 +131,7 @@ export async function GET() {
       recentPresentations,
     });
   } catch (error) {
-    console.error('사용자 통계 조회 실패:', error);
+    logger.error('사용자 통계 조회 실패', error);
     return NextResponse.json(
       { error: '통계 정보를 불러오는 중 문제가 발생했어요' },
       { status: 500 }

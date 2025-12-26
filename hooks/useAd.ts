@@ -29,6 +29,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 
 /**
  * 광고 환경 체크 (런타임에서만 사용)
@@ -109,7 +110,7 @@ export const useAd = (): AdState => {
    */
   const loadAd = useCallback(() => {
     if (!supported) {
-      console.warn('[Ad] 광고가 지원되지 않는 환경이에요');
+      logger.warn('광고가 지원되지 않는 환경이에요');
       return;
     }
 
@@ -127,16 +128,16 @@ export const useAd = (): AdState => {
           adGroupId: AD_GROUP_ID,
         },
         onEvent: (event: AdEvent) => {
-          console.log('[Ad] 로드 이벤트:', event.type);
+          logger.debug('광고 로드 이벤트', { type: event.type });
 
           if (event.type === 'loaded') {
             setLoading(false);
             setReady(true);
-            console.log('[Ad] 광고 로드 완료');
+            logger.info('광고 로드 완료');
           }
         },
         onError: (err: unknown) => {
-          console.error('[Ad] 로드 실패:', err);
+          logger.error('광고 로드 실패', err);
           setLoading(false);
           setError('광고를 불러오지 못했어요');
         },
@@ -144,7 +145,7 @@ export const useAd = (): AdState => {
 
       cleanupRef.current = cleanup;
     } catch (err) {
-      console.error('[Ad] 광고 로드 중 오류:', err);
+      logger.error('광고 로드 중 오류', err);
       setLoading(false);
       setError('광고 로드 중 문제가 발생했어요');
     }
@@ -156,13 +157,13 @@ export const useAd = (): AdState => {
   const showAd = useCallback((): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (!supported) {
-        console.warn('[Ad] 광고가 지원되지 않는 환경이에요');
+        logger.warn('광고가 지원되지 않는 환경이에요');
         resolve(); // 지원 안 되면 그냥 통과
         return;
       }
 
       if (!ready) {
-        console.warn('[Ad] 광고가 준비되지 않았어요');
+        logger.warn('광고가 준비되지 않았어요');
         resolve(); // 준비 안 되면 그냥 통과
         return;
       }
@@ -180,34 +181,34 @@ export const useAd = (): AdState => {
             adGroupId: AD_GROUP_ID,
           },
           onEvent: (event: AdEvent) => {
-            console.log('[Ad] 표시 이벤트:', event.type);
+            logger.debug('광고 표시 이벤트', { type: event.type });
 
             switch (event.type) {
               case 'requested':
-                console.log('[Ad] 광고 요청됨');
+                logger.debug('광고 요청됨');
                 break;
 
               case 'show':
-                console.log('[Ad] 광고 표시 시작');
+                logger.debug('광고 표시 시작');
                 break;
 
               case 'impression':
-                console.log('[Ad] 광고 노출됨 (수익 발생)');
+                logger.info('광고 노출됨 (수익 발생)');
                 break;
 
               case 'clicked':
-                console.log('[Ad] 광고 클릭됨');
+                logger.info('광고 클릭됨');
                 break;
 
               case 'dismissed':
-                console.log('[Ad] 광고 닫힘');
+                logger.debug('광고 닫힘');
                 setReady(false);
                 dismissResolveRef.current?.();
                 dismissResolveRef.current = null;
                 break;
 
               case 'failedToShow':
-                console.warn('[Ad] 광고 표시 실패');
+                logger.warn('광고 표시 실패');
                 setReady(false);
                 dismissResolveRef.current?.();
                 dismissResolveRef.current = null;
@@ -215,14 +216,14 @@ export const useAd = (): AdState => {
             }
           },
           onError: (err: unknown) => {
-            console.error('[Ad] 표시 실패:', err);
+            logger.error('광고 표시 실패', err);
             setReady(false);
             reject(new Error('광고 표시 중 문제가 발생했어요'));
             dismissResolveRef.current = null;
           },
         });
       } catch (err) {
-        console.error('[Ad] 광고 표시 중 오류:', err);
+        logger.error('광고 표시 중 오류', err);
         reject(err);
         dismissResolveRef.current = null;
       }

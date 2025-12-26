@@ -14,6 +14,7 @@ import { BUTTON_TEXT } from '@/lib/text-config';
 import { Check, X, Star, Sparkles, Loader2, AlertTriangle, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/types/monetization';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import PaymentTestBanner from '@/components/PaymentTestBanner';
@@ -122,7 +123,7 @@ export default function SubscriptionPage() {
         }
       }
     } catch (err) {
-      console.error('결제 중 오류:', err);
+      logger.error('결제 중 오류', err);
       const errorMsg = err instanceof Error ? err.message : '결제 처리 중 문제가 발생했어요';
 
       if (errorMsg.includes('결제 시스템 준비 중')) {
@@ -160,7 +161,7 @@ export default function SubscriptionPage() {
       setShowCancelDialog(false);
       toast.success('구독이 취소되었어요. 현재 기간이 끝날 때까지 계속 사용할 수 있어요.');
     } catch (error) {
-      console.error('[Subscription Cancel] Error:', error);
+      logger.error('구독 취소 에러', error);
       toast.error(error instanceof Error ? error.message : '구독 취소에 실패했어요');
     } finally {
       setIsCanceling(false);
@@ -196,7 +197,7 @@ export default function SubscriptionPage() {
         toast.error('자동 결제 해제에 실패했어요');
       }
     } catch (error) {
-      console.error('[BillingKey Delete] Error:', error);
+      logger.error('BillingKey 삭제 에러', error);
       toast.error('자동 결제 해제에 실패했어요');
     } finally {
       setIsDeletingBillingKey(false);

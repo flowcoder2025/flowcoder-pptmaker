@@ -12,6 +12,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export async function POST() {
   try {
@@ -42,7 +43,7 @@ export async function POST() {
     // 3. storeId 환경 변수 확인
     const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
     if (!storeId) {
-      console.error('[BillingKey Issue] PORTONE_STORE_ID not configured');
+      logger.error('PORTONE_STORE_ID 미설정');
       return NextResponse.json(
         { success: false, error: '결제 시스템 설정이 올바르지 않아요' },
         { status: 500 }
@@ -86,7 +87,7 @@ export async function POST() {
       redirectUrl: `${process.env.NEXTAUTH_URL}/subscription?billingKeyIssued=true`,
     };
 
-    console.log('[BillingKey Issue] Created request:', {
+    logger.debug('빌링키 발급 요청 생성', {
       billingKeyId,
       userId: session.user.id,
     });
@@ -97,7 +98,7 @@ export async function POST() {
       billingKeyRequest,
     });
   } catch (error) {
-    console.error('[BillingKey Issue] Error:', error);
+    logger.error('빌링키 발급 요청 생성 실패', error);
     return NextResponse.json(
       {
         success: false,

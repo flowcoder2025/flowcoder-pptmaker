@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/stats/usage
@@ -200,7 +201,7 @@ export async function GET() {
       creditTypeDistribution,
     });
   } catch (error) {
-    console.error('통계 조회 실패:', error);
+    logger.error('통계 조회 실패', error);
     return NextResponse.json(
       { error: '통계를 불러오는 중 문제가 발생했어요' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CreditUsageType } from '@/types/monetization';
 import { CREDIT_COST } from '@/constants/credits';
+import { logger } from '@/lib/logger';
 
 /**
  * 크레딧 상태 인터페이스
@@ -104,7 +105,7 @@ export const useCreditStore = create<CreditState>()(
         const { totalCredits } = get();
 
         if (totalCredits < amount) {
-          console.warn(`[Credit] 크래딧 부족: 필요 ${amount}, 보유 ${totalCredits}`);
+          logger.warn('크레딧 부족', { required: amount, available: totalCredits });
           return false;
         }
 
@@ -124,13 +125,13 @@ export const useCreditStore = create<CreditState>()(
 
           // 서버에서 반환된 최신 잔액으로 업데이트
           set({ totalCredits: data.remainingBalance });
-          console.log(`✅ 크래딧 사용: -${amount} (남은 크래딧: ${data.remainingBalance})`);
+          logger.info('크레딧 사용 완료', { used: amount, remaining: data.remainingBalance });
           return true;
         } catch (error) {
-          console.error('❌ 크래딧 사용 실패:', error);
+          logger.error('크레딧 사용 실패', error);
           // 에러 시 로컬 상태 업데이트 (fallback)
           set({ totalCredits: totalCredits - amount });
-          console.log(`[Credit] 로컬 크래딧 사용 (fallback): -${amount} (남은 크래딧: ${totalCredits - amount})`);
+          logger.debug('로컬 크레딧 사용 (fallback)', { used: amount, remaining: totalCredits - amount });
           return true;
         }
       },
@@ -152,14 +153,14 @@ export const useCreditStore = create<CreditState>()(
 
           // 서버에서 반환된 최신 잔액으로 업데이트
           set({ totalCredits: data.balance });
-          console.log(`✅ 크래딧 충전: +${amount} (현재 ${data.balance})`);
+          logger.info('크레딧 충전 완료', { added: amount, balance: data.balance });
         } catch (error) {
-          console.error('❌ 크래딧 충전 실패:', error);
+          logger.error('크레딧 충전 실패', error);
           // 에러 시 로컬 상태 업데이트 (fallback)
           set((state) => ({
             totalCredits: state.totalCredits + amount,
           }));
-          console.log(`[Credit] 로컬 크래딧 충전 (fallback): +${amount} (현재 ${get().totalCredits})`);
+          logger.debug('로컬 크레딧 충전 (fallback)', { added: amount, balance: get().totalCredits });
         }
       },
 
@@ -170,7 +171,7 @@ export const useCreditStore = create<CreditState>()(
           if (!response.ok) {
             // 401/403이면 로그인 필요
             if (response.status === 401 || response.status === 403) {
-              console.log('⚠️ 인증 필요: 로그인 후 크레딧 조회 가능');
+              logger.debug('인증 필요: 로그인 후 크레딧 조회 가능');
               return;
             }
             throw new Error(`크레딧 조회 실패: ${response.status}`);
@@ -186,9 +187,9 @@ export const useCreditStore = create<CreditState>()(
               qualityGeneration: data.firstTimeQualityGenerationUsed,
             },
           });
-          console.log(`✅ 크레딧 정보 로드: ${data.balance} 크래딧`);
+          logger.info('크레딧 정보 로드 완료', { balance: data.balance });
         } catch (error) {
-          console.error('❌ 크레딧 잔액 조회 실패:', error);
+          logger.error('크레딧 잔액 조회 실패', error);
           // 에러 시 로컬 상태 유지 (fallback)
         }
       },
@@ -202,7 +203,7 @@ export const useCreditStore = create<CreditState>()(
         const { firstTimeFree } = get();
 
         if (firstTimeFree[type]) {
-          console.warn(`[Credit] 이미 최초 무료를 사용했어요: ${type}`);
+          logger.warn('이미 최초 무료를 사용했어요', { type });
           return;
         }
 
@@ -215,12 +216,12 @@ export const useCreditStore = create<CreditState>()(
           });
 
           if (!response.ok) {
-            console.warn('⚠️ Supabase 업데이트 실패 (로컬 저장으로 폴백)');
+            logger.warn('Supabase 업데이트 실패 (로컬 저장으로 폴백)');
           } else {
-            console.log(`✅ Supabase 무료 카운트 업데이트 완료: ${type}`);
+            logger.info('Supabase 무료 카운트 업데이트 완료', { type });
           }
         } catch (error) {
-          console.error('❌ Supabase 업데이트 실패:', error);
+          logger.error('Supabase 업데이트 실패', error);
         }
 
         // localStorage 업데이트 (항상 실행)
@@ -231,7 +232,7 @@ export const useCreditStore = create<CreditState>()(
           },
         });
 
-        console.log(`[Credit] 최초 무료 사용: ${type}`);
+        logger.info('최초 무료 사용', { type });
       },
 
       fetchFirstTimeFree: async () => {
@@ -241,7 +242,7 @@ export const useCreditStore = create<CreditState>()(
           if (!response.ok) {
             // 401/403이면 로그인 필요
             if (response.status === 401 || response.status === 403) {
-              console.log('⚠️ 인증 필요: 로그인 후 무료 카운트 조회 가능');
+              logger.debug('인증 필요: 로그인 후 무료 카운트 조회 가능');
               return;
             }
             throw new Error(`무료 카운트 조회 실패: ${response.status}`);
@@ -257,9 +258,9 @@ export const useCreditStore = create<CreditState>()(
             },
           });
 
-          console.log('✅ Supabase 무료 카운트 동기화 완료');
+          logger.info('Supabase 무료 카운트 동기화 완료');
         } catch (error) {
-          console.error('❌ 무료 카운트 동기화 실패:', error);
+          logger.error('무료 카운트 동기화 실패', error);
           // 에러 시 로컬 상태 유지 (fallback)
         }
       },
@@ -278,7 +279,7 @@ export const useCreditStore = create<CreditState>()(
             qualityGeneration: false,
           },
         });
-        console.log('[Credit] 크래딧 초기화');
+        logger.debug('크레딧 초기화');
       },
     }),
     {

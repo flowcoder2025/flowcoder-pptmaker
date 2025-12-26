@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -85,7 +86,7 @@ export default function PremiumUpgradeButton({
 
       setUpgradeInfo(data);
     } catch (error) {
-      console.error('프리미엄 업그레이드 정보 조회 실패:', error);
+      logger.error('프리미엄 업그레이드 정보 조회 실패', error);
       toast.error('정보를 불러오지 못했어요.');
     } finally {
       setIsLoading(false);
@@ -156,7 +157,7 @@ export default function PremiumUpgradeButton({
 
       toast.success('프리미엄 업그레이드가 완료되었어요!');
     } catch (error) {
-      console.error('프리미엄 업그레이드 실패:', error);
+      logger.error('프리미엄 업그레이드 실패', error);
       setUpgradeResult({
         success: false,
         message: error instanceof Error ? error.message : '업그레이드에 실패했어요.',

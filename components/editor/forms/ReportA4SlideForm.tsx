@@ -151,7 +151,7 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
     });
   };
 
-  const handleChartChange = (field: string, value: any) => {
+  const handleChartChange = (field: string, value: string | number | { label: string; value: number }[]) => {
     if (!slide.props.chart) return;
 
     onChange({
@@ -203,7 +203,7 @@ export default function ReportA4SlideForm({ slide, onChange }: ReportA4SlideForm
     });
   };
 
-  const handleTableChange = (field: string, value: any) => {
+  const handleTableChange = (field: string, value: string | string[] | string[][]) => {
     if (!slide.props.table) return;
 
     onChange({

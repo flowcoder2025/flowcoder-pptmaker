@@ -39,6 +39,7 @@ import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThin from '@/components/ads/KakaoAdMobileThin';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import type { DraftResponse } from '@/types/draft';
+import { logger } from '@/lib/logger';
 
 export default function InputPage() {
   const router = useRouter();
@@ -109,7 +110,7 @@ export default function InputPage() {
           setShowDraftModal(true);
         }
       } catch (error) {
-        console.error('Failed to load draft:', error);
+        logger.error('임시저장 불러오기 실패', error);
       }
     };
 
@@ -123,7 +124,7 @@ export default function InputPage() {
 
     // 현재 슬라이더 값이 실제 최대값을 초과하면 조정
     if (targetSlideCount > effectiveMaxSlides) {
-      console.log(`📊 플랜 제한에 맞춰 슬라이드 수 조정: ${targetSlideCount}장 → ${effectiveMaxSlides}장`);
+      logger.debug('플랜 제한에 맞춰 슬라이드 수 조정', { from: targetSlideCount, to: effectiveMaxSlides });
       setTargetSlideCount(effectiveMaxSlides);
     }
   }, [plan, targetSlideCount, setTargetSlideCount]);
@@ -145,11 +146,11 @@ export default function InputPage() {
       clearTimeout(saveTimeoutRef.current);
     }
 
-    console.log('[Draft] 자동 저장 타이머 시작:', text.slice(0, 50) + '...');
+    logger.debug('Draft 자동 저장 타이머 시작', { preview: text.slice(0, 50) });
 
     // 1초 후 자동 저장
     saveTimeoutRef.current = setTimeout(async () => {
-      console.log('[Draft] 서버에 저장 시작...');
+      logger.debug('Draft 서버에 저장 시작');
       try {
         const res = await fetch('/api/drafts', {
           method: 'POST',
@@ -159,14 +160,14 @@ export default function InputPage() {
 
         if (!res.ok) {
           const error = await res.text();
-          console.error('[Draft] 저장 실패:', error);
+          logger.error('Draft 저장 실패', { error });
           return;
         }
 
         const data = await res.json();
-        console.log('[Draft] 저장 성공:', data);
+        logger.debug('Draft 저장 성공', data);
       } catch (error) {
-        console.error('[Draft] 저장 에러:', error);
+        logger.error('Draft 저장 에러', error);
       }
     }, 1000);
 
@@ -251,7 +252,7 @@ export default function InputPage() {
     try {
       await fetch('/api/drafts', { method: 'DELETE' });
     } catch (error) {
-      console.error('Failed to delete draft:', error);
+      logger.error('Draft 삭제 실패', error);
     }
 
     router.push('/viewer?from=input');
@@ -272,7 +273,7 @@ export default function InputPage() {
     try {
       await fetch('/api/drafts', { method: 'DELETE' });
     } catch (error) {
-      console.error('Failed to delete draft:', error);
+      logger.error('Draft 삭제 실패', error);
     }
   };
 

@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -166,7 +167,7 @@ export default function ViewerContent() {
           setIsSaved(true); // DB에서 로드한 것이므로 이미 저장됨
         })
         .catch((error) => {
-          console.error('프리젠테이션 로드 실패:', error);
+          logger.error('프리젠테이션 로드 실패', error);
           setIsLoading(false);
           router.push('/history');
         });
@@ -320,10 +321,10 @@ export default function ViewerContent() {
           text: `${currentPresentation.title} - PPT Maker로 제작`,
           url: window.location.href,
         });
-        console.log('✅ 공유 완료');
+        logger.info('공유 완료');
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
-          console.error('공유 실패:', error);
+          logger.error('공유 실패', error);
           setShareMessage('공유하지 못했어요. 다시 시도해 주세요.');
           setShareType('error');
           setShowShareAlert(true);
@@ -340,7 +341,7 @@ export default function ViewerContent() {
         setShareType('success');
         setShowShareAlert(true);
       } catch (error) {
-        console.error('링크 복사 실패:', error);
+        logger.error('링크 복사 실패', error);
         setShareMessage('링크 복사에 실패했어요.');
         setShareType('error');
         setShowShareAlert(true);
@@ -375,7 +376,7 @@ export default function ViewerContent() {
 
     try {
       // 웹 서비스에서는 광고 없이 다운로드 (향후 구독 모델로 제한 가능)
-      console.log('✅ 다운로드 시작');
+      logger.info('다운로드 시작', { format });
 
       // 다운로드 실행
       switch (format) {
@@ -393,7 +394,7 @@ export default function ViewerContent() {
       // 성공 상태로 업데이트
       setDownloadStatus('success');
     } catch (error) {
-      console.error('다운로드 실패:', error);
+      logger.error('다운로드 실패', error);
       // 에러 상태로 업데이트
       setDownloadStatus('error');
       setDownloadError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했어요');

@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -40,7 +41,7 @@ export async function GET() {
       user,
     });
   } catch (error) {
-    console.error('[Profile GET] Error:', error);
+    logger.error('프로필 조회 오류', error);
     return NextResponse.json(
       {
         success: false,
@@ -102,10 +103,7 @@ export async function PATCH(request: NextRequest) {
       user: updatedUser,
     });
   } catch (error) {
-    console.error('[Profile Update] Error:', error);
-    console.error('[Profile Update] Error name:', (error as Error).name);
-    console.error('[Profile Update] Error message:', (error as Error).message);
-    console.error('[Profile Update] Error stack:', (error as Error).stack);
+    logger.error('프로필 업데이트 오류', error);
 
     return NextResponse.json(
       {

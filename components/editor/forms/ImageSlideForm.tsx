@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Lightbulb, PenLine, CheckCircle2 } from 'lucide-react';
 import type { ImageSlide } from '@/types/slide';
 import ImageUploader from '../ImageUploader';
@@ -16,7 +17,7 @@ interface ImageSlideFormProps {
 
 export default function ImageSlideForm({ slide, onChange }: ImageSlideFormProps) {
   // 디버깅: 컴포넌트 렌더링 확인
-  console.log('🖼️ ImageSlideForm 렌더링:', {
+  logger.debug('ImageSlideForm 렌더링', {
     slideType: slide.type,
     arrangement: slide.props.arrangement,
     hasImage: !!slide.props.image,

@@ -6,6 +6,7 @@
  */
 
 import { create } from 'zustand';
+import { logger } from '@/lib/logger';
 
 export interface Notification {
   id: string;
@@ -65,7 +66,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         lastFetched: new Date(),
       });
     } catch (error) {
-      console.error('[NotificationStore] fetchNotifications error:', error);
+      logger.error('알림 목록 조회 실패', error);
       set({
         isLoading: false,
         error: error instanceof Error ? error.message : '알림을 불러오지 못했어요',
@@ -102,7 +103,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         unreadCount: data.unreadCount,
       });
     } catch (error) {
-      console.error('[NotificationStore] markAsRead error:', error);
+      logger.error('알림 읽음 처리 실패', error);
       set({
         error: error instanceof Error ? error.message : '알림 처리에 실패했어요',
       });
@@ -136,7 +137,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         unreadCount: 0,
       });
     } catch (error) {
-      console.error('[NotificationStore] markAllAsRead error:', error);
+      logger.error('전체 알림 읽음 처리 실패', error);
       set({
         error: error instanceof Error ? error.message : '알림 처리에 실패했어요',
       });

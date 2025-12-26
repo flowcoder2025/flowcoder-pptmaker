@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // GET /api/admin/presentations
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
       offset,
     })
   } catch (error) {
-    console.error('프레젠테이션 목록 조회 실패:', error)
+    logger.error('관리자 프레젠테이션 목록 조회 실패', error)
 
     // 권한 에러 처리
     if (error instanceof Error) {

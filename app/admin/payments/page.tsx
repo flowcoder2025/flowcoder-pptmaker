@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 
 interface Payment {
   id: string
@@ -83,7 +84,7 @@ export default function AdminPaymentsPage() {
       setStats(data.stats)
       setPayments(data.payments)
     } catch (error) {
-      console.error(error)
+      logger.error('결제 목록 조회 실패', error)
       toast.error('결제 목록을 불러오지 못했어요.')
     } finally {
       setLoading(false)

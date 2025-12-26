@@ -12,6 +12,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { grantCredits } from '@/lib/credits'
 import { CreditSourceType } from '@/types/credits'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // GET /api/subscriptions
@@ -52,7 +53,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[API] 구독 정보 조회 실패:', error)
+    logger.error('구독 정보 조회 실패', error)
     return NextResponse.json(
       { error: '구독 정보를 가져올 수 없어요' },
       { status: 500 }
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
           endDate,
         },
       })
-      console.log('[POST /api/subscriptions] 구독 업데이트:', subscription.id)
+      logger.info('구독 업데이트', { subscriptionId: subscription.id })
     } else {
       // 신규 구독 생성
       subscription = await prisma.subscription.create({
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
           endDate,
         },
       })
-      console.log('[POST /api/subscriptions] 신규 구독 생성:', subscription.id)
+      logger.info('신규 구독 생성', { subscriptionId: subscription.id })
     }
 
     // 5. 크레딧 지급 (30일 유효기간)
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
       30 // 30일 유효기간
     )
 
-    console.log(`[POST /api/subscriptions] 크레딧 지급 완료: ${creditsAmount} 크레딧`)
+    logger.info('크레딧 지급 완료', { creditsAmount })
 
     return NextResponse.json({
       subscription: {
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
       message: `${tier} 플랜 구독을 시작했어요. ${creditsAmount} 크레딧을 지급했어요.`,
     })
   } catch (error) {
-    console.error('❌ [POST /api/subscriptions] 구독 생성 실패:', error)
+    logger.error('구독 생성 실패', error)
     return NextResponse.json(
       { error: '구독을 시작하지 못했어요' },
       { status: 500 }

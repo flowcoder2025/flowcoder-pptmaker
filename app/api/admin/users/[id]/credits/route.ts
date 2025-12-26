@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import { grantCredits } from '@/lib/credits'
 import { CreditSourceType } from '@/types/credits'
+import { logger } from '@/lib/logger'
 
 /**
  * Admin 크레딧 지급 API (v2.0)
@@ -66,9 +67,7 @@ export async function POST(
         sourceType === CreditSourceType.FREE ||
         sourceType === CreditSourceType.PURCHASE
       ) {
-        console.warn(
-          `[WARN] ${sourceType} 타입은 영구 크레딧이므로 expiresInDays가 무시됩니다.`
-        )
+        logger.warn(`${sourceType} 타입은 영구 크레딧이므로 expiresInDays가 무시됩니다`)
       }
     }
 
@@ -94,9 +93,7 @@ export async function POST(
       expiresInDays
     )
 
-    console.log(
-      `[ADMIN] 크레딧 지급: ${user.email} - ${amount} 크레딧 (${sourceType})`
-    )
+    logger.info('관리자 크레딧 지급 완료', { email: user.email, amount, sourceType })
 
     return NextResponse.json({
       success: true,
@@ -117,7 +114,7 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('❌ [ADMIN] 크레딧 지급 실패:', error)
+    logger.error('관리자 크레딧 지급 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(

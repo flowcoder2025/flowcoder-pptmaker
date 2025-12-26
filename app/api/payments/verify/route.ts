@@ -19,6 +19,7 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import type {
   VerifyPaymentRequestBody,
   VerifyPaymentResponse,
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
     // 4. 포트원 API로 결제 검증
     const apiSecret = process.env.PORTONE_API_SECRET;
     if (!apiSecret) {
-      console.error('[Payment Verify] PORTONE_API_SECRET not configured');
+      logger.error('PORTONE_API_SECRET 미설정');
       return NextResponse.json(
         { success: false, error: '결제 시스템 설정이 올바르지 않아요' },
         { status: 500 }
@@ -106,11 +107,11 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    console.log('[Payment Verify] PortOne API response status:', portoneResponse.status);
+    logger.debug('PortOne API 응답 상태', { status: portoneResponse.status });
 
     if (!portoneResponse.ok) {
       const errorText = await portoneResponse.text();
-      console.error('[Payment Verify] PortOne API error:', portoneResponse.status, errorText);
+      logger.error('PortOne API 오류', { status: portoneResponse.status, errorText });
       return NextResponse.json(
         { success: false, error: '결제 검증 중 오류가 발생했어요' },
         { status: 500 }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const portoneData = (await portoneResponse.json()) as any;
 
-    console.log('[Payment Verify] PortOne response data:', JSON.stringify(portoneData, null, 2));
+    logger.debug('PortOne 응답 데이터', { portoneData });
 
     // 5. 결제 상태 확인 (V2 API 응답 형식)
     const paymentStatus = portoneData.status;
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       try {
         customData = JSON.parse(portoneData.customData);
       } catch {
-        console.error('[Payment Verify] Failed to parse customData:', portoneData.customData);
+        logger.error('customData 파싱 실패', { customData: portoneData.customData });
         customData = undefined;
       }
     } else if (portoneData.customData) {
@@ -170,7 +171,7 @@ export async function POST(request: NextRequest) {
       customData = dbPortoneData?.customData as Record<string, unknown> | undefined;
     }
 
-    console.log('[Payment Verify] Extracted customData:', customData);
+    logger.debug('추출된 customData', { customData });
 
     // 7. 트랜잭션으로 DB 업데이트
     const result = await prisma.$transaction(async (tx) => {
@@ -275,7 +276,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[Payment Verify] Error:', error);
+    logger.error('결제 검증 오류', error);
     return NextResponse.json(
       {
         success: false,

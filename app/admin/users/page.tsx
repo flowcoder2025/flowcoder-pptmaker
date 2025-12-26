@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import { CreditSourceType } from '@/types/credits'
 
 interface User {
@@ -91,7 +92,7 @@ export default function AdminUsersPage() {
       setStats(data.stats)
       setUsers(data.users)
     } catch (error) {
-      console.error(error)
+      logger.error('사용자 목록 조회 실패', error)
       toast.error('사용자 목록을 불러오지 못했어요.')
     } finally {
       setLoading(false)
@@ -171,7 +172,7 @@ export default function AdminUsersPage() {
       setSelectedUser(null)
       fetchUsers() // 목록 새로고침
     } catch (error) {
-      console.error(error)
+      logger.error('크레딧 지급 실패', error)
       toast.error(error instanceof Error ? error.message : '크레딧 지급에 실패했어요.')
     } finally {
       setProcessing(false)
@@ -193,7 +194,7 @@ export default function AdminUsersPage() {
       toast.success('관리자 권한을 부여했어요.')
       fetchUsers()
     } catch (error) {
-      console.error(error)
+      logger.error('관리자 권한 부여 실패', error)
       toast.error(error instanceof Error ? error.message : '권한 부여에 실패했어요.')
     }
   }
@@ -215,7 +216,7 @@ export default function AdminUsersPage() {
       toast.success('관리자 권한을 제거했어요.')
       fetchUsers()
     } catch (error) {
-      console.error(error)
+      logger.error('관리자 권한 제거 실패', error)
       toast.error(error instanceof Error ? error.message : '권한 제거에 실패했어요.')
     }
   }
@@ -242,7 +243,7 @@ export default function AdminUsersPage() {
       setSelectedUser(null)
       fetchUsers()
     } catch (error) {
-      console.error(error)
+      logger.error('구독 변경 실패', error)
       toast.error(error instanceof Error ? error.message : '구독 변경에 실패했어요.')
     } finally {
       setProcessing(false)

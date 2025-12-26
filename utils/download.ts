@@ -14,6 +14,7 @@ import pptxgen from 'pptxgenjs';
 import type { Presentation, AspectRatio } from '@/types/presentation';
 import type { HTMLSlide } from '@/types/slide';
 import { calculateSlideSize } from '@/services/template/engine/types';
+import { logger } from '@/lib/logger';
 
 /**
  * html-to-image 공통 설정
@@ -34,7 +35,7 @@ const getHtmlToImageOptions = (width: number, height: number) => ({
  */
 export async function downloadHTML(presentation: Presentation): Promise<void> {
   try {
-    console.log('📄 HTML 다운로드 시작...');
+    logger.info('HTML 다운로드 시작');
 
     const { title, slides } = presentation;
 
@@ -52,9 +53,9 @@ export async function downloadHTML(presentation: Presentation): Promise<void> {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    console.log('✅ HTML 다운로드 완료');
+    logger.info('HTML 다운로드 완료');
   } catch (error) {
-    console.error('❌ HTML 다운로드 실패:', error);
+    logger.error('HTML 다운로드 실패', error);
     throw new Error('HTML 다운로드에 실패했습니다.');
   }
 }
@@ -164,7 +165,7 @@ async function renderSlideToImage(
  */
 export async function downloadPDF(presentation: Presentation): Promise<void> {
   try {
-    console.log('📄 PDF 다운로드 시작...');
+    logger.info('PDF 다운로드 시작');
 
     const { title, slides, slideData } = presentation;
 
@@ -173,7 +174,7 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
     const slideSize = calculateSlideSize(aspectRatio);
     const orientation = aspectRatio === 'A4-portrait' ? 'portrait' : 'landscape';
 
-    console.log(`📐 AspectRatio: ${aspectRatio}, 크기: ${slideSize.width}x${slideSize.height}`);
+    logger.debug('PDF 설정', { aspectRatio, width: slideSize.width, height: slideSize.height });
 
     // jsPDF 인스턴스 생성 (aspectRatio에 맞게 조정)
     // pixelRatio 2배 적용된 이미지 크기에 맞춰 PDF 크기도 조정
@@ -190,7 +191,7 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
     });
 
     for (let i = 0; i < slides.length; i++) {
-      console.log(`📄 슬라이드 ${i + 1}/${slides.length} 변환 중...`);
+      logger.debug('PDF 슬라이드 변환 중', { current: i + 1, total: slides.length });
 
       const slide = slides[i];
 
@@ -207,9 +208,9 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
     // PDF 다운로드
     pdf.save(`${sanitizeFilename(title)}.pdf`);
 
-    console.log('✅ PDF 다운로드 완료');
+    logger.info('PDF 다운로드 완료', { slideCount: slides.length });
   } catch (error) {
-    console.error('❌ PDF 다운로드 실패:', error);
+    logger.error('PDF 다운로드 실패', error);
     throw new Error('PDF 다운로드에 실패했습니다.');
   }
 }
@@ -226,7 +227,7 @@ export async function downloadPDF(presentation: Presentation): Promise<void> {
  */
 export async function downloadPPTX(presentation: Presentation): Promise<void> {
   try {
-    console.log('📊 PPTX 다운로드 시작...');
+    logger.info('PPTX 다운로드 시작');
 
     const { title, slides, slideData } = presentation;
 
@@ -234,7 +235,7 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
     const aspectRatio = slideData?.aspectRatio || '16:9';
     const slideSize = calculateSlideSize(aspectRatio);
 
-    console.log(`📐 AspectRatio: ${aspectRatio}, 크기: ${slideSize.width}x${slideSize.height}`);
+    logger.debug('PPTX 설정', { aspectRatio, width: slideSize.width, height: slideSize.height });
 
     // PptxGenJS 인스턴스 생성
     const pptx = new pptxgen();
@@ -261,7 +262,7 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
     }
 
     for (let i = 0; i < slides.length; i++) {
-      console.log(`📊 슬라이드 ${i + 1}/${slides.length} 생성 중...`);
+      logger.debug('PPTX 슬라이드 생성 중', { current: i + 1, total: slides.length });
 
       const slide = slides[i];
       const pptxSlide = pptx.addSlide();
@@ -281,9 +282,9 @@ export async function downloadPPTX(presentation: Presentation): Promise<void> {
     // PPTX 파일 생성 및 다운로드
     await pptx.writeFile({ fileName: `${sanitizeFilename(title)}.pptx` });
 
-    console.log('✅ PPTX 다운로드 완료');
+    logger.info('PPTX 다운로드 완료', { slideCount: slides.length });
   } catch (error) {
-    console.error('❌ PPTX 다운로드 실패:', error);
+    logger.error('PPTX 다운로드 실패', error);
     throw new Error('PPTX 다운로드에 실패했습니다.');
   }
 }

@@ -6,6 +6,7 @@
  */
 
 import type { SlideTemplate } from './types';
+import { logger } from '@/lib/logger';
 
 /**
  * TemplateRegistry 클래스
@@ -41,13 +42,12 @@ export class TemplateRegistry {
 
     // 중복 등록 체크
     if (this.templates.has(template.id)) {
-      console.warn(`⚠️ 템플릿이 이미 등록되어 있습니다: ${template.id}`);
-      console.warn('기존 템플릿을 덮어씁니다.');
+      logger.warn('템플릿이 이미 등록되어 있어요. 덮어씁니다.', { templateId: template.id });
     }
 
     // 템플릿 등록
     this.templates.set(template.id, template);
-    console.log(`✅ 템플릿 등록 완료: ${template.name} (${template.id})`);
+    logger.debug('템플릿 등록 완료', { name: template.name, id: template.id });
   }
 
   /**
@@ -61,9 +61,9 @@ export class TemplateRegistry {
 
     if (existed) {
       this.templates.delete(templateId);
-      console.log(`🗑️ 템플릿 제거 완료: ${templateId}`);
+      logger.debug('템플릿 제거 완료', { templateId });
     } else {
-      console.warn(`⚠️ 템플릿을 찾을 수 없습니다: ${templateId}`);
+      logger.warn('템플릿을 찾을 수 없어요', { templateId });
     }
 
     return existed;
@@ -131,7 +131,7 @@ export class TemplateRegistry {
   clear(): void {
     const count = this.templates.size;
     this.templates.clear();
-    console.log(`🗑️ 모든 템플릿 제거 완료: ${count}개`);
+    logger.debug('모든 템플릿 제거 완료', { count });
   }
 
   /**
@@ -147,22 +147,15 @@ export class TemplateRegistry {
    * 템플릿 정보 출력 (디버깅용)
    */
   printInfo(): void {
-    console.log('\n📋 템플릿 레지스트리 정보');
-    console.log(`총 ${this.count}개의 템플릿 등록됨\n`);
-
     const freeTemplates = this.getFree();
     const premiumTemplates = this.getPremium();
 
-    console.log(`🆓 무료 템플릿: ${freeTemplates.length}개`);
-    freeTemplates.forEach(t => {
-      console.log(`  - ${t.name} (${t.id})`);
+    logger.debug('템플릿 레지스트리 정보', {
+      total: this.count,
+      free: freeTemplates.length,
+      premium: premiumTemplates.length,
+      freeList: freeTemplates.map(t => ({ name: t.name, id: t.id })),
+      premiumList: premiumTemplates.map(t => ({ name: t.name, id: t.id, price: t.price })),
     });
-
-    console.log(`\n💎 프리미엄 템플릿: ${premiumTemplates.length}개`);
-    premiumTemplates.forEach(t => {
-      console.log(`  - ${t.name} (${t.id}) - ${t.price}원`);
-    });
-
-    console.log('');
   }
 }

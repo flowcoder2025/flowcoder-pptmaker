@@ -3,6 +3,8 @@
  * 프로덕션 환경에서 필수 환경 변수 누락 시 즉시 에러 발생
  */
 
+import { logger } from '@/lib/logger';
+
 /**
  * Apps in Toss WebView 환경을 위한 Window 인터페이스 확장
  */
@@ -56,37 +58,33 @@ export function validateAndLogEnvironment(): void {
   const result = validateEnvironmentVariables()
 
   if (!result.isValid) {
-    console.error('🚨 환경 변수 검증 실패!')
-    result.errors.forEach(error => console.error(`  ❌ ${error}`))
+    logger.error('환경 변수 검증 실패', { errors: result.errors });
     throw new Error('필수 환경 변수가 설정되지 않았어요')
   }
 
   if (result.warnings.length > 0) {
-    console.warn('⚠️ 환경 변수 경고:')
-    result.warnings.forEach(warning => console.warn(`  ⚠️ ${warning}`))
+    logger.warn('환경 변수 경고', { warnings: result.warnings });
   }
 
-  console.log('✅ 환경 변수 검증 완료')
-  console.log(`  📝 Gemini API 키: ${process.env.NEXT_PUBLIC_GEMINI_API_KEY?.substring(0, 10)}...`)
-  console.log(`  📺 광고 그룹 ID: ${process.env.NEXT_PUBLIC_AD_GROUP_ID || '미설정'}`)
+  logger.info('환경 변수 검증 완료', {
+    geminiKeyPrefix: process.env.NEXT_PUBLIC_GEMINI_API_KEY?.substring(0, 10),
+    adGroupId: process.env.NEXT_PUBLIC_AD_GROUP_ID || '미설정',
+  });
 }
 
 /**
  * 진단 정보 출력 (디버깅용)
  */
 export function logEnvironmentDiagnostics(): void {
-  console.log('🔍 환경 변수 진단 정보:')
-  console.log('  환경:', process.env.NODE_ENV || 'development')
-  console.log('  빌드 타임:', new Date().toISOString())
-  console.log('  API 키 존재:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY)
-  console.log('  광고 ID 존재:', !!process.env.NEXT_PUBLIC_AD_GROUP_ID)
+  const isClient = typeof window !== 'undefined';
 
-  // 빌드 시 값이 주입되었는지 확인
-  if (typeof window !== 'undefined') {
-    console.log('  클라이언트 환경 감지')
-  } else {
-    console.log('  서버 환경 감지')
-  }
+  logger.debug('환경 변수 진단 정보', {
+    environment: process.env.NODE_ENV || 'development',
+    buildTime: new Date().toISOString(),
+    hasGeminiKey: !!process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+    hasAdGroupId: !!process.env.NEXT_PUBLIC_AD_GROUP_ID,
+    runtime: isClient ? 'client' : 'server',
+  });
 }
 
 /**

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/credits/transactions
@@ -89,7 +90,7 @@ export async function GET(req: Request) {
       total,
     });
   } catch (error) {
-    console.error('크레딧 거래 내역 조회 실패:', error);
+    logger.error('크레딧 거래 내역 조회 실패', error);
     return NextResponse.json(
       { error: '거래 내역을 불러오는 중 문제가 발생했어요' },
       { status: 500 }

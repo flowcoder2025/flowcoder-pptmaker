@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { logger } from '@/lib/logger'
 import { TemplateEngine } from "@/services/template"
 import { SAMPLE_PPT_DATA } from "@/utils/sandbox/testData"
 import { PerformanceTimer } from "@/utils/sandbox/testHelpers"
@@ -50,7 +51,7 @@ export function TemplateRenderTest() {
       setRenderTime(timer.getFormattedDuration())
       setRenderedHTML(fullHTML)
     } catch (error) {
-      console.error("렌더링 실패:", error)
+      logger.error('렌더링 실패', error)
       alert(`렌더링 실패: ${error instanceof Error ? error.message : "알 수 없는 오류"}`)
     } finally {
       setIsRendering(false)
@@ -90,7 +91,7 @@ export function TemplateRenderTest() {
       setRenderTime(timer.getFormattedDuration())
       setRenderedHTML(fullHTML)
     } catch (error) {
-      console.error("렌더링 실패:", error)
+      logger.error('렌더링 실패', error)
       alert(`렌더링 실패: ${error instanceof Error ? error.message : "알 수 없는 오류"}`)
     } finally {
       setIsRendering(false)

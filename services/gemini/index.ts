@@ -4,6 +4,7 @@
 
 import { generateSlideContent, type ContentGenerationOptions } from './content-generator'
 import type { UnifiedPPTJSON } from '@/types/pptJson'
+import { logger } from '@/lib/logger'
 
 /**
  * Gemini API를 사용한 콘텐츠 생성 서비스
@@ -38,7 +39,7 @@ export class GeminiService {
       const data = JSON.parse(jsonString) as UnifiedPPTJSON
       return data
     } catch (error) {
-      console.error('JSON 파싱 실패:', error)
+      logger.error('Gemini 응답 JSON 파싱 실패', error)
       throw new Error('생성된 데이터 형식이 올바르지 않아요')
     }
   }

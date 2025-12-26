@@ -2,10 +2,12 @@
  * Perplexity API 설정
  */
 
+import { logger } from '@/lib/logger';
+
 const API_KEY = process.env.NEXT_PUBLIC_PERPLEXITY_API_KEY || '';
 
 if (!API_KEY) {
-  console.warn('⚠️ NEXT_PUBLIC_PERPLEXITY_API_KEY가 설정되지 않았습니다. .env.local 파일을 확인하세요.');
+  logger.warn('Perplexity API 키가 설정되지 않았어요', { envVar: 'NEXT_PUBLIC_PERPLEXITY_API_KEY' });
 }
 
 export const PERPLEXITY_CONFIG = {

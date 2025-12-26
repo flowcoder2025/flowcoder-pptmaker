@@ -12,6 +12,7 @@ import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { PLAN_BENEFITS } from '@/constants/subscription';
 import { User, Mail, Calendar, CreditCard, Star, Phone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
 import { BUTTON_TEXT, STATUS_TEXT } from '@/lib/text-config';
@@ -68,7 +69,7 @@ export default function ProfilePage() {
         setEditForm(profile);
       }
     } catch (error) {
-      console.error('프로필 조회 실패:', error);
+      logger.error('프로필 조회 실패', error);
       // Fallback: 세션 정보 사용
       const fallbackProfile = {
         name: session?.user.name || '',
@@ -93,7 +94,7 @@ export default function ProfilePage() {
         subscriptionTier: data.subscriptionTier || 'FREE',
       });
     } catch (error) {
-      console.error('사용자 통계 조회 실패:', error);
+      logger.error('사용자 통계 조회 실패', error);
       toast.error('정보를 불러오는 중 문제가 발생했어요');
     } finally {
       setIsLoading(false);
@@ -168,7 +169,7 @@ export default function ProfilePage() {
       // NextAuth 세션 새로고침 (다음 로그인 시 반영)
       await update();
     } catch (error) {
-      console.error('프로필 저장 실패:', error);
+      logger.error('프로필 저장 실패', error);
       toast.error(error instanceof Error ? error.message : '프로필 저장 중 문제가 발생했어요');
     } finally {
       setIsSaving(false);

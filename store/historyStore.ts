@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import type { Presentation } from '@/types/presentation';
+import { logger } from '@/lib/logger';
 
 interface HistoryState {
   past: Presentation[];
@@ -45,14 +46,14 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       future: [], // 새 변경 시 미래 스택 초기화
     });
 
-    console.log(`📜 히스토리 기록: ${newPast.length}개 (최대 ${MAX_HISTORY}개)`);
+    logger.debug('히스토리 기록', { count: newPast.length, max: MAX_HISTORY });
   },
 
   undo: () => {
     const { past } = get();
 
     if (past.length === 0) {
-      console.log('⚠️ Undo할 내역이 없어요');
+      logger.debug('Undo할 내역이 없어요');
       return null;
     }
 
@@ -68,7 +69,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       past: newPast,
     });
 
-    console.log('↶ Undo 실행');
+    logger.debug('Undo 실행');
     return previousPresentation;
   },
 
@@ -76,7 +77,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     const { future } = get();
 
     if (future.length === 0) {
-      console.log('⚠️ Redo할 내역이 없어요');
+      logger.debug('Redo할 내역이 없어요');
       return null;
     }
 
@@ -88,7 +89,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       future: newFuture,
     });
 
-    console.log('↷ Redo 실행');
+    logger.debug('Redo 실행');
     return nextPresentation;
   },
 
@@ -105,6 +106,6 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
       past: [],
       future: [],
     });
-    console.log('🗑️ 히스토리 초기화');
+    logger.debug('히스토리 초기화');
   },
 }));

@@ -9,6 +9,7 @@
  */
 
 import { gemini3Flash, GEMINI_CONFIG } from './config';
+import { logger } from '@/lib/logger';
 
 /**
  * Base64 이미지 추출 결과
@@ -45,7 +46,7 @@ function extractBase64Images(html: string): ExtractedImages {
   });
 
   if (imageMap.size > 0) {
-    console.log(`🖼️ [Premium Upgrade] ${imageMap.size}개 Base64 이미지 추출 (토큰 절약)`);
+    logger.debug('Base64 이미지 추출 (토큰 절약)', { count: imageMap.size });
   }
 
   return { sanitizedHtml, imageMap };
@@ -62,7 +63,7 @@ function restoreBase64Images(html: string, imageMap: Map<string, string>): strin
   }
 
   if (imageMap.size > 0) {
-    console.log(`🖼️ [Premium Upgrade] ${imageMap.size}개 Base64 이미지 복원 완료`);
+    logger.debug('Base64 이미지 복원 완료', { count: imageMap.size });
   }
 
   return restoredHtml;
@@ -96,7 +97,7 @@ export async function upgradeSingleSlide(
 ): Promise<PremiumUpgradeResult> {
   const { slideHtml, slideIndex, totalSlides } = options;
 
-  console.log(`✨ [Premium Upgrade] 슬라이드 ${slideIndex + 1}/${totalSlides} 업그레이드 시작`);
+  logger.info('프리미엄 업그레이드 시작', { slideIndex: slideIndex + 1, totalSlides });
 
   // Base64 이미지 추출 (토큰 한도 초과 방지)
   const { sanitizedHtml, imageMap } = extractBase64Images(slideHtml);
@@ -189,9 +190,12 @@ ${sanitizedHtml}
     const outputCost = (outputTokens / 1000000) * outputCostPerMillion;
     const totalCost = inputCost + outputCost;
 
-    console.log(`✅ [Premium Upgrade] 슬라이드 ${slideIndex + 1}/${totalSlides} 업그레이드 완료`);
-    console.log(`💰 토큰 사용량: 입력 ${inputTokens}, 출력 ${outputTokens}, 총 ${totalTokens}`);
-    console.log(`💵 예상 비용: ${totalCost.toFixed(2)}원 (입력 ${inputCost.toFixed(2)}원 + 출력 ${outputCost.toFixed(2)}원)`);
+    logger.info('프리미엄 업그레이드 완료', {
+      slideIndex: slideIndex + 1,
+      totalSlides,
+      tokens: { input: inputTokens, output: outputTokens, total: totalTokens },
+      cost: { input: inputCost.toFixed(2), output: outputCost.toFixed(2), total: totalCost.toFixed(2) },
+    });
 
     return {
       upgradedHtml: cleanHtmlOutput(upgradedHtml),
@@ -207,7 +211,7 @@ ${sanitizedHtml}
       },
     };
   } catch (error) {
-    console.error(`❌ [Premium Upgrade] 슬라이드 ${slideIndex + 1} 업그레이드 실패:`, error);
+    logger.error('프리미엄 업그레이드 실패', { slideIndex: slideIndex + 1, error });
     throw error;
   }
 }
@@ -226,7 +230,7 @@ export async function upgradeAllSlides(
   };
   totalEstimatedCost: number;
 }> {
-  console.log(`✨ [Premium Upgrade] 전체 ${slides.length}장 슬라이드 업그레이드 시작`);
+  logger.info('전체 슬라이드 프리미엄 업그레이드 시작', { totalSlides: slides.length });
 
   const upgradedSlides: string[] = [];
   let totalInputTokens = 0;
@@ -248,9 +252,10 @@ export async function upgradeAllSlides(
     totalCost += result.estimatedCost.totalCost;
   }
 
-  console.log(`✅ [Premium Upgrade] 전체 업그레이드 완료!`);
-  console.log(`💰 총 토큰 사용량: 입력 ${totalInputTokens}, 출력 ${totalOutputTokens}, 총 ${totalTokens}`);
-  console.log(`💵 총 예상 비용: ${totalCost.toFixed(2)}원`);
+  logger.info('전체 슬라이드 프리미엄 업그레이드 완료', {
+    tokens: { input: totalInputTokens, output: totalOutputTokens, total: totalTokens },
+    totalCost: totalCost.toFixed(2),
+  });
 
   return {
     upgradedSlides,

@@ -13,6 +13,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import imageCompression from 'browser-image-compression';
+import { logger } from '@/lib/logger';
 import { Camera, Loader2, Link as LinkIcon, Upload, AlertCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,7 @@ export default function ImageUploader({
   maxSizeMB = 2,
 }: ImageUploaderProps) {
   // 디버깅: 컴포넌트 마운트 확인
-  console.log('📸 ImageUploader 마운트:', {
+  logger.debug('ImageUploader 마운트', {
     hasCurrentImage: !!currentImage,
     currentImageLength: currentImage?.length || 0,
     maxSizeMB,
@@ -65,7 +66,7 @@ export default function ImageUploader({
   const compressImage = async (file: File): Promise<File> => {
     try {
       const originalSizeMB = file.size / 1024 / 1024;
-      console.log(`원본 크기: ${originalSizeMB.toFixed(2)}MB`);
+      logger.debug('이미지 원본 크기', { sizeMB: originalSizeMB.toFixed(2) });
 
       // 압축
       const compressedFile = await imageCompression(file, {
@@ -76,7 +77,7 @@ export default function ImageUploader({
       });
 
       const compressedSizeMB = compressedFile.size / 1024 / 1024;
-      console.log(`압축 후 크기: ${compressedSizeMB.toFixed(2)}MB`);
+      logger.debug('이미지 압축 완료', { sizeMB: compressedSizeMB.toFixed(2) });
 
       // 압축 성공 알림
       if (originalSizeMB > 1) {
@@ -87,7 +88,7 @@ export default function ImageUploader({
 
       return compressedFile;
     } catch (err) {
-      console.error('이미지 압축 실패:', err);
+      logger.error('이미지 압축 실패', err);
       throw new Error('이미지 압축에 실패했어요');
     }
   };
@@ -212,7 +213,7 @@ export default function ImageUploader({
       // 성공 알림
       toast.success('이미지를 업로드했어요');
     } catch (err) {
-      console.error('이미지 처리 실패:', err);
+      logger.error('이미지 처리 실패', err);
       const errorMessage =
         err instanceof Error ? err.message : '이미지 처리에 실패했어요. 다시 시도해주세요.';
       setError(errorMessage);
@@ -245,7 +246,7 @@ export default function ImageUploader({
       // URL 입력 필드 초기화
       setImageUrl('');
     } catch (err) {
-      console.error('URL 이미지 업로드 실패:', err);
+      logger.error('URL 이미지 업로드 실패', err);
       const errorMessage = err instanceof Error ? err.message : 'URL 이미지 업로드에 실패했어요';
       setError(errorMessage);
       toast.error(errorMessage);

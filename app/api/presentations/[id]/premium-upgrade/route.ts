@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/prisma'
 import { requirePresentationEditor } from '@/lib/permissions'
 import { getCurrentUserId } from '@/lib/auth'
@@ -74,7 +75,7 @@ export async function POST(
     }
 
     // 프리미엄 업그레이드 실행
-    console.log(`🚀 [Premium Upgrade] 프레젠테이션 ${id} 업그레이드 시작 (${slides.length}장)`)
+    logger.info('프리미엄 업그레이드 시작', { presentationId: id, slideCount: slides.length })
 
     const result = await upgradeAllSlides(slides)
 
@@ -114,8 +115,8 @@ export async function POST(
       })
     }
 
-    console.log(`✅ [Premium Upgrade] 프레젠테이션 ${id} 업그레이드 완료!`)
-    console.log(`💰 크레딧 차감: ${requiredCredits} (잔액: ${consumeResult.remaining})`)
+    logger.info('프리미엄 업그레이드 완료', { presentationId: id })
+    logger.info('크레딧 차감 완료', { creditsUsed: requiredCredits, remaining: consumeResult.remaining })
 
     return NextResponse.json({
       success: true,
@@ -147,7 +148,7 @@ export async function POST(
       return NextResponse.json({ error: errorMessage }, { status: 402 })
     }
 
-    console.error('프리미엄 업그레이드 실패:', error)
+    logger.error('프리미엄 업그레이드 실패', error)
     return NextResponse.json(
       { error: '프리미엄 업그레이드에 실패했어요. 다시 시도해주세요.' },
       { status: 500 }
@@ -215,7 +216,7 @@ export async function GET(
       estimatedCostKRW: requiredCredits * 10, // 1크레딧 = 10원
     })
   } catch (error: unknown) {
-    console.error('프리미엄 업그레이드 정보 조회 실패:', error)
+    logger.error('프리미엄 업그레이드 정보 조회 실패', error)
     return NextResponse.json(
       { error: '정보를 불러오지 못했어요.' },
       { status: 500 }

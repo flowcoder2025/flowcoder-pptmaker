@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { requireAdmin, grantSystemAdmin, revoke } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 /**
  * Admin 권한 부여 API
@@ -39,7 +40,7 @@ export async function POST(
       message: '관리자 권한을 부여했어요.',
     })
   } catch (error) {
-    console.error('Grant admin permission error:', error)
+    logger.error('관리자 권한 부여 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(
@@ -99,7 +100,7 @@ export async function DELETE(
       message: '관리자 권한을 제거했어요.',
     })
   } catch (error) {
-    console.error('Revoke admin permission error:', error)
+    logger.error('관리자 권한 제거 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(

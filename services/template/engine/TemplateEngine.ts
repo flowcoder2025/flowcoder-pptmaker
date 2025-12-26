@@ -11,6 +11,7 @@ import type { SlideTemplate, TemplateContext } from './types';
 import type { Slide, HTMLSlide, UnifiedPPTJSON } from '@/types/slide';
 import type { AspectRatio } from '@/types/presentation';
 import { STYLE_THEMES } from '@/constants/themes';
+import { logger } from '@/lib/logger';
 import {
   isTitleSlide,
   isSectionSlide,
@@ -79,7 +80,7 @@ export class TemplateEngine {
     let effectiveTemplate = template;
     if (aspectRatio && aspectRatio !== '16:9' && 'withAspectRatio' in template) {
       effectiveTemplate = (template as any).withAspectRatio(aspectRatio);
-      console.log(`📐 [generateSlide] AspectRatio 적용: ${aspectRatio}`);
+      logger.debug('AspectRatio 적용', { aspectRatio, method: 'generateSlide' });
     }
 
     // 슬라이드 렌더링
@@ -110,7 +111,7 @@ export class TemplateEngine {
     if (aspectRatio !== '16:9' && 'withAspectRatio' in template) {
       // TossDefaultTemplate인 경우 AspectRatio를 적용한 새 인스턴스 생성
       effectiveTemplate = (template as any).withAspectRatio(aspectRatio);
-      console.log(`📐 AspectRatio 적용: ${aspectRatio}`);
+      logger.debug('AspectRatio 적용', { aspectRatio });
     }
 
     // 모든 슬라이드 렌더링
@@ -128,7 +129,7 @@ export class TemplateEngine {
     const endTime = performance.now();
     const duration = Math.round(endTime - startTime);
 
-    console.log(`✅ ${slideData.slides.length}개 슬라이드 생성 완료 (${duration}ms, ${aspectRatio})`);
+    logger.info('슬라이드 생성 완료', { count: slideData.slides.length, durationMs: duration, aspectRatio });
 
     return htmlSlides;
   }
@@ -264,7 +265,7 @@ export class TemplateEngine {
       template.description = theme.description;
 
       this.registry.register(template);
-      console.log(`✅ 템플릿 등록 완료: ${theme.id} (${theme.name} - ${theme.tone})`);
+      logger.debug('템플릿 등록 완료', { id: theme.id, name: theme.name, tone: theme.tone });
     });
   }
 
@@ -318,7 +319,7 @@ export class TemplateEngine {
    * 엔진 정보 출력 (디버깅용)
    */
   printInfo(): void {
-    console.log('\n🎨 템플릿 엔진 정보');
+    logger.debug('템플릿 엔진 정보', { templateCount: this.registry.getAll().length });
     this.registry.printInfo();
   }
 }

@@ -14,6 +14,7 @@ import {
   calculateBalance,
   getExpiringCredits,
 } from '@/lib/credits'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -37,7 +38,7 @@ export async function GET() {
         },
       })
     } catch (dbError) {
-      console.error('[API] User 조회 실패:', dbError)
+      logger.error('User 조회 실패', dbError)
       return NextResponse.json(
         {
           error: '사용자 정보 조회에 실패했어요',
@@ -62,9 +63,9 @@ export async function GET() {
       balance = result.balance
       balanceByType = result.balanceByType
     } catch (balanceError) {
-      console.error('[API] calculateBalance 실패:', balanceError)
+      logger.error('calculateBalance 실패', balanceError)
       // 크레딧 잔액 계산 실패 시 0으로 fallback (에러 반환하지 않음)
-      console.warn('⚠️ 크레딧 잔액 계산 실패, 0으로 fallback')
+      logger.warn('크레딧 잔액 계산 실패, 0으로 fallback')
     }
 
     // 4. 곧 만료될 크레딧 조회 (7일 이내)
@@ -76,9 +77,9 @@ export async function GET() {
     try {
       expiringCredits = await getExpiringCredits(session.user.id)
     } catch (expiringError) {
-      console.error('[API] getExpiringCredits 실패:', expiringError)
+      logger.error('getExpiringCredits 실패', expiringError)
       // 만료 크레딧 조회 실패 시 빈 배열 반환 (에러 반환하지 않음)
-      console.warn('⚠️ 만료 예정 크레딧 조회 실패, 빈 배열 반환')
+      logger.warn('만료 예정 크레딧 조회 실패, 빈 배열 반환')
     }
 
     // 5. 응답 반환
@@ -90,7 +91,7 @@ export async function GET() {
       expiringCredits, // 만료 예정 크레딧 목록
     })
   } catch (error) {
-    console.error('❌ [API] 크레딧 정보 조회 실패:', error)
+    logger.error('크레딧 정보 조회 실패', error)
     const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류'
     return NextResponse.json(
       {

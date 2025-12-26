@@ -13,6 +13,7 @@ import { consumeCredits, calculateBalance } from '@/lib/credits'
 import { prisma } from '@/lib/prisma'
 import { hasUnlimitedGeneration } from '@/constants/subscription'
 import type { SubscriptionPlan } from '@/types/monetization'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // POST /api/credits/consume
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       throw error
     }
   } catch (error) {
-    console.error('크레딧 사용 실패:', error)
+    logger.error('크레딧 사용 실패', error)
     return NextResponse.json(
       { error: '크레딧을 사용하지 못했어요' },
       { status: 500 }

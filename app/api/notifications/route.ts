@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/notifications
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
       unreadCount,
     });
   } catch (error) {
-    console.error('[GET /api/notifications] Error:', error);
+    logger.error('알림 목록 조회 실패', error);
     return NextResponse.json(
       { error: '알림을 불러오지 못했어요' },
       { status: 500 }
@@ -146,7 +147,7 @@ export async function PATCH(request: NextRequest) {
       unreadCount,
     });
   } catch (error) {
-    console.error('[PATCH /api/notifications] Error:', error);
+    logger.error('알림 읽음 처리 실패', error);
     return NextResponse.json(
       { error: '알림 처리에 실패했어요' },
       { status: 500 }

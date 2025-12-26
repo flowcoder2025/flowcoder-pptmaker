@@ -154,7 +154,7 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
     });
   };
 
-  const handleChartChange = (field: string, value: any) => {
+  const handleChartChange = (field: string, value: string | number | { label: string; value: number }[]) => {
     if (!slide.props.chart) return;
 
     onChange({
@@ -206,7 +206,7 @@ export default function ReportTwoColumnSlideForm({ slide, onChange }: ReportTwoC
     });
   };
 
-  const handleTableChange = (field: string, value: any) => {
+  const handleTableChange = (field: string, value: string | string[] | string[][]) => {
     if (!slide.props.table) return;
 
     onChange({

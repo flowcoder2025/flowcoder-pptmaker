@@ -1,9 +1,12 @@
 /**
  * Gemini를 사용한 슬라이드 콘텐츠 생성
  * 사용자 입력 + 자료 조사 결과 → 구조화된 슬라이드 콘텐츠
+ *
+ * 🔒 보안: 서버 프록시를 통해 API 키 보호
  */
 
-import { geminiFlash, geminiPro } from './config';
+import { callGeminiProxy } from './client';
+import { logger } from '@/lib/logger';
 import type { ResearchResult } from '@/types/research';
 
 export interface ContentGenerationOptions {
@@ -16,20 +19,10 @@ export interface ContentGenerationOptions {
 }
 
 /**
- * 지수 백오프를 사용한 대기 함수
- */
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
  * 사용자 입력과 자료 조사 결과를 바탕으로 슬라이드 콘텐츠 생성
  *
- * 재시도 정책:
- * - 최대 3회 재시도
- * - Exponential backoff: 2초, 4초, 8초
- * - 503 에러(서버 과부하)에 대해서만 재시도
- * - 모두 실패하면 명확한 에러 메시지 반환
+ * 🔒 서버 프록시를 통해 Gemini API 호출
+ * 재시도 로직은 서버에서 처리됨
  */
 export async function generateSlideContent(options: ContentGenerationOptions): Promise<string> {
   const {
@@ -41,11 +34,10 @@ export async function generateSlideContent(options: ContentGenerationOptions): P
     pageFormat = 'slides'
   } = options;
 
-  const model = useProModel ? geminiPro : geminiFlash;
   const modelName = useProModel ? 'Pro' : 'Flash';
 
-  console.log(`📝 [Gemini ${modelName}] 슬라이드 콘텐츠 생성 시작`);
-  console.log(`📐 AspectRatio: ${aspectRatio}, PageFormat: ${pageFormat}`);
+  logger.info(`Gemini ${modelName} 슬라이드 콘텐츠 생성 시작`);
+  logger.debug(`설정: AspectRatio=${aspectRatio}, PageFormat=${pageFormat}`);
 
   // 프롬프트 구성
   let prompt = `당신은 프리젠테이션 콘텐츠 전문가입니다. 주어진 정보를 바탕으로 UnifiedPPTJSON 형식의 슬라이드 데이터를 생성해주세요.
@@ -973,69 +965,57 @@ ${research.sources.slice(0, 5).map((s, i) => `${i + 1}. ${s.title} - ${s.url}`).
    - 능동적 표현: "제공됐습니다" → "제공합니다"
    - 긍정적 표현: "없습니다" → 대안 제시와 함께 사용`;
 
-  // 재시도 로직
-  const MAX_RETRIES = 3;
-  const RETRY_DELAYS = [2000, 4000, 8000]; // 2초, 4초, 8초
+  // 서버 프록시를 통해 Gemini API 호출
+  // 재시도 로직은 서버에서 처리됨 (/api/gemini/generate)
+  try {
+    const result = await callGeminiProxy({
+      prompt,
+      useProModel,
+    });
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      if (attempt > 0) {
-        const delay = RETRY_DELAYS[attempt - 1];
-        console.log(`⏳ [Gemini ${modelName}] ${attempt}차 재시도 중... (${delay / 1000}초 대기 후)`);
-        await sleep(delay);
-      }
+    const content = result.content;
 
-      const result = await model.generateContent(prompt);
-      const content = result.response.text();
+    logger.info(`Gemini ${modelName} 슬라이드 콘텐츠 생성 완료`, {
+      contentLength: content.length,
+    });
 
-      console.log(`✅ [Gemini ${modelName}] 슬라이드 콘텐츠 생성 완료`);
-      console.log(`📏 생성된 콘텐츠 길이: ${content.length}자`);
+    // 디버깅: 응답 상세 로깅
+    logger.debug(`Gemini ${modelName} 응답 미리보기 (첫 500자)`, {
+      preview: content.substring(0, 500),
+    });
 
-      // 🆕 디버깅: 응답 상세 로깅
-      console.log(`📝 [Gemini ${modelName}] 응답 미리보기 (첫 500자):`, content.substring(0, 500));
-      console.log(`📝 [Gemini ${modelName}] 응답 끝부분 (마지막 500자):`, content.substring(Math.max(0, content.length - 500)));
-
-      // 🆕 검증: 응답이 비어있거나 너무 짧으면 경고
-      if (content.length < 100) {
-        console.warn(`⚠️ [Gemini ${modelName}] 응답이 너무 짧습니다 (${content.length}자). 재시도가 필요할 수 있습니다.`);
-      }
-
-      // 토큰 사용량 로깅
-      if (result.response.usageMetadata) {
-        const usage = result.response.usageMetadata;
-        console.log(`💰 [Gemini ${modelName}] 토큰 사용량:`, {
-          입력_토큰: usage.promptTokenCount,
-          출력_토큰: usage.candidatesTokenCount,
-          캐시_토큰: usage.cachedContentTokenCount || 0,
-          총_토큰: usage.totalTokenCount,
-          계산_검증: `${usage.promptTokenCount} + ${usage.candidatesTokenCount} + ${usage.cachedContentTokenCount || 0} = ${(usage.promptTokenCount || 0) + (usage.candidatesTokenCount || 0) + (usage.cachedContentTokenCount || 0)}`,
-        });
-      }
-
-      return content;
-    } catch (error: unknown) {
-      const isLastAttempt = attempt === MAX_RETRIES;
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isServerOverloaded = errorMessage.includes('503') ||
-                                  errorMessage.includes('overloaded');
-
-      console.error(`❌ [Gemini ${modelName}] 슬라이드 콘텐츠 생성 실패 (시도 ${attempt + 1}/${MAX_RETRIES + 1}):`, errorMessage);
-
-      // 503 에러가 아니거나 마지막 시도인 경우 즉시 종료
-      if (!isServerOverloaded || isLastAttempt) {
-        if (isServerOverloaded) {
-          throw new Error(
-            `Gemini ${modelName} 서버가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요. (${MAX_RETRIES + 1}회 시도 모두 실패)`
-          );
-        }
-        throw error;
-      }
-
-      // 재시도 계속
-      console.log(`🔄 [Gemini ${modelName}] 재시도 예정...`);
+    // 검증: 응답이 비어있거나 너무 짧으면 경고
+    if (content.length < 100) {
+      logger.warn(`Gemini ${modelName} 응답이 너무 짧음`, {
+        contentLength: content.length,
+      });
     }
-  }
 
-  // 이 코드에 도달하면 안되지만, 타입스크립트를 위한 fallback
-  throw new Error(`Gemini ${modelName} 요청 실패: 알 수 없는 오류`);
+    // 토큰 사용량 로깅
+    if (result.usage) {
+      logger.debug(`Gemini ${modelName} 토큰 사용량`, {
+        promptTokens: result.usage.promptTokens,
+        completionTokens: result.usage.completionTokens,
+        totalTokens: result.usage.totalTokens,
+      });
+    }
+
+    return content;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`Gemini ${modelName} 슬라이드 콘텐츠 생성 실패`, { error: errorMessage });
+
+    // 사용자 친화적 에러 메시지로 변환
+    if (errorMessage.includes('로그인')) {
+      throw new Error('로그인이 필요해요');
+    }
+    if (errorMessage.includes('요청이 너무 많')) {
+      throw new Error('요청이 너무 많아요. 잠시 후 다시 시도해주세요.');
+    }
+    if (errorMessage.includes('AI 서버')) {
+      throw new Error('AI 서버가 일시적으로 바빠요. 잠시 후 다시 시도해주세요.');
+    }
+
+    throw new Error('콘텐츠를 생성하지 못했어요. 다시 시도해주세요.');
+  }
 }

@@ -24,6 +24,33 @@
 ### ✨ Features
 
 #### 2025-12-26
+- **프로덕션 Logger 시스템 구축**
+  - `lib/logger.ts` 생성 - 환경별 로그 레벨 관리 (production: warn 이상만 출력)
+  - 프로젝트 전체 console.log/warn/error를 logger 시스템으로 교체 (90개 파일)
+  - logger.debug(), logger.info(), logger.warn(), logger.error(), logger.audit() 메서드 제공
+  - 구조화된 로깅 (메시지 + 메타데이터 객체)
+
+- **Zod 스키마 API 입력 검증 시스템 도입**
+  - `lib/validations/index.ts` 생성 - 8개 API 스키마 정의
+  - 적용된 API 라우트: /api/generate, /api/gemini/generate, /api/presentations, /api/research, /api/credits/grant, /api/drafts, /api/presentations/[id]
+  - Zod v4 호환성 처리 및 Prisma InputJsonValue 타입 캐스팅
+  - validateRequest() 헬퍼 함수로 일관된 검증 패턴 제공
+
+- **Gemini API 서버 프록시 라우트 추가**
+  - `app/api/gemini/generate/route.ts` - 콘텐츠 생성 프록시
+  - `app/api/gemini/parse-document/route.ts` - 문서 파싱 프록시
+  - API 키 서버 사이드 보호 (클라이언트 노출 방지)
+  - Rate Limiting (분당 10 요청) 및 재시도 로직
+
+### 🔧 Technical
+
+#### 2025-12-26
+- **API 에러 메시지 한글 표준화 (해요체)**
+  - /api/drafts: 'Unauthorized' → '로그인이 필요해요'
+  - /api/cron/subscriptions: 'Batch job failed' → '배치 작업에 실패했어요'
+  - 전체 API 라우트 에러 메시지 한글화 완료
+
+
 - **Pro 플랜 초과 슬라이드 비용 시스템 구현**
   - Pro 플랜 20장 초과 시 2 크레딧/장으로 최대 50장까지 생성 가능
   - constants/credits.ts에 EXTRA_SLIDE 비용 상수 추가

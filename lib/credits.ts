@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 import {
   CreditSourceType,
   CreditTransactionType,
@@ -172,10 +173,10 @@ export async function consumeCredits(
     },
   })
 
-  console.log(`[consumeCredits] 사용 가능한 크레딧: ${availableCredits.length}건`)
-  if (availableCredits.length > 0) {
-    console.log('[consumeCredits] 크레딧 샘플:', availableCredits[0])
-  }
+  logger.debug('사용 가능한 크레딧 조회', {
+    count: availableCredits.length,
+    sample: availableCredits[0] || null,
+  });
 
   // 2. 타입별로 그룹화 및 잔액 계산
   interface CreditGroup {

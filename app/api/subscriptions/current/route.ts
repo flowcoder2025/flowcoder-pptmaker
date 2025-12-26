@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -58,7 +59,7 @@ export async function GET() {
       daysRemaining,
     })
   } catch (error) {
-    console.error('[API] 구독 정보 조회 실패:', error)
+    logger.error('구독 정보 조회 실패', error)
     return NextResponse.json(
       { error: '구독 정보를 가져올 수 없어요' },
       { status: 500 }

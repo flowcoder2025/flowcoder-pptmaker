@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { logger } from '@/lib/logger'
 
 const typeLabels: Record<string, { label: string; color: string }> = {
   FREE: { label: '무료', color: 'bg-blue-100 text-blue-800' },
@@ -75,7 +76,7 @@ export default function AdminCreditsPage() {
       setStats(data.stats)
       setTransactions(data.transactions)
     } catch (error) {
-      console.error('Error fetching credits:', error)
+      logger.error('크레딧 데이터 조회 실패', error)
     } finally {
       setLoading(false)
     }

@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { Lightbulb, Calendar } from 'lucide-react';
 import type { RoadmapSlide } from '@/types/slide';
 
@@ -47,7 +48,7 @@ export default function RoadmapSlideForm({
   };
 
   const handleAddItem = () => {
-    console.log('➕ [RoadmapForm] 항목 추가 시작', {
+    logger.debug('RoadmapForm 항목 추가 시작', {
       현재항목수: slide.props.items.length,
     });
 
@@ -64,7 +65,7 @@ export default function RoadmapSlideForm({
       },
     };
 
-    console.log('📤 [RoadmapForm] onChange 호출', {
+    logger.debug('RoadmapForm onChange 호출', {
       새항목수: newItems.length,
       슬라이드타입: updatedSlide.type,
     });

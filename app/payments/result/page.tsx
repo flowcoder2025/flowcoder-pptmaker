@@ -18,6 +18,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { VerifyPaymentResponse } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * 결제 결과 페이지 내부 컴포넌트
@@ -126,7 +127,7 @@ function PaymentResultContent() {
         setPaymentData(data);
       }
     } catch (err) {
-      console.error('결제 검증 오류:', err);
+      logger.error('결제 검증 오류', err);
       setVerifySuccess(false);
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했어요');
     } finally {

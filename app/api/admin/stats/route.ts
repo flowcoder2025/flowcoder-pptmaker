@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { requireAdmin } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 /**
  * Admin 대시보드 통계 API
@@ -81,7 +82,7 @@ export async function GET() {
 
     return NextResponse.json(stats)
   } catch (error) {
-    console.error('Admin stats error:', error)
+    logger.error('관리자 통계 조회 실패', error)
 
     if (error instanceof Error) {
       return NextResponse.json(

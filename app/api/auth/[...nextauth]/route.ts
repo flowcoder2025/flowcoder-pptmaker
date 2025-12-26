@@ -12,6 +12,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // NextAuth 설정
@@ -110,7 +111,7 @@ export const authOptions: NextAuthOptions = {
       // OAuth 로그인 시 사용자 생성 또는 업데이트
       if (account?.provider === 'github' || account?.provider === 'google') {
         try {
-          console.log('🔐 OAuth signIn attempt:', {
+          logger.info('OAuth 로그인 시도', {
             provider: account.provider,
             email: user.email,
             providerAccountId: account.providerAccountId
@@ -127,7 +128,7 @@ export const authOptions: NextAuthOptions = {
               },
             },
           })
-          console.log('👤 Existing user:', existingUser ? `Found (${existingUser.id})` : 'Not found')
+          logger.debug('기존 사용자 조회', { found: !!existingUser, userId: existingUser?.id })
 
           if (existingUser) {
             // 기존 사용자: Account 연결 확인
@@ -139,11 +140,11 @@ export const authOptions: NextAuthOptions = {
                 },
               },
             })
-            console.log('🔗 Existing account:', existingAccount ? 'Found' : 'Not found')
+            logger.debug('기존 계정 조회', { found: !!existingAccount })
 
             if (!existingAccount) {
               // 같은 이메일에 다른 provider 연결 (새 Account 생성)
-              console.log('📝 Linking new account to existing user...')
+              logger.debug('기존 사용자에 새 계정 연결 중')
               await prisma.account.create({
                 data: {
                   userId: existingUser.id,
@@ -159,7 +160,7 @@ export const authOptions: NextAuthOptions = {
                   session_state: account.session_state,
                 },
               })
-              console.log('✅ New account linked to existing user')
+              logger.info('기존 사용자에 새 계정 연결 완료')
             }
 
             // user 객체에 기존 사용자 정보 설정 (phoneNumber 포함)
@@ -167,7 +168,7 @@ export const authOptions: NextAuthOptions = {
             user.phoneNumber = existingUser.phoneNumber
           } else {
             // 새 사용자 생성
-            console.log('📝 Creating new user...')
+            logger.debug('새 사용자 생성 중')
             const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
@@ -176,10 +177,10 @@ export const authOptions: NextAuthOptions = {
                 emailVerified: new Date(),
               },
             })
-            console.log('✅ User created:', newUser.id)
+            logger.info('사용자 생성 완료', { userId: newUser.id })
 
             // Account 생성
-            console.log('📝 Creating account link...')
+            logger.debug('계정 연결 생성 중')
             await prisma.account.create({
               data: {
                 userId: newUser.id,
@@ -195,21 +196,16 @@ export const authOptions: NextAuthOptions = {
                 session_state: account.session_state,
               },
             })
-            console.log('✅ Account link created')
+            logger.info('계정 연결 생성 완료')
 
             // user.id를 새 사용자 ID로 설정
             user.id = newUser.id
           }
 
-          console.log('✅ OAuth signIn success')
+          logger.info('OAuth 로그인 성공')
           return true
         } catch (error) {
-          console.error('❌ OAuth signIn error:', error)
-          console.error('Error details:', {
-            name: (error as Error).name,
-            message: (error as Error).message,
-            stack: (error as Error).stack,
-          })
+          logger.error('OAuth 로그인 오류', error)
           return false
         }
       }

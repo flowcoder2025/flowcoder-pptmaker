@@ -4,6 +4,7 @@
  */
 
 import type { Presentation } from '@/types/presentation';
+import { logger } from '@/lib/logger';
 
 export async function savePresentation(presentation: Presentation): Promise<void> {
   // TODO: Bedrock SDK Storage API 연동
@@ -24,9 +25,9 @@ export async function savePresentation(presentation: Presentation): Promise<void
       localStorage.setItem(listKey, JSON.stringify(list));
     }
 
-    console.log('💾 프리젠테이션 저장 완료:', presentation.id);
+    logger.info('프리젠테이션 저장 완료', { id: presentation.id });
   } catch (error) {
-    console.error('저장 실패:', error);
+    logger.error('프리젠테이션 저장 실패', error);
     throw new Error('프리젠테이션 저장에 실패했습니다.');
   }
 }
@@ -42,7 +43,7 @@ export async function loadPresentation(id: string): Promise<Presentation | null>
 
     return JSON.parse(data) as Presentation;
   } catch (error) {
-    console.error('불러오기 실패:', error);
+    logger.error('프리젠테이션 불러오기 실패', error);
     return null;
   }
 }
@@ -53,7 +54,7 @@ export async function listPresentations(): Promise<string[]> {
     const listData = localStorage.getItem(listKey);
     return listData ? JSON.parse(listData) : [];
   } catch (error) {
-    console.error('목록 불러오기 실패:', error);
+    logger.error('프리젠테이션 목록 불러오기 실패', error);
     return [];
   }
 }

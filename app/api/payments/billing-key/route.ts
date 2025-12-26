@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/payments/billing-key
@@ -87,7 +88,7 @@ export async function GET() {
       } : null,
     });
   } catch (error) {
-    console.error('[BillingKey GET] Error:', error);
+    logger.error('빌링키 조회 실패', error);
     return NextResponse.json(
       {
         success: false,
@@ -146,14 +147,14 @@ export async function DELETE() {
           }
         );
 
-        console.log('[BillingKey DELETE] PortOne API response:', portoneResponse.status);
+        logger.debug('PortOne 빌링키 삭제 API 응답', { status: portoneResponse.status });
 
         // 삭제 실패해도 DB에서는 비활성화 처리
         if (!portoneResponse.ok) {
-          console.warn('[BillingKey DELETE] PortOne deletion failed, but continuing with DB update');
+          logger.warn('PortOne 빌링키 삭제 실패, DB 업데이트는 계속 진행');
         }
       } catch (portoneError) {
-        console.error('[BillingKey DELETE] PortOne API error:', portoneError);
+        logger.error('PortOne API 오류', portoneError);
         // 포트원 API 실패해도 계속 진행
       }
     }
@@ -197,14 +198,14 @@ export async function DELETE() {
       });
     }
 
-    console.log('[BillingKey DELETE] Successfully deleted billing key:', billingKey.billingKeyId);
+    logger.info('빌링키 삭제 완료', { billingKeyId: billingKey.billingKeyId });
 
     return NextResponse.json({
       success: true,
       message: '결제 수단이 삭제되었어요',
     });
   } catch (error) {
-    console.error('[BillingKey DELETE] Error:', error);
+    logger.error('빌링키 삭제 실패', error);
     return NextResponse.json(
       {
         success: false,

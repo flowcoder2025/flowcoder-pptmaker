@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET: 무료 카운트 조회
@@ -41,7 +42,7 @@ export async function GET() {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error('❌ 무료 카운트 조회 실패:', error);
+    logger.error('무료 카운트 조회 실패', error);
     return NextResponse.json(
       { error: '무료 카운트 조회에 실패했어요' },
       { status: 500 }
@@ -91,11 +92,11 @@ export async function PATCH(req: Request) {
       data: updateData,
     });
 
-    console.log(`✅ 무료 카운트 사용 기록: ${type} (사용자: ${session.user.email})`);
+    logger.info('무료 카운트 사용 기록', { type, email: session.user.email });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('❌ 무료 카운트 업데이트 실패:', error);
+    logger.error('무료 카운트 업데이트 실패', error);
     return NextResponse.json(
       { error: '무료 카운트 업데이트에 실패했어요' },
       { status: 500 }
