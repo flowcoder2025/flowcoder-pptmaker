@@ -24,7 +24,7 @@ import {
 import { usePresentationStore } from '@/store/presentationStore';
 import { useSubscriptionStore } from '@/store/subscriptionStore';
 import { useCreditStore } from '@/store/creditStore';
-import { PLAN_BENEFITS } from '@/constants/subscription';
+import { PLAN_BENEFITS, hasUnlimitedGeneration } from '@/constants/subscription';
 import { TEMPLATE_EXAMPLES } from '@/constants/design';
 import { STYLE_THEMES } from '@/constants/themes';
 import { RESEARCH_MODE_CONFIG, type ResearchMode } from '@/types/research';
@@ -197,6 +197,12 @@ export default function InputPage() {
       return;
     }
 
+    // Pro/Premium 플랜은 무제한 사용
+    if (hasUnlimitedGeneration(plan)) {
+      setUseProContentModel(true);
+      return;
+    }
+
     const isFirstFree = isFirstTimeFree('qualityGeneration');
     const hasCredit = totalCredits >= getCreditCost('qualityGeneration');
 
@@ -210,6 +216,12 @@ export default function InputPage() {
 
   const handleResearchClick = (mode: ResearchMode) => {
     if (mode !== 'deep') {
+      setResearchMode(mode);
+      return;
+    }
+
+    // Pro/Premium 플랜은 무제한 사용
+    if (hasUnlimitedGeneration(plan)) {
       setResearchMode(mode);
       return;
     }
@@ -295,11 +307,11 @@ export default function InputPage() {
                 )}
               </div>
               <div className="text-2xl font-bold text-blue-700">
-                {totalCredits} 크래딧
+                {hasUnlimitedGeneration(plan) ? '무제한' : `${totalCredits} 크래딧`}
               </div>
-              {isPremiumUser && (
+              {hasUnlimitedGeneration(plan) && (
                 <p className="text-xs text-blue-600 mt-1">
-                  매월 490 크래딧 제공
+                  심층검색 · 고품질 생성 무제한
                 </p>
               )}
             </Card>
@@ -532,16 +544,21 @@ export default function InputPage() {
                   if (price === 0) {
                     priceLabel = '무료';
                   } else if (mode === 'deep') {
-                    const isFirstFree = isFirstTimeFree('deepResearch');
-                    const creditCost = getCreditCost('deepResearch');
-                    const hasCredit = totalCredits >= creditCost;
-
-                    if (isFirstFree) {
-                      priceLabel = '최초 1회 무료';
-                    } else if (hasCredit) {
-                      priceLabel = `${creditCost} 크래딧`;
+                    // Pro/Premium 플랜은 무제한
+                    if (hasUnlimitedGeneration(plan)) {
+                      priceLabel = '무제한';
                     } else {
-                      priceLabel = `${creditCost} 크래딧 필요`;
+                      const isFirstFree = isFirstTimeFree('deepResearch');
+                      const creditCost = getCreditCost('deepResearch');
+                      const hasCredit = totalCredits >= creditCost;
+
+                      if (isFirstFree) {
+                        priceLabel = '최초 1회 무료';
+                      } else if (hasCredit) {
+                        priceLabel = `${creditCost} 크래딧`;
+                      } else {
+                        priceLabel = `${creditCost} 크래딧 필요`;
+                      }
                     }
                   } else {
                     priceLabel = `+₩${price.toLocaleString()}`;
@@ -624,6 +641,11 @@ export default function InputPage() {
                     </div>
                     <span className="text-xs font-semibold text-blue-600">
                       {(() => {
+                        // Pro/Premium 플랜은 무제한
+                        if (hasUnlimitedGeneration(plan)) {
+                          return '무제한';
+                        }
+
                         const isFirstFree = isFirstTimeFree('qualityGeneration');
                         const creditCost = getCreditCost('qualityGeneration');
                         const hasCredit = totalCredits >= creditCost;
@@ -910,13 +932,13 @@ export default function InputPage() {
                 ? '고품질 생성을 사용하려면 크래딧이 필요해요. (50 크래딧)'
                 : '깊은 조사를 사용하려면 크래딧이 필요해요. (40 크래딧)'}
               <br /><br />
-              Pro 구독 시 매월 490 크래딧을 받을 수 있어요.
+              Pro 구독 시 무제한으로 사용할 수 있어요.
             </p>
 
             <div className="p-4 bg-gray-50 rounded-lg mb-4 space-y-3">
               <div>
-                <div className="font-semibold text-gray-900">옵션 1: Pro 구독 (₩4,900/월)</div>
-                <p className="text-sm text-gray-600">• 광고 제거 + 매월 490 크래딧 제공</p>
+                <div className="font-semibold text-gray-900">옵션 1: Pro 구독 (₩7,900/월)</div>
+                <p className="text-sm text-gray-600">• 광고 제거 + 심층검색/고품질 생성 무제한</p>
               </div>
               <div>
                 <div className="font-semibold text-gray-900">옵션 2: 크레딧 구매</div>
