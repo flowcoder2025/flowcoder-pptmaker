@@ -12,7 +12,7 @@ import { usePortOnePayment, PAYMENT_CHANNELS } from '@/hooks/usePortOnePayment';
 import { PLAN_BENEFITS, hasUnlimitedGeneration } from '@/constants/subscription';
 import { CREDIT_BUNDLES, CREDIT_COST } from '@/constants/credits';
 import { BUTTON_TEXT } from '@/lib/text-config';
-import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem, Infinity } from 'lucide-react';
+import { Coins, Sparkles, TrendingUp, Loader2, Gift, Gem, Infinity, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import KakaoAdBanner from '@/components/ads/KakaoAdBanner';
 import KakaoAdMobileThick from '@/components/ads/KakaoAdMobileThick';
@@ -174,7 +174,7 @@ export default function CreditsPage() {
       </div>
 
       {/* 크레딧 사용량 안내 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <div className="rounded-xl p-5 bg-secondary">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={20} className="text-primary" />
@@ -217,6 +217,25 @@ export default function CreditsPage() {
               {CREDIT_COST.QUALITY_GENERATION} 크레딧
             </p>
           )}
+        </div>
+
+        {/* 초과 슬라이드 - Pro 플랜 전용 */}
+        <div className="rounded-xl p-5 bg-secondary">
+          <div className="flex items-center gap-2 mb-2">
+            <Layers size={20} className="text-primary" />
+            <h3 className="font-bold text-foreground">
+              초과 슬라이드
+            </h3>
+          </div>
+          <p className="text-sm mb-1 text-muted-foreground">
+            Pro 플랜 20장 초과 시 추가 비용
+          </p>
+          <p className="text-2xl font-bold text-primary">
+            {CREDIT_COST.EXTRA_SLIDE} 크레딧/장
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Pro 플랜: 최대 50장까지 생성 가능
+          </p>
         </div>
       </div>
 
