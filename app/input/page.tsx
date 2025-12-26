@@ -118,12 +118,13 @@ export default function InputPage() {
 
   // 플랜 변경 시 슬라이더 값 조정
   useEffect(() => {
-    const planMaxSlides = PLAN_BENEFITS[plan].benefits.maxSlides;
+    // Pro 플랜은 크레딧으로 최대 50장까지 생성 가능
+    const effectiveMaxSlides = plan === 'pro' ? 50 : PLAN_BENEFITS[plan].benefits.maxSlides;
 
-    // 현재 슬라이더 값이 플랜 최대값을 초과하면 조정
-    if (targetSlideCount > planMaxSlides) {
-      console.log(`📊 플랜 제한에 맞춰 슬라이드 수 조정: ${targetSlideCount}장 → ${planMaxSlides}장`);
-      setTargetSlideCount(planMaxSlides);
+    // 현재 슬라이더 값이 실제 최대값을 초과하면 조정
+    if (targetSlideCount > effectiveMaxSlides) {
+      console.log(`📊 플랜 제한에 맞춰 슬라이드 수 조정: ${targetSlideCount}장 → ${effectiveMaxSlides}장`);
+      setTargetSlideCount(effectiveMaxSlides);
     }
   }, [plan, targetSlideCount, setTargetSlideCount]);
 
