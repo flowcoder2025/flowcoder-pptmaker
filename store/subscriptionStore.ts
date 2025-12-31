@@ -7,6 +7,7 @@ import {
   getMaxSlides as getPlanMaxSlides,
   hasWatermark as planHasWatermark,
   getPremiumTemplatesAccess as getPlanPremiumTemplatesAccess,
+  hasUnlimitedGeneration as planHasUnlimitedGeneration,
 } from '@/constants/subscription';
 import { logger } from '@/lib/logger';
 
@@ -111,6 +112,12 @@ interface SubscriptionState {
    * 프리미엄 템플릿 접근 권한 가져오기
    */
   getPremiumTemplatesAccess: () => 'none' | 'discount' | 'unlimited';
+
+  /**
+   * 무제한 생성 여부 (심층 검색 + 고품질 생성)
+   * PRO 이상 구독자는 크레딧 없이 무제한 사용 가능
+   */
+  hasUnlimitedGeneration: () => boolean;
 
   /**
    * 월별 초기화 (크래딧 제공)
@@ -335,6 +342,17 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         }
 
         return getPlanPremiumTemplatesAccess(plan);
+      },
+
+      hasUnlimitedGeneration: () => {
+        const { plan } = get();
+
+        // 구독이 활성 상태가 아니면 무제한 생성 불가
+        if (!get().isActive()) {
+          return false;
+        }
+
+        return planHasUnlimitedGeneration(plan);
       },
 
       resetMonthly: () => {

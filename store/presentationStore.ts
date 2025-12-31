@@ -278,49 +278,60 @@ export const usePresentationStore = create<PresentationState>((set, get) => ({
       const { selectedThemeId, researchMode, useProContentModel, targetSlideCount } = get();
 
       // 💳 크레딧 차감 로직
-      // 1. 깊은 조사 사용 시
+      // PRO/Premium 구독자는 무제한 생성 혜택 (심층 검색 + 고품질 생성)
+      const hasUnlimitedGeneration = subscriptionStore.hasUnlimitedGeneration();
+
+      // 1. 깊은 조사 사용 시 (PRO/Premium 구독자는 무료)
       if (researchMode === 'deep') {
-        const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
-
-        if (isFirstFree) {
-          logger.info('깊은 조사 최초 1회 무료 사용');
-          await creditStore.useFirstTimeFree('deepResearch');
+        if (hasUnlimitedGeneration) {
+          logger.info('깊은 조사 사용 (PRO/Premium 무제한 혜택)', { plan: subscriptionStore.plan });
         } else {
-          const deepResearchCost = creditStore.getCreditCost('deepResearch');
-          const hasCredits = creditStore.canUseCredits(deepResearchCost);
+          const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
 
-          if (!hasCredits) {
-            throw new Error(`크레딧이 부족해요. 깊은 조사를 사용하려면 ${deepResearchCost} 크레딧이 필요해요.`);
-          }
+          if (isFirstFree) {
+            logger.info('깊은 조사 최초 1회 무료 사용');
+            await creditStore.useFirstTimeFree('deepResearch');
+          } else {
+            const deepResearchCost = creditStore.getCreditCost('deepResearch');
+            const hasCredits = creditStore.canUseCredits(deepResearchCost);
 
-          const success = await creditStore.useCredits(deepResearchCost);
-          if (!success) {
-            throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+            if (!hasCredits) {
+              throw new Error(`크레딧이 부족해요. 깊은 조사를 사용하려면 ${deepResearchCost} 크레딧이 필요해요.`);
+            }
+
+            const success = await creditStore.useCredits(deepResearchCost);
+            if (!success) {
+              throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+            }
+            logger.info('깊은 조사 크레딧 차감', { cost: deepResearchCost });
           }
-          logger.info('깊은 조사 크레딧 차감', { cost: deepResearchCost });
         }
       }
 
-      // 2. Pro 모델 사용 시
+      // 2. Pro 모델 사용 시 (PRO/Premium 구독자는 무료)
       if (useProContentModel) {
-        const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
-
-        if (isFirstFree) {
-          logger.info('고품질 생성 최초 1회 무료 사용');
-          await creditStore.useFirstTimeFree('qualityGeneration');
+        if (hasUnlimitedGeneration) {
+          logger.info('고품질 생성 사용 (PRO/Premium 무제한 혜택)', { plan: subscriptionStore.plan });
         } else {
-          const qualityCost = creditStore.getCreditCost('qualityGeneration');
-          const hasCredits = creditStore.canUseCredits(qualityCost);
+          const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
 
-          if (!hasCredits) {
-            throw new Error(`크레딧이 부족해요. 고품질 생성을 사용하려면 ${qualityCost} 크레딧이 필요해요.`);
-          }
+          if (isFirstFree) {
+            logger.info('고품질 생성 최초 1회 무료 사용');
+            await creditStore.useFirstTimeFree('qualityGeneration');
+          } else {
+            const qualityCost = creditStore.getCreditCost('qualityGeneration');
+            const hasCredits = creditStore.canUseCredits(qualityCost);
 
-          const success = await creditStore.useCredits(qualityCost);
-          if (!success) {
-            throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+            if (!hasCredits) {
+              throw new Error(`크레딧이 부족해요. 고품질 생성을 사용하려면 ${qualityCost} 크레딧이 필요해요.`);
+            }
+
+            const success = await creditStore.useCredits(qualityCost);
+            if (!success) {
+              throw new Error('크레딧 차감에 실패했어요. 다시 시도해주세요.');
+            }
+            logger.info('고품질 생성 크레딧 차감', { cost: qualityCost });
           }
-          logger.info('고품질 생성 크레딧 차감', { cost: qualityCost });
         }
       }
 

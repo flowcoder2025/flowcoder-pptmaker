@@ -94,10 +94,28 @@ export const useMonetization = (): MonetizationState => {
 
   /**
    * 생성 검증
+   *
+   * PRO/Premium 구독자는 무제한 생성 혜택 (심층 검색 + 고품질 생성)
+   * - 슬라이드 수 제한 내에서 크레딧 없이 무료 사용
+   * - Pro: 20페이지, Premium: 50페이지
    */
   const validateGeneration = useCallback(
     (options: GenerationOptions): PaymentValidation => {
       const { aiModel, research } = options;
+
+      // PRO/Premium 구독자: 무제한 생성 혜택
+      const hasUnlimited = subscriptionStore.hasUnlimitedGeneration();
+
+      if (hasUnlimited) {
+        // 프리미엄 기능도 무료 (심층 검색 + 고품질 생성)
+        return {
+          allowed: true,
+          method: 'subscription',
+          price: 0,
+          requiresAd: false,
+          message: `✨ ${subscriptionStore.plan.toUpperCase()} 구독 혜택: 무료로 사용할 수 있어요`,
+        };
+      }
 
       // 무료 사용 (광고 필수)
       const isFreeUsage =
@@ -116,7 +134,7 @@ export const useMonetization = (): MonetizationState => {
         };
       }
 
-      // Pro 모델 사용 (50 크래딧)
+      // Pro 모델 사용 (50 크래딧) - 무료 사용자만 해당
       if (aiModel === 'pro') {
         const isFirstFree = creditStore.isFirstTimeFree('qualityGeneration');
         const creditCost = creditStore.getCreditCost('qualityGeneration');
@@ -152,7 +170,7 @@ export const useMonetization = (): MonetizationState => {
         };
       }
 
-      // 깊은 조사 사용 (40 크래딧)
+      // 깊은 조사 사용 (40 크래딧) - 무료 사용자만 해당
       if (research === 'deep') {
         const isFirstFree = creditStore.isFirstTimeFree('deepResearch');
         const creditCost = creditStore.getCreditCost('deepResearch');
@@ -235,6 +253,8 @@ export const useMonetization = (): MonetizationState => {
 
   /**
    * 크래딧 차감 처리
+   *
+   * PRO/Premium 구독자는 크레딧 차감 없이 무료 사용
    */
   const processCredits = useCallback(
     async (options: GenerationOptions): Promise<boolean> => {
@@ -245,13 +265,21 @@ export const useMonetization = (): MonetizationState => {
         return false;
       }
 
+      // 구독자 무제한 사용
+      if (validation.method === 'subscription') {
+        logger.debug('구독자 무제한 사용 (크레딧 차감 없음)', {
+          plan: subscriptionStore.plan,
+        });
+        return true;
+      }
+
       // 무료 사용
       if (validation.method === 'free') {
         logger.debug('무료 사용 (광고 시청)');
         return true;
       }
 
-      // 크래딧 사용
+      // 크래딧 사용 (무료 사용자만 해당)
       if (validation.method === 'bundle') {
         // Pro 모델
         if (options.aiModel === 'pro') {
@@ -262,7 +290,7 @@ export const useMonetization = (): MonetizationState => {
             return true;
           } else {
             const creditCost = creditStore.getCreditCost('qualityGeneration');
-            const success = creditStore.useCredits(creditCost);
+            const success = await creditStore.useCredits(creditCost);
             logger.info('크래딧 차감', { creditCost, success });
             return success;
           }
@@ -277,7 +305,7 @@ export const useMonetization = (): MonetizationState => {
             return true;
           } else {
             const creditCost = creditStore.getCreditCost('deepResearch');
-            const success = creditStore.useCredits(creditCost);
+            const success = await creditStore.useCredits(creditCost);
             logger.info('크래딧 차감', { creditCost, success });
             return success;
           }
@@ -286,7 +314,7 @@ export const useMonetization = (): MonetizationState => {
 
       return false;
     },
-    [validateGeneration, creditStore]
+    [validateGeneration, creditStore, subscriptionStore]
   );
 
   return {

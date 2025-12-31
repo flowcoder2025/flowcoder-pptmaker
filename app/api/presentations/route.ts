@@ -15,6 +15,8 @@ import { getCurrentUserId } from '@/lib/auth'
 import { calculateBalance, consumeCredits } from '@/lib/credits'
 import { logger } from '@/lib/logger'
 import { presentationCreateRequestSchema, validateRequest } from '@/lib/validations'
+import { hasUnlimitedGeneration } from '@/constants/subscription'
+import type { SubscriptionPlan } from '@/types/monetization'
 
 // ============================================
 // GET /api/presentations
@@ -149,20 +151,40 @@ export async function POST(request: NextRequest) {
       hasMetadata: !!metadata,
     })
 
-    // 1. 크레딧 차감 금액 계산
+    // 1. 구독 정보 조회 (PRO/Premium은 무제한 생성)
+    const subscription = await prisma.subscription.findUnique({
+      where: { userId },
+      select: { tier: true, status: true, endDate: true },
+    })
+
+    // 구독 상태 확인 및 무제한 생성 여부 체크
+    const userPlan = (subscription?.tier?.toLowerCase() || 'free') as SubscriptionPlan
+    const isSubscriptionActive = subscription
+      ? subscription.status === 'ACTIVE' && (!subscription.endDate || new Date(subscription.endDate) > new Date())
+      : false
+    const userHasUnlimitedGeneration = isSubscriptionActive && hasUnlimitedGeneration(userPlan)
+
+    logger.debug('구독 정보 확인', { userPlan, isSubscriptionActive, userHasUnlimitedGeneration })
+
+    // 2. 크레딧 차감 금액 계산 (무제한 생성 구독자는 무료)
     const useProContentModel = metadata?.useProContentModel || false
     const researchMode = metadata?.researchMode || 'none'
 
     let creditsToCharge = 0
 
-    // Pro 모델 사용 시 50 크레딧
-    if (useProContentModel) {
-      creditsToCharge += 50
-    }
+    // PRO/Premium 구독자는 심층 검색 + 고품질 생성 무료
+    if (!userHasUnlimitedGeneration) {
+      // Pro 모델 사용 시 50 크레딧 (무료 사용자만)
+      if (useProContentModel) {
+        creditsToCharge += 50
+      }
 
-    // 심층 조사 사용 시 40 크레딧 추가
-    if (researchMode === 'deep') {
-      creditsToCharge += 40
+      // 심층 조사 사용 시 40 크레딧 추가 (무료 사용자만)
+      if (researchMode === 'deep') {
+        creditsToCharge += 40
+      }
+    } else {
+      logger.info('PRO/Premium 구독 혜택: 심층 검색 + 고품질 생성 무료', { userPlan })
     }
 
     // Flash + 빠른 조사 = 0 크레딧 (무료)
@@ -199,7 +221,7 @@ export async function POST(request: NextRequest) {
       logger.debug('무료 옵션 사용 - 크레딧 차감 없음')
     }
 
-    // 2. 프레젠테이션 생성
+    // 3. 프레젠테이션 생성
     let presentation
     try {
       presentation = await prisma.presentation.create({
@@ -227,7 +249,7 @@ export async function POST(request: NextRequest) {
       throw new Error(`데이터베이스 저장에 실패했어요: ${dbError instanceof Error ? dbError.message : '알 수 없는 오류'}`)
     }
 
-    // 3. 크레딧 차감 (유료 옵션만)
+    // 4. 크레딧 차감 (유료 옵션만)
     if (creditsToCharge > 0) {
       try {
         const creditDescription = `프리젠테이션 생성: ${title} (${useProContentModel ? 'Pro 모델 50' : ''}${useProContentModel && researchMode === 'deep' ? ' + ' : ''}${researchMode === 'deep' ? '심층 조사 40' : ''} 크레딧)`
@@ -248,7 +270,7 @@ export async function POST(request: NextRequest) {
       logger.debug('무료 옵션 - 크레딧 차감 건너뜀')
     }
 
-    // 4. GenerationHistory 생성 (모니터링용)
+    // 5. GenerationHistory 생성 (모니터링용)
     try {
       const historyData = {
         userId,
@@ -274,7 +296,7 @@ export async function POST(request: NextRequest) {
       // 히스토리 생성 실패는 치명적이지 않으므로 계속 진행
     }
 
-    // 5. Zanzibar 권한 부여: 생성자를 owner로 설정
+    // 6. Zanzibar 권한 부여: 생성자를 owner로 설정
     try {
       await grantPresentationOwnership(presentation.id, userId)
       logger.info('권한 부여 완료')
