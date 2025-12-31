@@ -327,6 +327,51 @@ export async function grantCredits(
  *
  * @returns 처리된 사용자 수 및 만료 건수
  */
+/**
+ * 여러 사용자의 크레딧 잔액을 한 번에 계산 (배치 처리)
+ *
+ * @param userIds - 사용자 ID 배열
+ * @returns userId별 잔액 맵
+ */
+export async function calculateBalanceBatch(
+  userIds: string[]
+): Promise<Map<string, number>> {
+  if (userIds.length === 0) {
+    return new Map()
+  }
+
+  // 한 번의 쿼리로 모든 사용자의 트랜잭션 조회
+  const transactions = await prisma.creditTransaction.findMany({
+    where: {
+      userId: { in: userIds },
+      OR: [
+        { expiresAt: null }, // 영구 크레딧
+        { expiresAt: { gt: new Date() } }, // 아직 만료 안됨
+      ],
+    },
+    select: {
+      userId: true,
+      amount: true,
+    },
+  })
+
+  // userId별로 합산
+  const balanceMap = new Map<string, number>()
+
+  // 모든 userIds에 대해 기본값 0으로 초기화
+  for (const userId of userIds) {
+    balanceMap.set(userId, 0)
+  }
+
+  // 트랜잭션 합산
+  for (const tx of transactions) {
+    const current = balanceMap.get(tx.userId) || 0
+    balanceMap.set(tx.userId, current + tx.amount)
+  }
+
+  return balanceMap
+}
+
 export async function expireCreditsJob(): Promise<{
   totalUsers: number
   totalExpired: number

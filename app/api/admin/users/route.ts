@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { requireAdmin, check } from '@/lib/permissions'
+import { requireAdmin, checkAdminBatch } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
-import { calculateBalance } from '@/lib/credits'
+import { calculateBalanceBatch } from '@/lib/credits'
 import { logger } from '@/lib/logger'
 
 /**
@@ -25,32 +25,31 @@ export async function GET() {
       },
     })
 
-    // 각 사용자의 크래딧 잔액 및 관리자 여부 조회
-    const usersWithDetails = await Promise.all(
-      users.map(async (user) => {
-        // 정확한 크래딧 잔액 계산 (만료된 크래딧 제외)
-        const { balance } = await calculateBalance(user.id)
+    // 사용자 ID 목록 추출
+    const userIds = users.map((user) => user.id)
 
-        // 관리자 여부 확인
-        const isAdmin = await check(user.id, 'system', 'global', 'admin')
+    // 배치로 크레딧 잔액 및 admin 권한 조회 (N+1 쿼리 문제 해결)
+    const [balanceMap, adminMap] = await Promise.all([
+      calculateBalanceBatch(userIds),
+      checkAdminBatch(userIds),
+    ])
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          createdAt: user.createdAt.toISOString(),
-          creditBalance: balance,
-          subscription: user.subscription
-            ? {
-                tier: user.subscription.tier,
-                status: user.subscription.status,
-                endDate: user.subscription.endDate?.toISOString() || null,
-              }
-            : null,
-          isAdmin,
-        }
-      })
-    )
+    // 결과 조합
+    const usersWithDetails = users.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt.toISOString(),
+      creditBalance: balanceMap.get(user.id) || 0,
+      subscription: user.subscription
+        ? {
+            tier: user.subscription.tier,
+            status: user.subscription.status,
+            endDate: user.subscription.endDate?.toISOString() || null,
+          }
+        : null,
+      isAdmin: adminMap.get(user.id) || false,
+    }))
 
     // 통계 계산
     const now = new Date()

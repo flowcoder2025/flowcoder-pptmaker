@@ -357,6 +357,49 @@ function getInheritedRelations(relation: Relation): Relation[] {
 }
 
 // ============================================
+// Batch Operations (배치 처리)
+// ============================================
+
+/**
+ * 여러 사용자의 admin 권한을 한 번에 확인 (배치 처리)
+ *
+ * @param userIds - 사용자 ID 배열
+ * @returns userId별 admin 여부 맵
+ */
+export async function checkAdminBatch(
+  userIds: string[]
+): Promise<Map<string, boolean>> {
+  if (userIds.length === 0) {
+    return new Map()
+  }
+
+  // 한 번의 쿼리로 모든 admin 권한 조회
+  const adminTuples = await prisma.relationTuple.findMany({
+    where: {
+      namespace: 'system',
+      objectId: 'global',
+      relation: 'admin',
+      subjectType: 'user',
+      subjectId: { in: userIds },
+    },
+    select: {
+      subjectId: true,
+    },
+  })
+
+  // admin인 사용자 ID Set 생성
+  const adminSet = new Set(adminTuples.map((t) => t.subjectId))
+
+  // 결과 맵 생성
+  const resultMap = new Map<string, boolean>()
+  for (const userId of userIds) {
+    resultMap.set(userId, adminSet.has(userId))
+  }
+
+  return resultMap
+}
+
+// ============================================
 // Admin Middleware
 // ============================================
 

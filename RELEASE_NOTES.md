@@ -44,6 +44,13 @@
 
 ### 🔧 Technical
 
+#### 2025-12-31
+- **Admin 사용자 목록 API N+1 쿼리 문제 해결** `e9b1ba8`
+  - `calculateBalanceBatch()` 함수 추가 (lib/credits.ts) - 한 번의 쿼리로 여러 사용자 크레딧 잔액 계산
+  - `checkAdminBatch()` 함수 추가 (lib/permissions.ts) - 한 번의 쿼리로 여러 사용자 admin 권한 확인
+  - /api/admin/users API 쿼리 수: 약 280개 → 4개로 축소
+  - 응답 시간: 수 초~타임아웃 → 452ms로 개선
+
 #### 2025-12-26
 - **API 에러 메시지 한글 표준화 (해요체)**
   - /api/drafts: 'Unauthorized' → '로그인이 필요해요'
