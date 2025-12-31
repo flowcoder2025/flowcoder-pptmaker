@@ -33,7 +33,7 @@ const GEMINI_CONFIG = {
     maxOutputTokens: 16384,
   },
   pro: {
-    model: 'gemini-2.5-pro-preview-06-05',
+    model: 'gemini-2.5-pro',
     temperature: 0.3,
     maxOutputTokens: 32768,
   },
